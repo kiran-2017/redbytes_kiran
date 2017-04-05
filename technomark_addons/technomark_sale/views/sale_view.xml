@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited sale view to add new fields for Delivery Information-->
+        <record id="view_order_form_inherited" model="ir.ui.view">
+            <field name="name">view.order.form.inherited</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+
+              <!-- Add delivery page to sale view-->
+              <xpath expr="//page" position="after">
+                <page string="Delivery" name="technomark_delivery">
+                    <group col="4" colspan="4">
+                        <group string="Delivery Information" name="delivery_information" col="4" colspan="4">
+                            <field name="delivery_date"/>
+                            <field name="delivery_instructions"/>
+                            <field name="insurance"/>
+                            <field name="warranty"/>
+                            <field name="special_remarks"/>
+                        </group>
+                    </group>
+                 </page>
+              </xpath>
+
+              <!-- Add new fields to sale order line form view -->
+              <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']" position="after">
+                  <field name="bore"/>
+                  <field name="valve"/>
+                  <field name="valve_operation"/>
+                  <field name="pn"/>
+                  <field name="case_file_number"/>
+                  <field name="pro_delivery_date"/>
+              </xpath>
+
+              <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']" position="attributes">
+                  <attribute name="string">Rate(Rs)</attribute>
+              </xpath>
+
+              <!-- Add new fields to sale order line tree view -->
+              <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                  <field name="bore"/>
+                  <field name="valve"/>
+                  <field name="valve_operation"/>
+                  <field name="pn"/>
+                  <field name="case_file_number"/>
+                  <field name="pro_delivery_date"/>
+              </xpath>
+
+              <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="attributes">
+                  <attribute name="string">Rate(Rs)</attribute>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="attributes">
+                  <attribute name="string">Amount</attribute>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='qty_delivered']" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='qty_invoiced']" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
+            </field>
+        </record>
+</odoo>

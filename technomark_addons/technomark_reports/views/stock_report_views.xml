@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Add new Menu-->
+        <report
+            string="Delivery Challan"
+            id="action_report_delivery_inherited"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="technomark_reports.report_deliveryslip_inherited"
+            file="technomark_reports.report_deliveryslip_inherited"
+        />
+
+        <report
+            string="Incoming Shipment"
+            id="incoming_shipment_for_sale"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="technomark_reports.report_incoming_shipment"
+            file="technomark_reports.report_incoming_shipment"
+        />
+
+        <!-- Inherit Delivery SLip menu to hide default DS Menu-->
+        <report
+            string="Delivery Slip"
+            id="stock.action_report_delivery"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="stock.report_deliveryslip"
+            file="stock.report_deliveryslip"
+            menu="False"
+        />
+      </data>
+</odoo>

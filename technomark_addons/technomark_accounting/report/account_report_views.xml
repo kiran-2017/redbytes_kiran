@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Add TAx Invoice Menu -->
+        <report
+            string="Tax Invoice"
+            id="action_report_tax_invoice"
+            model="account.invoice"
+            report_type="qweb-pdf"
+            name="technomark_accounting.report_tax_invoice"
+            file="technomark_accounting.report_tax_invoice"
+            menu="True"
+        />
+    </data>
+</odoo>

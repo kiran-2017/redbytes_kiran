@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="company_form_inherited" model="ir.ui.view">
+        <field name="name">res.company.form.inherited</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <field name="vat" position="after">
+                <field name="cst" string="CST TIN"/>
+            </field>
+
+            <xpath expr="//field[@name='vat']" position="attributes">
+              <attribute name="string">VAT TIN</attribute>
+            </xpath>
+            <xpath expr="//field[@name='company_registry']" position="attributes">
+              <attribute name="string">Company PAN</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='website']" position="after">
+                <field name="declaration"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
