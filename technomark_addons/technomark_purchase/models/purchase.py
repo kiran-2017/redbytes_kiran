@@ -33,6 +33,7 @@ class PurchaseOrder(models.Model):
     @api.model
     def date_converted(self, date):
         """ This function convert date %Y-%m-%d %H:%M:%S to  %m/%d/%Y remove time from date"""
+        import datetime
         if date:
             converted_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%m/%d/%Y')
             return converted_date
@@ -94,7 +95,7 @@ class PurchaseOrderLine(models.Model):
     def date_converted(self, date):
         """ This function convert date %Y-%m-%d %H:%M:%S to  %m/%d/%Y remove time from date"""
         if date:
-            converted_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%m/%d/%Y')
+            converted_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%m/%d/%Y')
             return converted_date
 
 
