@@ -6,7 +6,9 @@ from num2words import num2words
 
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
+    """ Inherit this call for adding new fields on TAX INVOICE"""
 
+    ## Add new fields to print on TAX Invoice On Invoice object
     buyer_order_no = fields.Char(string="Buyer Order No")
     despateched_doc_no = fields.Char(string="Dispatched Document Number")
     despatched_through = fields.Char(string="Despatched Through")

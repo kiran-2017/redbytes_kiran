@@ -40,7 +40,6 @@
                       }
                     </style>
                 </div>
-                <!-- <h2 class="text-center col-xs-12 page_bar" style="margin-top:20px;">TAX INVOICE</h2> -->
                 <table class="table table-condensed mt48 page_bar" width="100%" style="border: 1px solid #ddd; margin-top:2000px;">
                     <tr>
                         <td width="50%" class="td_formating">
@@ -251,11 +250,7 @@
 
                                 <tr  t-if=" not o.amount_tax">
                                       <td class="td_formating text-right" colspan="2">
-                                          <!-- <t t-foreach="o.invoice_line_ids" t-as="invoice_line"> -->
-                                            <!-- <span t-foreach="invoice_line.invoice_line_tax_ids" t-as="invoice_tax" t-field="invoice_tax.name"/> -->
                                             <span>TAX</span>
-                                            <!-- <span t-foreach="invoice_line.invoice_line_tax_ids" t-as="invoice_tax" t-if="invoice_tax.name"><br/></span> -->
-                                          <!-- </t> -->
                                       </td>
 
                                     <td t-if="not o.amount_tax" class="text-right td_formating" colspan="4">

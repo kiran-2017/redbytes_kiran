@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited purchase view to add new fields for Delivery Information-->
+        <record id="purchase_order_form_inherited" model="ir.ui.view">
+            <field name="name">purchase.order.form.inherited</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+
+              <!-- Add new fields on purchase order line tree view -->
+              <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
+                  <field name="serial_no"/>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                  <field name="material"/>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='date_planned']" position="after">
+                  <field name="approx_weight"/>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="attributes">
+                  <attribute name="string">Rate</attribute>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='date_planned']" position="attributes">
+                  <attribute name="string">Date Req</attribute>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="attributes">
+                  <attribute name="string">Amount</attribute>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']" position="attributes">
+                  <attribute name="string">Per</attribute>
+              </xpath>
+
+              <!-- Add new fields on purchase order line form view -->
+              <xpath expr="//field[@name='order_line']/form/sheet/group/group/field[@name='product_id']" position="after">
+                  <field name="material"/>
+              </xpath>
+
+              <xpath expr="//field[@name='order_line']/form/sheet/group/group/field[@name='date_planned']" position="after">
+                  <field name="approx_weight"/>
+              </xpath>
+
+              <xpath expr="//field[@name='order_line']/form/sheet/group/group/field[@name='price_unit']" position="attributes">
+                  <attribute name="string">Rate</attribute>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/form/sheet/group/group/field[@name='date_planned']" position="attributes">
+                  <attribute name="string">Date Req</attribute>
+              </xpath>
+
+            </field>
+        </record>
+</odoo>

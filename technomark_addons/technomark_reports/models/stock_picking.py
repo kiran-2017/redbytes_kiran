@@ -7,13 +7,13 @@ import datetime
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
+    """ Inhertit for print customized reports for DC and Incoming Shipment for Sale and Purchase"""
 
     ## incoming shipment fields
     in_time = fields.Datetime(string="In Time")
     transporter_name = fields.Char(string="Transporter Name")
     vehical_no = fields.Char(string="Vehical No")
     received_by = fields.Char(string="Received By", default=lambda self: self.env.user.name)
-    # picking_type_flag = fields.Boolean(string="Picking Type Flag", default=False)
 
     @api.multi
     def do_print_picking(self):

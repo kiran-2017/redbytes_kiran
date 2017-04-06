@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited sale view to add new fields for Delivery Information-->
+        <record id="view_picking_form_inherited" model="ir.ui.view">
+            <field name="name">stock.picking.form.inherited</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+              <!-- Add delivery page to sale view-->
+              <xpath expr="//field[@name='origin']" position="after">
+                <field name="picking_type_flag" invisible="1"/>
+              </xpath>
+              <!-- Screen for entering Incoming Shipment details-->
+              <xpath expr="//page[@name='extra']" position="after">
+                <page string="Incoming Shipment" name="incoming_shipment" attrs="{'invisible': [('picking_type_flag','=',False)]}">
+                    <group>
+                      <!-- THis fields are declared in technomark_reports modules
+                      only use for printing-->
+                        <group col="4" colspan="4">
+                            <field name="in_time"/>
+                            <field name="transporter_name"/>
+                            <field name="vehical_no"/>
+                            <field name="received_by"/>
+                        </group>
+                    </group>
+                </page>
+              </xpath>
+          </field>
+      </record>
+</odoo>

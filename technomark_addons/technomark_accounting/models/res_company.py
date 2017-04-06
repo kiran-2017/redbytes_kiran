@@ -6,6 +6,7 @@ from odoo import models, fields
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
+    """Inherit this class for adding new fields on company form to print on TAX INVOICE REPORT"""
 
     #Add cst on company view
     cst = fields.Char(string="CST")
