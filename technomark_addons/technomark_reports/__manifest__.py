@@ -17,6 +17,7 @@ You could use this simplified accounting in case you work with an (external) acc
     'depends' : ['product', 'sale', 'stock', 'purchase'],
     'data': [
             'views/stock_report_views.xml',
+            'views/stock_picking_views.xml',
             'report/incoming_shipment.xml',
             'report/report_deliveryslip.xml',
     ],

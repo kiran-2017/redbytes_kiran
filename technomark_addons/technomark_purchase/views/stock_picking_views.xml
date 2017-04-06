@@ -10,6 +10,12 @@
               <xpath expr="//field[@name='origin']" position="after">
                 <field name="picking_type_flag" invisible="1"/>
               </xpath>
+
+
+              <!-- <button name="%(stock.action_report_delivery)d" position="replace">
+                  <button name="do_print_picking" string="Print" states="done" type="object" groups="base.group_user"/>
+              </button> -->
+
               <!-- Screen for entering Incoming Shipment details-->
               <xpath expr="//page[@name='extra']" position="after">
                 <page string="Incoming Shipment" name="incoming_shipment" attrs="{'invisible': [('picking_type_flag','=',False)]}">

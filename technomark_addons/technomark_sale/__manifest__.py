@@ -17,7 +17,6 @@ You could use this simplified accounting in case you work with an (external) acc
     'depends' : ['product', 'sale', 'stock', 'technomark_reports'],
     'data': [
             'views/sale_view.xml',
-            'views/stock_picking_views.xml',
     ],
     'demo': [
     ],
