@@ -145,6 +145,6 @@ class PurchaseOrderLine(models.Model):
                 })
 
     ## Add new fields on PO line
-    serial_no = fields.Integer(compute='_get_po_line_seq', string="Sr.No")
+    serial_no = fields.Integer(compute='_get_po_line_seq', string="Sr.No", default=1)
     material = fields.Char(string="Material")
     approx_weight = fields.Float(string="Approx Weight(kg)")
