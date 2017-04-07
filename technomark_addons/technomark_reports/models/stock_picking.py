@@ -18,13 +18,19 @@ class StockPicking(models.Model):
     @api.multi
     def do_print_picking(self):
         """ Inherit for pass new customized report for Delivery Slip"""
-        print self.picking_type_id,'-------picking type'
+        report_name = ""
         if self.picking_type_id.code == 'incoming':
+            report_id = self.env["report"].get_action(self, 'technomark_reports.report_incoming_shipment')
+            report_name = 'Incoming Shipment' + '-' + self.name
+            report_id.update({'name':report_name})
             self.write({'printed': True})
-            return self.env["report"].get_action(self, 'technomark_reports.report_incoming_shipment')
+            return report_id
         else:
+            report_id = self.env["report"].get_action(self, 'technomark_reports.report_deliveryslip_inherited')
+            report_name = 'Delivery Challan' + '-' + self.name
+            report_id.update({'name':report_name})
             self.write({'printed': True})
-            return self.env["report"].get_action(self, 'technomark_reports.report_deliveryslip_inherited')
+            return report_id
 
     @api.model
     def date_converted(self, date):

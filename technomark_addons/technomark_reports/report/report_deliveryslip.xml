@@ -202,13 +202,12 @@
                                     <!-- Print vore, valve , valve operation, pn, case file no, seril no, etc-->
                                     <t t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
                                         <span t-if="sale_order_line_data"><br/></span>
-                                        <span t-if="sale_order_line_data">FOR-</span><span t-if="sale_order_line_data" t-field="sale_order_line_data.valve"/>
-                                        <span t-if="sale_order_line_data">,</span>
-                                        <span t-if="sale_order_line_data" t-field="sale_order_line_data.valve_operation"/>
-                                        <span t-if="sale_order_line_data">,</span>
-                                        <span t-if="sale_order_line_data" t-field="sale_order_line_data.pn"/><br/>
+                                        <span t-if="sale_order_line_data">For:</span><span t-if="sale_order_line_data" t-field="sale_order_line_data.valve"/><span t-if="sale_order_line_data">,</span>
+                                        <span t-if="sale_order_line_data" t-field="sale_order_line_data.valve_operation"/><span t-if="sale_order_line_data">,</span>
+                                        PN:<span t-if="sale_order_line_data" t-field="sale_order_line_data.pn"/><br/>
                                         Case File: <span  t-if="sale_order_line_data" t-field="sale_order_line_data.case_file_number"/><br/>
                                         Bore: <span t-if="sale_order_line_data" t-field="sale_order_line_data.bore"/>
+                                        <span t-if="sale_order_line_data.bore"> mm</span>
                                     </t>
                                     <br/>
                                     Serial No(s) : <span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>
@@ -258,10 +257,11 @@
                               <td>
                                 <span></span>
                               </td>
-                              <td class="text-right">
-                                    <span><strong>Total</strong></span>
+                              <td>
+                                    <span></span>
                               </td>
-                              <td class="text-center">
+                              <td class="text-right">
+                                  <span><strong>Total</strong></span>
                                   <t t-if="(l.qty_done for l in o.pack_operation_ids)" t-esc="sum(l.qty_done for l in o.pack_operation_ids)"/>
                               </td>
                             </tr>

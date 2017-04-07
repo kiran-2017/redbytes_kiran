@@ -21,10 +21,12 @@ class SaleOrderLine(models.Model):
     """ Inherit class for adding new fields on order line to print on DC report"""
 
     ## Add new fields
-    bore = fields.Integer(string="Bore(mm)")
+    bore = fields.Integer(string="Bore (mm)")
     valve = fields.Text(string="Valve")
-    valve_operation = fields.Char(string="Valve Operation")
+    valve_operation = fields.Char(string="MO / EO")
     pn = fields.Char(string="PN")
     case_file_number = fields.Char(string="Case File No")
     quantity = fields.Integer(string="Quantity")
     pro_delivery_date = fields.Date(string="Delivery Date")
+    ## Inherit this fields to remove decimal point from it
+    product_uom_qty = fields.Integer(string='Quantity', default=1)

@@ -33,7 +33,7 @@
               </xpath>
 
               <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']" position="attributes">
-                  <attribute name="string">Rate(Rs)</attribute>
+                  <attribute name="string">Rate(₹)</attribute>
               </xpath>
 
               <!-- Add new fields to sale order line tree view -->
@@ -47,8 +47,15 @@
               </xpath>
 
               <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="attributes">
-                  <attribute name="string">Rate(Rs)</attribute>
+                  <attribute name="string">Rate(₹)</attribute>
               </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
+              <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="attributes">
+                  <attribute name="string">Qty</attribute>
+              </xpath>
+
               <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="attributes">
                   <attribute name="string">Amount</attribute>
               </xpath>

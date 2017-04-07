@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="mrp_bom_form_view_inherited" model="ir.ui.view">
+            <field name="name">mrp.bom.form.view</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+
+              <!-- Add sr no and used for fields on bom components -->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='sequence']" position="before">
+                  <field name="serial_no"/>
+              </xpath>
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_uom_id']" position="after">
+                  <field name="used_for"/>
+              </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

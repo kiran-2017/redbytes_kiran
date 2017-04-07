@@ -358,11 +358,13 @@
                         <td t-if="o.company_id" id="bank_account_details" class="td_formating">
                             <t t-set="bank_info" t-value="o.get_bank_details(o.company_id, o.company_id.partner_id)" />
                             Company's Bank details<br/>
-                            Bank Name: <strong><span t-esc="bank_info.bank_id.name"/></strong><br/>
-                            A/c No: <strong><span t-esc="bank_info.acc_number"/></strong><br/>
-                            Branch And IFSC Code : <strong><span t-esc="bank_info.bank_id.bic"/></strong><br/>
+                            <t t-foreach="bank_info" t-as="bank">
+                              Bank Name: <strong><span t-esc="bank.bank_id.name"/></strong><br/>
+                              A/c No: <strong><span t-esc="bank.acc_number"/></strong><br/>
+                              Branch And IFSC Code : <strong><span t-esc="bank.bank_id.bic"/></strong><br/>
+                              <br/>
+                            </t>
                             <br/><br/>
-
                         </td>
                     </tr>
                     <tr>
