@@ -22,6 +22,13 @@ class PurchaseOrder(models.Model):
         Inherit class for priting new fields on PO
     """
 
+    @api.multi
+    def print_quotation(self):
+        self.write({'state': "sent"})
+        report = self.env['report'].get_action(self, 'purchase.report_purchasequotation')
+        report.update({'print_report_name':'Request For Quotation'+ ' ' + self.name})
+        return report
+
 
     @api.model
     def amount_in_words(self, total):

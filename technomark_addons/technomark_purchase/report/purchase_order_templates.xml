@@ -149,7 +149,7 @@
                             <!-- <span t-field="line.date_planned"/> -->
                         </td>
                         <td class="text-center">
-                            <span t-field="line.approx_weight"/>
+                            <span t-if="line.approx_weight>0" t-field="line.approx_weight"/>
                         </td>
                         <td class="text-right">
                             <span t-field="line.product_qty"/>
@@ -182,8 +182,11 @@
                     <div  style="margin-left:-20px;">
                       <table class="table-condensed">
                         <tr class="">
-                            <td class="text-left">
-                              FREIGHT : <span t-if="o.partner_id.frieght" t-esc="o.partner_id.frieght"/><br/>
+                            <td class="text-left" t-if="o.incoterm_id">
+                              FREIGHT : <span t-if="o.incoterm_id" t-esc="o.incoterm_id.name"/><br/>
+                            </td>
+                            <td class="text-left" t-if="not o.incoterm_id">
+                              FREIGHT : <span t-if="not o.incoterm_id">DOOR DELIVERY</span><br/>
                             </td>
                         </tr>
                         <tr class="">
@@ -202,7 +205,7 @@
                   </div>
 
                   <div class="col-xs-5">
-                    <br/><br/><br/>
+                    <!-- <br/><br/><br/> -->
                     <table class="table table-condensed">
                         <tr class="border-black">
                             <td><strong>Total Without Taxes</strong></td>

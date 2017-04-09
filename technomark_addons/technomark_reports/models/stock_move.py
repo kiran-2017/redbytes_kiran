@@ -25,7 +25,7 @@ class PackOperation(models.Model):
 
     product_qty = fields.Integer('To Do', default=1, required=True)
     ordered_qty = fields.Integer('Ordered Quantity')
-    qty_done = fields.Integer('Done', default=1)
+    qty_done = fields.Integer('Done')
 
 class AccountInvoiceLine(models.Model):
     """ Inherit this calss to remove all decimal points from quantity fields"""

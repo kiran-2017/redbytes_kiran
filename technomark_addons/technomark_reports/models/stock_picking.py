@@ -21,14 +21,15 @@ class StockPicking(models.Model):
         report_name = ""
         if self.picking_type_id.code == 'incoming':
             report_id = self.env["report"].get_action(self, 'technomark_reports.report_incoming_shipment')
-            report_name = 'Incoming Shipment' + '-' + self.name
+            report_name = 'Incoming Shipment' + ' ' + self.name
+            report_id.update({'print_report_name':report_name})
             report_id.update({'name':report_name})
             self.write({'printed': True})
             return report_id
         else:
             report_id = self.env["report"].get_action(self, 'technomark_reports.report_deliveryslip_inherited')
-            report_name = 'Delivery Challan' + '-' + self.name
-            report_id.update({'name':report_name})
+            report_name = 'Delivery Challan' + ' ' + self.name
+            report_id.update({'print_report_name':report_name})
             self.write({'printed': True})
             return report_id
 

@@ -11,8 +11,18 @@ class SaleOrder(models.Model):
     delivery_date = fields.Date(string="Delivery Date")
     delivery_instructions = fields.Text(string="Delivery Instructions")
     insurance = fields.Text(string="Insurance")
-    warranty = fields.Integer(string="Warranty(Months)")
+    warranty = fields.Integer(string="Warranty(Months)", default=12)
     special_remarks = fields.Text(string="Special Remarks")
+
+    @api.multi
+    def print_quotation(self):
+        """ Inherit this function to change report name to add doc number to it"""
+        self.filtered(lambda s: s.state == 'draft').write({'state': 'sent'})
+        report = self.env['report'].get_action(self, 'sale.report_saleorder')
+        report.update({'print_report_name':'Quotation_Order'+ ' ' + self.name})
+        return report
+
+
 
 
 

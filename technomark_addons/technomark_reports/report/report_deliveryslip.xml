@@ -116,6 +116,9 @@
                                 <th t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
                                   <strong>Customer Reference</strong>
                                 </th>
+                                <th t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
+                                  <strong>Mode</strong>
+                                </th>
                                 <th t-if="o.picking_type_id.code=='incoming' and o.partner_id">
                                   <strong>Vendor Reference</strong>
                                 </th>
@@ -138,6 +141,12 @@
                                 </td>
                                 <td t-if="o.origin">
                                     <span t-if="o.origin" t-esc="o.get_cust_ref(o.origin)"/>
+                                </td>
+                                <td t-if="o.partner_id.customer">
+                                    <span>Non-Returnable</span> Returnable
+                                </td>
+                                <td t-if="o.partner_id.supplier">
+                                    <span>Returnable</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -202,7 +211,7 @@
                                     <!-- Print vore, valve , valve operation, pn, case file no, seril no, etc-->
                                     <t t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
                                         <span t-if="sale_order_line_data"><br/></span>
-                                        <span t-if="sale_order_line_data">For:</span><span t-if="sale_order_line_data" t-field="sale_order_line_data.valve"/><span t-if="sale_order_line_data">,</span>
+                                        <span t-if="sale_order_line_data">For:</span><span t-if="sale_order_line_data" t-field="sale_order_line_data.valve"/><span t-if="sale_order_line_data.valve">,</span>
                                         <span t-if="sale_order_line_data" t-field="sale_order_line_data.valve_operation"/><span t-if="sale_order_line_data">,</span>
                                         PN:<span t-if="sale_order_line_data" t-field="sale_order_line_data.pn"/><br/>
                                         Case File: <span  t-if="sale_order_line_data" t-field="sale_order_line_data.case_file_number"/><br/>

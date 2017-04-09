@@ -30,5 +30,15 @@
             file="stock.report_deliveryslip"
             menu="False"
         />
+
       </data>
 </odoo>
+<!--
+Need to set report format on server
+
+FOR DC- ('Delivery Challan'+ '  ' + str(object.name).replace('_','/')+'.pdf')
+Tax Invoice ('Tax Invoice'+ '  ' + str(object.number or "").replace('_','/')+'.pdf')
+Quotation_order  ('Ouotation_Order'+ '  ' + str(object.name).replace('_','/')+'.pdf')
+Request for Quotation ('Request For Ouotation'+ '  ' + str(object.name).replace('_','/')+'.pdf')
+purchase order ('Purchase Order'+ '  ' + (object.name)+'.pdf')
+-->
