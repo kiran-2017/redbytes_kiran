@@ -27,6 +27,9 @@
                             <field name="transporter_name"/>
                             <field name="vehical_no"/>
                             <field name="received_by"/>
+                            <field name="challan_date"/>
+                            <field name="challan_no"/>
+                            <field name="ics_lr_no"/>f
                         </group>
                     </group>
                 </page>

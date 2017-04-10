@@ -9,4 +9,4 @@ class ResPartner(models.Model):
     """ Inherit class for adding new fields on partner form"""
 
     # Add fields
-    frieght = fields.Char(string="Frieght")
+    party_tin = fields.Char(string="Party TIN")

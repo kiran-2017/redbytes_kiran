@@ -33,7 +33,7 @@ class SaleOrderLine(models.Model):
     ## Add new fields
     bore = fields.Integer(string="Bore (mm)")
     valve = fields.Text(string="Valve")
-    valve_operation = fields.Char(string="MO / EO")
+    valve_operation = fields.Char(string="MO/EO")
     pn = fields.Char(string="PN")
     case_file_number = fields.Char(string="Case File No")
     quantity = fields.Integer(string="Quantity")

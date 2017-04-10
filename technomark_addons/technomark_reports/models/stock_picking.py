@@ -14,6 +14,9 @@ class StockPicking(models.Model):
     transporter_name = fields.Char(string="Transporter Name")
     vehical_no = fields.Char(string="Vehical No")
     received_by = fields.Char(string="Received By", default=lambda self: self.env.user.name)
+    challan_date = fields.Date(string="Challan Date")
+    challan_no = fields.Char(string="Challan No.")
+    ics_lr_no = fields.Char(string="L.R. No.")
 
     @api.multi
     def do_print_picking(self):

@@ -18,7 +18,6 @@ You could use this simplified accounting in case you work with an (external) acc
     'data': [
             'views/purchase_views.xml',
             'views/product_views.xml',
-            'views/res_partner_views.xml',
             'views/stock_picking_views.xml',
             'report/purchase_order_templates.xml',
             'report/purchase_report.xml',

@@ -14,7 +14,7 @@ You could use this simplified accounting in case you work with an (external) acc
     """,
     'category': 'Accounting',
     'website': 'https://www.odoo.com/page/billing',
-    'depends' : ['account', 'account_accountant', 'base_vat'],
+    'depends' : ['account', 'account_accountant'], #'base_vat'
     'data': [
             'views/account_invoice_view.xml',
             'views/res_company_views.xml',

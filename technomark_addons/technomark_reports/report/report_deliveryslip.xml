@@ -116,9 +116,9 @@
                                 <th t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
                                   <strong>Customer Reference</strong>
                                 </th>
-                                <th t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
+                                <!-- <th t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
                                   <strong>Mode</strong>
-                                </th>
+                                </th> -->
                                 <th t-if="o.picking_type_id.code=='incoming' and o.partner_id">
                                   <strong>Vendor Reference</strong>
                                 </th>
@@ -142,12 +142,12 @@
                                 <td t-if="o.origin">
                                     <span t-if="o.origin" t-esc="o.get_cust_ref(o.origin)"/>
                                 </td>
-                                <td t-if="o.partner_id.customer">
+                                <!-- <td t-if="o.partner_id.customer">
                                     <span>Non-Returnable</span> Returnable
                                 </td>
                                 <td t-if="o.partner_id.supplier">
                                     <span>Returnable</span>
-                                </td>
+                                </td> -->
                             </tr>
                         </tbody>
                     </table>
@@ -156,6 +156,7 @@
                             <tr>
                                 <th><strong>Sr.No.</strong></th>
                                 <th><strong>Product</strong></th>
+                                <th><strong>Weight</strong></th>
                                 <th><strong>Ordered Quantity</strong></th>
                                 <th><strong>Delivered Quantity</strong></th>
                             </tr>
@@ -167,8 +168,12 @@
                                   <span t-esc="i">
                                     <t t-set="i" t-value="i+1"/>
                                   </span>
+
                                 </td>
                                 <td><span t-field="move.product_id"/></td>
+                                <td t-if="((move.product_id.is_weight_applicable) and (move.product_id.weight>0))">
+                                  <span t-field="move.product_id.weight"/>
+                                </td>
                                 <td>
                                     <span t-field="move.ordered_qty"/>
                                     <span t-field="move.product_uom"/>
@@ -181,12 +186,14 @@
                         </tbody>
                     </table>
                     <t t-set="backorder" t-value="False"/>
+
                     <table class="table table-condensed mt48" t-if="o.pack_operation_ids">
                         <t t-set="has_serial_number" t-value="o.pack_operation_ids.filtered('pack_lot_ids')" groups="stock.group_production_lot"/>
                         <thead>
                             <tr>
                                 <th><strong>Sr.No.</strong></th>
                                 <th><strong>Product</strong></th>
+                                <th><strong>Weight</strong></th>
                                 <!-- <th name="lot_serial" t-if="has_serial_number">
                                     <span class="pull-left">Lot/Serial Number</span>
                                 </th> -->
@@ -219,13 +226,27 @@
                                         <span t-if="sale_order_line_data.bore"> mm</span>
                                     </t>
                                     <br/>
-                                    Serial No(s) : <span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>
+                                    Serial No(s) :
+                                    <t t-foreach="pack_operation.pack_lot_ids" t-as="packlot">
+                                        <span t-field="packlot.lot_id"/>
+                                        <t t-if="not packlot.lot_id">
+                                            <span t-field="packlot.lot_name"/>
+                                        </t>
+                                    </t>
+
+                                    <!--<span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>-->
                                     <!-- <t t-foreach="pack_operation.pack_lot_ids" t-as="pack_lot_id"> -->
                                       <!-- <span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>-->  <!--<span t-if="pack_operation.pack_lot_ids.qty" t-field="pack_operation.pack_lot_ids.qty"/>-->
                                     <!-- </t> -->
                                     <t t-if="not pack_operation.product_id and pack_operation.package_id">
                                         <span  t-field="pack_operation.package_id"/>
                                     </t>
+                                </td>
+                                <!-- Add weight fields here-->
+                                <td>
+                                  <t t-if="((pack_operation.product_id.is_weight_applicable) and (pack_operation.product_id.weight>0))">
+                                      <span  t-esc="(pack_operation.product_id.weight*pack_operation.qty_done)"/>
+                                  </t>
                                 </td>
                                 <!-- <t t-if="has_serial_number">
                                     <td t-if="pack_operation.pack_lot_ids">
@@ -269,7 +290,10 @@
                               <td>
                                     <span></span>
                               </td>
-                              <td class="text-right">
+                              <td>
+                                    <span></span>
+                              </td>
+                              <td class="text-right" t-if="o.state == 'done'">
                                   <span><strong>Total</strong></span>
                                   <t t-if="(l.qty_done for l in o.pack_operation_ids)" t-esc="sum(l.qty_done for l in o.pack_operation_ids)"/>
                               </td>
@@ -307,14 +331,35 @@
                       <br/>
                       <strong style="margin-right:180px;">Authorised Signatory</strong>
                     </div>
+                    <!-- tO ADD TERMS AND CONDITION HERE FROM DEFAULT SO SETTING-->
+                    <br/>
+                    <p t-if="o.note">
+                        <strong>Terms And Conditions</strong>
+                          <br/>
+                        <t t-esc="o.note"/>
+                    </p>
+
                     <p t-if="o.backorder_id">
-                        This shipment is a backorder of <t t-esc="o.backorder_id.name"/>.
+                        This shipment is a backorder of <t t-esc="o.backorder_id.name"/>
                     </p>
                     <p>
                         <t t-if="backorder">
                             All items couldn't be shipped, the remaining ones will be shipped as soon as they become available.
                         </t>
                     </p>
+
+                    <!-- To add new fields on DC like transporter name, l r no, road permit no, etc..-->
+                    <div class="col-xs-12 text-left page_bar" style="margin-left:-10px; margin-top:200px;">
+                      <span><strong>Transporter Name</strong></span> : <span t-if="o.transporter_name_id" t-field="o.transporter_name_id.name"/><br/>
+                      <span><strong>L.R. No</strong></span> : <span t-if="o.lr_no" t-field="o.lr_no"/><br/>
+                      <span><strong>L.R. Date</strong></span> : <span t-if="o.lr_date" t-field="o.lr_date"/><br/>
+                      <span><strong>Vehical Registration No.</strong></span> : <span t-if="o.vehical_registration_no" t-field="o.vehical_registration_no"/><br/>
+                      <span><strong>Basic Of Freight</strong></span> : <span t-if="o.basic_of_freight" t-field="o.basic_of_freight"/><br/>
+                      <span><strong>Party TIN</strong> : </span><span t-if="o.partner_id" t-field="o.partner_id.party_tin"/><br/>
+                      <span><strong>Road Permit No.</strong></span> : <span t-if="o.road_permit_no" t-field="o.road_permit_no"/><br/>
+                      <span><strong>Delivery Type</strong></span> : <span t-if="o.delivery_type" t-field="o.delivery_type"/><br/>
+                    </div>
+
                 </div>
             </t>
          </t>

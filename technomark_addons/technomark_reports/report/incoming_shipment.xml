@@ -182,6 +182,40 @@
                             </tr>
                         </tbody>
                     </table>
+                    <table class="table table-condensed" t-if="o.picking_type_id.code=='incoming'">
+                        <thead>
+                            <tr>
+                                <!-- <th t-if="o.origin"><strong>Order (Origin)</strong></th> -->
+                                <th name="td_sched_date_h">
+                                    <strong>Challan Date</strong>
+                                </th>
+                                <th>
+                                  <strong>Challan No</strong>
+                                </th>
+                                <th>
+                                  <strong>L.R. No</strong>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <!--remove code for orion <td t-if="o.origin">
+                                    <span t-field="o.origin"/>
+                                </td> -->
+                                <td>
+                                     <span t-if="o.challan_date" t-esc="o.challan_date"/>
+                                </td>
+
+                                <td>
+                                     <span t-if="o.challan_no" t-esc="o.challan_no"/>
+                                </td>
+
+                                <td t-if="o.ics_lr_no">
+                                    <span t-field="o.ics_lr_no"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <table class="table table-condensed mt48" t-if="not o.pack_operation_ids">
                         <thead>
                             <tr>
@@ -253,7 +287,15 @@
                                         <span t-if="sale_order_line_data.bore"> mm</span>
                                     </t>
                                     <br/>
-                                    Serial No(s) : <span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>
+                                    Serial No(s) :
+                                    <t t-foreach="pack_operation.pack_lot_ids" t-as="packlot">
+                                        <span t-field="packlot.lot_id"/>
+                                        <t t-if="not packlot.lot_id">
+                                            <span t-field="packlot.lot_name"/>
+                                        </t>
+                                    </t>
+
+                                    <!--<span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>-->
                                     <!-- <t t-foreach="pack_operation.pack_lot_ids" t-as="pack_lot_id">
                                       <span t-if="pack_lot_id" t-field="pack_lot_id.lot_id"/>
                                     </t> -->
@@ -308,7 +350,7 @@
                               <td class="text-right">
                                 <span></span>
                               </td>
-                              <td class="text-right">
+                              <td class="text-right" t-if="o.state == 'done'">
                                 <span><strong>Total</strong></span>
                                 <t t-esc="sum(l.qty_done for l in o.pack_operation_ids)"/>
                               </td>

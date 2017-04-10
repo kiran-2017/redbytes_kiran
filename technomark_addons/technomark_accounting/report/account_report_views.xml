@@ -2,6 +2,19 @@
 <odoo>
     <data>
 
+      <!-- Hide default Invoices menu from account invoice -->
+      <report
+          id="account_invoices"
+          model="account.invoice"
+          string="Invoices"
+          report_type="qweb-pdf"
+          name="account.report_invoice"
+          file="account.report_invoice"
+          attachment_use="True"
+          attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+          menu="False"
+        />
+
         <!-- Add TAx Invoice Menu -->
         <report
             string="Tax Invoice"
@@ -12,5 +25,6 @@
             file="technomark_accounting.report_tax_invoice"
             menu="True"
         />
+
     </data>
 </odoo>

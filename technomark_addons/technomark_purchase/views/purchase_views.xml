@@ -7,6 +7,12 @@
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
 
+              <!-- Add taxes/duties field on PO form-->
+              <xpath expr="//field[@name='incoterm_id']" position="after">
+                  <field name="taxes_duties"/>
+              </xpath>
+
+
               <!-- Add new fields on purchase order line tree view -->
               <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
                   <field name="serial_no"/>

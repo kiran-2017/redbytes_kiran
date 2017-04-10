@@ -21,6 +21,8 @@ class PurchaseOrder(models.Model):
     """
         Inherit class for priting new fields on PO
     """
+    ## Add new fields to print on PO as taxes/duties
+    taxes_duties = fields.Char(string="TAXES/DUTIES", default="As Applicable")
 
     @api.multi
     def print_quotation(self):

@@ -175,11 +175,12 @@
             <div class="row">
                 <div class="col-xs-12">
                   <div class="col-xs-7">
-                    <span t-if="o.notes">Note:</span>
-                    <p t-field="o.notes"/>
+                    <span t-if="o.notes"  style="margin-left:-20px;">Note:</span>
+                    <p  style="margin-left:-20px;" t-field="o.notes"/>
                     <div class="oe_structure"/>
                     <br/><br/><br/>
                     <div  style="margin-left:-20px;">
+                      <div class="oe_structure"/>
                       <table class="table-condensed">
                         <tr class="">
                             <td class="text-left" t-if="o.incoterm_id">
@@ -196,8 +197,7 @@
                         </tr>
                         <tr class="">
                             <td class="text-left">
-                                TAXES/DUTIES :   <span t-field="o.amount_tax"
-                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/><br/>
+                                TAXES/DUTIES :   <span t-field="o.taxes_duties"/><br/>
                             </td>
                         </tr>
                       </table>

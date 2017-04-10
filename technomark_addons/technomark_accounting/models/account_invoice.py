@@ -8,6 +8,15 @@ class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
     """ Inherit this call for adding new fields on TAX INVOICE"""
 
+    @api.multi
+    def invoice_print(self):
+        """ Print the invoice and mark it as sent, so that we can see more
+            easily the next step of the workflow Inherited to pass Tax Invoice ID
+        """
+        self.ensure_one()
+        self.sent = True
+        return self.env['report'].get_action(self, 'technomark_accounting.report_tax_invoice')
+
     ## Add new fields to print on TAX Invoice On Invoice object
     buyer_order_no = fields.Char(string="Buyer Order No")
     despateched_doc_no = fields.Char(string="Dispatched Document Number")
