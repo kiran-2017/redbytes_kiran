@@ -116,9 +116,9 @@
                                 <th t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
                                   <strong>Customer Reference</strong>
                                 </th>
-                                <!-- <th t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
+                                <th t-if="o.picking_type_id.code=='outgoing' and o.origin">
                                   <strong>Mode</strong>
-                                </th> -->
+                                </th>
                                 <th t-if="o.picking_type_id.code=='incoming' and o.partner_id">
                                   <strong>Vendor Reference</strong>
                                 </th>
@@ -142,12 +142,9 @@
                                 <td t-if="o.origin">
                                     <span t-if="o.origin" t-esc="o.get_cust_ref(o.origin)"/>
                                 </td>
-                                <!-- <td t-if="o.partner_id.customer">
-                                    <span>Non-Returnable</span> Returnable
+                                <td t-if="o.picking_type_id.code=='outgoing' and o.origin">
+                                    <span t-field="o.dc_mode"/>
                                 </td>
-                                <td t-if="o.partner_id.supplier">
-                                    <span>Returnable</span>
-                                </td> -->
                             </tr>
                         </tbody>
                     </table>
@@ -216,7 +213,7 @@
                                 <td>
                                     <span t-field="pack_operation.product_id"/>
                                     <!-- Print vore, valve , valve operation, pn, case file no, seril no, etc-->
-                                    <t t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
+                                    <t t-if="o.picking_type_id.code=='outgoing' and o.origin">
                                         <span t-if="sale_order_line_data"><br/></span>
                                         <span t-if="sale_order_line_data">For:</span><span t-if="sale_order_line_data" t-field="sale_order_line_data.valve"/><span t-if="sale_order_line_data.valve">,</span>
                                         <span t-if="sale_order_line_data" t-field="sale_order_line_data.valve_operation"/><span t-if="sale_order_line_data">,</span>
@@ -233,7 +230,6 @@
                                             <span t-field="packlot.lot_name"/>
                                         </t>
                                     </t>
-
                                     <!--<span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>-->
                                     <!-- <t t-foreach="pack_operation.pack_lot_ids" t-as="pack_lot_id"> -->
                                       <!-- <span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>-->  <!--<span t-if="pack_operation.pack_lot_ids.qty" t-field="pack_operation.pack_lot_ids.qty"/>-->

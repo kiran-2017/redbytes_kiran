@@ -21,6 +21,7 @@
                             <field name="basic_of_freight"/>
                             <field name="road_permit_no"/>
                             <field name="delivery_type"/>
+                            <field name="dc_mode"/>
                         </group>
                     </group>
                 </page>

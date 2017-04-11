@@ -12,6 +12,19 @@ class StockPicking(models.Model):
         and for adding other info tab fields on Stock picking form
     """
 
+    @api.model
+    def create(self, vals):
+        """ Inherit create method to pass default dc_mode as Non-Returnable when dc created from SO"""
+        res = super(StockPicking, self).create(vals)
+        if res and res.origin:
+            sale_order_id = self.env['sale.order'].search([('name', '=', res.origin)])
+            print sale_order_id,'--sale_order_id'
+            if sale_order_id and res.picking_type_id.code == 'outgoing':
+                res.dc_mode = 'non_returnable'
+        return res
+
+
+
     ## Add this fields on DC form to print on DC report
     transporter_name_id = fields.Many2one('transporter.name', string="Transporter Name")
     lr_no = fields.Char(string="L.R. No")
@@ -20,6 +33,7 @@ class StockPicking(models.Model):
     basic_of_freight = fields.Selection([('to_pay', 'To Pay'), ('paid', 'Paid')], 'Basic Of Freight', default='')
     road_permit_no = fields.Char(string="Road Permit No")
     delivery_type = fields.Selection([('door_delivery', 'DOOR DELIVERY'), ('godown_delivery', 'GODOWN DELIVERY')], 'Delivery Type', default='door_delivery')
+    dc_mode = fields.Selection([('returnable', 'Returnable'), ('non_returnable', 'Non-Returnable')], 'Delivery Mode')
 
 
 class TransporterName(models.Model):

@@ -328,7 +328,7 @@
                                     <span t-field="pack_operation.ordered_qty"/>
                                     <span t-field="pack_operation.product_uom_id"/>
                                 </td>
-                                <td><span t-field="pack_operation.product_id.weight"/></td>
+                                <td><span t-if="(pack_operation.product_id.weight)>0" t-field="pack_operation.product_id.weight"/></td>
                                 <td class="text-right" t-if="pack_operation.state == 'done'">
                                     <t t-if="pack_operation.ordered_qty != pack_operation.qty_done">
                                         <t t-set="backorder" t-value="True"/>
