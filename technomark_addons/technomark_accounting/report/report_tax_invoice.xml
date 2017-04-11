@@ -207,7 +207,12 @@
                                           <span t-if="product_info" t-field="product_info.pn"/><br/>
                                           Case File: <span  t-if="product_info" t-field="product_info.case_file_number"/><br/>
                                           Bore: <span t-if="product_info" t-field="product_info.bore"/><br/>
-                                          Serial No(s) :<!--<span t-if="pack_operation.pack_lot_ids.lot_id" t-field="pack_operation.pack_lot_ids.lot_id"/>-->
+                                          <!-- Logic to print lot serail number for product in Tax Invoice-->
+                                          <t t-if="o.origin" t-set="lot_data" t-value="o.get_lot_serial_number(o.origin, invoice.product_id)" />
+                                          Serial No(s) :
+                                          <t t-foreach="lot_data" t-as="lot_id">
+                                            <span t-if="lot_id" t-esc="lot_id"/>
+                                          </t>
                                     </td>
                                     <td class="td_formating"><span t-field="invoice.quantity"/></td>
                                     <td class="td_formating text-right"><span t-field="invoice.price_unit"/></td>

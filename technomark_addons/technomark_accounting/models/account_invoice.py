@@ -106,3 +106,21 @@ class AccountInvoice(models.Model):
             so_id = so_obj.search([('name', '=', origin)])
             if so_id:
                 return so_id.special_remarks
+
+    @api.model
+    def get_lot_serial_number(self, origin, product_id):
+        """ This function return lot_id from multiple lot_ids for a product"""
+        pack_id_list = []
+        if origin:
+            order_id = self.env['sale.order'].search([('name', '=', origin)])
+            if not order_id:
+                order_id = self.env['purchase.order'].search([('name', '=', origin)])
+        if order_id:
+            for picking_id in order_id.picking_ids:
+                if picking_id.state == 'done':
+                    pack_operation_ids = [pack_id for pack_id in picking_id.pack_operation_product_ids]
+                    for pack_operation_id in pack_operation_ids:
+                        if pack_operation_id.product_id.id == product_id.id:
+                            for lot_id in pack_operation_id.pack_lot_ids:
+                                pack_id_list.append(lot_id.lot_id.name)
+        return pack_id_list

@@ -245,7 +245,7 @@
                                 <!-- Add weight fields here-->
                                 <td>
                                   <t t-if="((pack_operation.product_id.is_weight_applicable) and (pack_operation.product_id.weight>0))">
-                                      <span  t-esc="(pack_operation.product_id.weight*pack_operation.qty_done)"/>
+                                      <span  t-if="(pack_operation.product_id.weight*pack_operation.qty_done)>0" t-esc="(pack_operation.product_id.weight*pack_operation.qty_done)"/>
                                   </t>
                                 </td>
                                 <!-- <t t-if="has_serial_number">
