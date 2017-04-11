@@ -54,6 +54,16 @@ class PurchaseOrderLine(models.Model):
         as per product weight
     """
 
+    @api.model
+    def create(self, vals):
+        """ Inherit create method to validate POL qty field it should be > 0"""
+        if vals and 'product_qty' in vals and vals['product_qty'] == 0:
+            raise UserError(_('You cannot enter product quantity as Zero'))
+        res = super(PurchaseOrderLine, self).create(vals)
+        return res
+
+
+
     @api.onchange('product_id')
     def onchange_product_id(self):
         """ Inherit function to pass approx weight to POL on change of product id"""
@@ -95,10 +105,16 @@ class PurchaseOrderLine(models.Model):
     @api.multi
     def write(self, vals):
         """ Logic for change approx_weight in PO line and apply new sub total"""
+        """ Inherit write method to validate POL qty field it should be > 0"""
         if vals and 'approx_weight' in vals and self.product_id.is_weight_applicable:
             vals.update({'price_subtotal': vals['approx_weight'] * self.product_qty * self.price_unit})
+        if vals and 'product_qty' in vals and vals['product_qty'] == 0:
+            raise UserError(_('You cannot enter product quantity as Zero'))
         res = super(PurchaseOrderLine, self).write(vals)
+        if res and self.product_qty == 0:
+            raise UserError(_('You cannot enter product quantity as Zero'))
         return res
+
 
     @api.model
     def date_converted(self, date):
@@ -157,3 +173,5 @@ class PurchaseOrderLine(models.Model):
     serial_no = fields.Integer(compute='_get_po_line_seq', string="Sr.No", default=1)
     material = fields.Char(string="Material")
     approx_weight = fields.Float(string="Approx Weight(kg)")
+    ## Inherit product_qty to make it Integer to remove all deciaml points
+    product_qty = fields.Integer(string='Quantity', required=True)
