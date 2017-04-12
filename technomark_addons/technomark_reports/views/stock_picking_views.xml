@@ -6,6 +6,9 @@
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.view_picking_form"/>
             <field name="arch" type="xml">
+              <xpath expr="//field[@name='origin']" position="after">
+                <field name="picking_type_flag" invisible="1"/>
+              </xpath>
               <button name="%(stock.action_report_delivery)d" position="replace">
                   <button name="do_print_picking" string="Print" states="done" type="object" groups="base.group_user"/>
               </button>

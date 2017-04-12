@@ -17,6 +17,7 @@ class StockPicking(models.Model):
     challan_date = fields.Date(string="Challan Date")
     challan_no = fields.Char(string="Challan No.")
     ics_lr_no = fields.Char(string="L.R. No.")
+    picking_type_flag = fields.Boolean(string="Picking Type Flag", default=False)
 
     @api.multi
     def do_print_picking(self):
@@ -105,3 +106,11 @@ class StockPicking(models.Model):
         elif pack_id_list and len(pack_id_list) == 1:
             serial_num = pack_id_list[0]
         return serial_num
+
+class ProductTemplate(models.Model):
+    _inherit = "product.template"
+    """ Inherit class for add new fields to allow use of product weight
+        at sale order line and calculate subtotal as weight * quantity * unit price
+    """
+    # This field allow to use product weight in Sale order Line
+    is_weight_applicable = fields.Boolean(string="Allow To Use Weight")
