@@ -23,6 +23,8 @@ class PurchaseOrder(models.Model):
     """
     ## Add new fields to print on PO as taxes/duties
     taxes_duties = fields.Char(string="TAXES/DUTIES", default="As Applicable")
+    ## Inherit this field to pass default value as "DOOR DELIVERY" on PO
+    incoterm_id = fields.Many2one('stock.incoterms', 'Incoterm', states={'done': [('readonly', True)]}, help="International Commercial Terms are a series of predefined commercial terms used in international transactions.", default=lambda self: self.env['stock.incoterms'].search([('name', '=', 'DOOR DELIVERY')]))
 
     @api.multi
     def print_quotation(self):

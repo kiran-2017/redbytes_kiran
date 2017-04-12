@@ -290,8 +290,10 @@
                                     <span></span>
                               </td>
                               <td class="text-right" t-if="o.state == 'done'">
-                                  <span><strong>Total</strong></span>
-                                  <t t-if="(l.qty_done for l in o.pack_operation_ids)" t-esc="sum(l.qty_done for l in o.pack_operation_ids)"/>
+                                  <span class="page_bar" style="margin-right:40px;"><strong>Total</strong></span>
+                                  <span class="page_bar" style="margin-right:40px;">
+                                    <t t-if="(l.qty_done for l in o.pack_operation_ids)" t-esc="sum(l.qty_done for l in o.pack_operation_ids)"/>
+                                  </span>
                               </td>
                             </tr>
                         </tbody>

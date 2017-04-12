@@ -57,6 +57,17 @@ class StockPicking(models.Model):
                     return line ## return line to fetched data on qweb DC report
 
     @api.model
+    def get_purchase_order_line_data(self, origin, product_id):
+        """ This function fetch data from POL like approx weight etc on IS"""
+        purchase_order_obj = self.env['purchase.order']
+        res = []
+        if origin:
+            purchase_order_line_id = purchase_order_obj.search([('name', '=', origin)])
+            for line in purchase_order_line_id.order_line:
+                if line.product_id.id == product_id.id:
+                    return line ## return line to fetched data on qweb IS report
+
+    @api.model
     def get_cust_ref(self, origin):
         """ This function dsplay customer referance on qweb report for DC"""
         if origin == 'incoming_shipment':

@@ -328,7 +328,9 @@
                                     <span t-field="pack_operation.ordered_qty"/>
                                     <span t-field="pack_operation.product_uom_id"/>
                                 </td>
-                                <td><span t-if="(pack_operation.product_id.weight)>0" t-field="pack_operation.product_id.weight"/></td>
+                                <t t-set="po_line_data" t-value="o.get_purchase_order_line_data(o.origin, pack_operation.product_id)"/>
+                                <td><span t-if="po_line_data and (po_line_data.approx_weight)>0" t-field="po_line_data.approx_weight"/></td>
+
                                 <td class="text-right" t-if="pack_operation.state == 'done'">
                                     <t t-if="pack_operation.ordered_qty != pack_operation.qty_done">
                                         <t t-set="backorder" t-value="True"/>
@@ -389,6 +391,10 @@
                       <br/>
                       <strong style="margin-right:100px;">Authorised Signatory</strong>
                     </div>
+                    <p t-if="o.note">
+                          <br/>
+                        <t t-esc="o.note"/>
+                    </p>
 
                     <p t-if="o.backorder_id">
                         This shipment is a backorder of <t t-esc="o.backorder_id.name"/>.

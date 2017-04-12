@@ -186,9 +186,9 @@
                             <td class="text-left" t-if="o.incoterm_id">
                               FREIGHT : <span t-if="o.incoterm_id" t-esc="o.incoterm_id.name"/><br/>
                             </td>
-                            <td class="text-left" t-if="not o.incoterm_id">
+                            <!-- <td class="text-left" t-if="not o.incoterm_id">
                               FREIGHT : <span t-if="not o.incoterm_id">DOOR DELIVERY</span><br/>
-                            </td>
+                            </td> -->
                         </tr>
                         <tr class="">
                             <td class="text-left">
