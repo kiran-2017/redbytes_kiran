@@ -114,3 +114,12 @@ class ProductTemplate(models.Model):
     """
     # This field allow to use product weight in Sale order Line
     is_weight_applicable = fields.Boolean(string="Allow To Use Weight")
+
+
+class PurchaseOrderLine(models.Model):
+    _inherit = "purchase.order.line"
+    """ Inherit for Adding new fields and inherit functionality to calculate subtotal
+        as per product weight
+    """
+
+    approx_weight = fields.Float(string="Approx Weight(kg)")
