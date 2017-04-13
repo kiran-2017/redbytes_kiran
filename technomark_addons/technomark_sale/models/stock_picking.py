@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError, ValidationError
 import datetime
 
 
@@ -29,7 +30,10 @@ class StockPicking(models.Model):
                 if (picking_type.use_create_lots or picking_type.use_existing_lots):
                     for pack in pick.pack_operation_ids:
                         new_lot_ids = []
-                        if pack.product_id and pack.product_id.tracking != 'none':
+                        ## Show warning for PO Delivery when lot id is not assign to product
+                        if pack.product_id and pack.product_id.tracking != 'none' and pick.picking_type_id.code == 'incoming':
+                            raise UserError(_('Some products require lots/serial numbers, so you need to specify those first!'))
+                        if pack.product_id and pack.product_id.tracking != 'none' and pick.picking_type_id.code == 'outgoing':
                             # raise UserError(_('Some products require lots/serial numbers, so you need to specify those first!'))
                             ######## Write lot id assign logic here #####
                             product_lot_ids = self.env['stock.production.lot'].search([('product_id', '=', pack.product_id.id)])
