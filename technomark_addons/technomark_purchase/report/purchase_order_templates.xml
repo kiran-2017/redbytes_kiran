@@ -230,8 +230,8 @@
                         </tr>
                         <tr class="border-black"><!-- style="font-size:75%;"-->
                             <td colspan="2">
-                              <strong>Rupees</strong>
-                              <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> <strong>Only</strong>
+                              <strong>Rupees
+                              <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> only</strong>
                             </td>
                             <!-- <td class="text-left">
                                 <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> <strong>Only</strong>
@@ -247,7 +247,9 @@
             <div>
               <div style="margin-left:15px;"><!--margin-top:420px;-->
                 <span>
-                  <strong>For TECHNOMARK INDIA</strong>
+                  <br/> <!-- To add one line space bofore company name-->
+                  <span><strong>For </strong></span> <strong><span t-if="o.company_id" t-esc="o.company_id.name"/></strong>
+                  <!-- <strong>For TECHNOMARK INDIA</strong> -->
                   <br/>
                   <br/>
                   <br/>

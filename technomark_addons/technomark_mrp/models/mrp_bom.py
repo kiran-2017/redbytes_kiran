@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models
 
+
 class MrpBomLine(models.Model):
     _inherit = "mrp.bom.line"
 
@@ -19,3 +20,9 @@ class MrpBomLine(models.Model):
 
     serial_no = fields.Integer(compute="_get_line_seq", string="Sr No", default="1")
     used_for = fields.Char(string="Used For")
+    size = fields.Char(string="Size")
+    material = fields.Char(string="Material")
+    machine_drawing_no = fields.Char(string="Machine Drawing")
+    casting_drawing_no = fields.Char(string="Casting Drawing")
+    # Inherit field to remove deciaml point and convert to integer
+    # product_qty = fields.Integer(string='Product Quantity', default=1, required=True)

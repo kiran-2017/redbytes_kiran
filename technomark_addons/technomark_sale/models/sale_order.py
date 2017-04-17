@@ -60,4 +60,4 @@ class SaleOrderLine(models.Model):
     quantity = fields.Integer(string="Quantity")
     pro_delivery_date = fields.Date(string="Delivery Date")
     ## Inherit this fields to remove decimal point from it
-    product_uom_qty = fields.Integer(string='Quantity', default=1)
+    # product_uom_qty = fields.Integer(string='Quantity', default=1)

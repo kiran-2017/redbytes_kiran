@@ -18,6 +18,7 @@ class StockPicking(models.Model):
         """ Inherit this function to pass already existing lot id to DC"""
         op_vals = {}
         new_ids_write = {}
+        stock_product_lot_obj = self.env['stock.production.lot']
         for pick in self:
             pack_operations_delete = self.env['stock.pack.operation']
             stock_pack_op_lot_obj = self.env['stock.pack.operation.lot']
@@ -36,16 +37,22 @@ class StockPicking(models.Model):
                         if pack.product_id and pack.product_id.tracking != 'none' and pick.picking_type_id.code == 'outgoing':
                             # raise UserError(_('Some products require lots/serial numbers, so you need to specify those first!'))
                             ######## Write lot id assign logic here #####
-                            product_lot_ids = self.env['stock.production.lot'].search([('product_id', '=', pack.product_id.id)])
+                            ## To delete all existing lot ids
                             if pack.pack_lot_ids:
                                 pack.pack_lot_ids.unlink()
-                            if not pack.pack_lot_ids:
-                                product_lot_id_list = [product_lot_id.id for product_lot_id in product_lot_ids]
-                                product_lot_id_list.reverse()
-                                for i in range(int(pack.product_qty)):
-                                    if i < len(product_lot_id_list):
-                                        new_lot_ids.append(product_lot_id_list[i])
+
+                            ## Logic for creating new sequence number for lot assign product in SO DC
+                            for i in range(int(pack.product_qty)):
+                                next_sequence = self.env['ir.sequence'].get('stock.lot.serial')
+                                seq_vals = {
+                                        'name' : next_sequence,
+                                        'product_id': pack.product_id.id,
+                                        }
+                                new_lot_id = stock_product_lot_obj.create(seq_vals)
+                                ## append all created new lot ids to this list
+                                new_lot_ids.append(new_lot_id.id)
                             for new_lot_id in new_lot_ids:
+                                ## Logic to assign newly created lot id to related pack operation
                                 op_vals = {'lot_id': new_lot_id, 'qty_todo': 1, 'qty': 1, 'operation_id': pack.id}
                                 new_ids_write = {'lot_id': new_lot_id}
                                 op_id = stock_pack_op_lot_obj.create(op_vals)
@@ -111,8 +118,8 @@ class StockPicking(models.Model):
     transporter_name_id = fields.Many2one('transporter.name', string="Transporter Name")
     lr_no = fields.Char(string="L.R. No")
     lr_date = fields.Date(string="L.R. Date")
-    vehical_registration_no = fields.Char(string="Vehicka Reg. No")
-    basic_of_freight = fields.Selection([('to_pay', 'To Pay'), ('paid', 'Paid')], 'Basic Of Freight', default='')
+    vehical_registration_no = fields.Char(string="Vehicle Reg. No")
+    basis_of_freight = fields.Selection([('to_pay', 'To Pay'), ('paid', 'Paid')], 'Basis Of Freight', default='')
     road_permit_no = fields.Char(string="Road Permit No")
     delivery_type = fields.Selection([('door_delivery', 'DOOR DELIVERY'), ('godown_delivery', 'GODOWN DELIVERY')], 'Delivery Type', default='door_delivery')
     dc_mode = fields.Selection([('returnable', 'Returnable'), ('non_returnable', 'Non-Returnable')], 'Delivery Mode')
@@ -124,3 +131,27 @@ class TransporterName(models.Model):
     """ Newly added class to reate entries for transporter used on DC form"""
 
     name = fields.Char(string="Name")
+
+class PackOperation(models.Model):
+    """ Inherit this calss to add new field weight of product"""
+    _inherit = "stock.pack.operation"
+
+    weight = fields.Float(string='Weight')
+
+    @api.model
+    def create(self, vals):
+        """ Inherit create method to pass default unit weight of product on pack operation form in DC"""
+        product_obj = self.env['product.product']
+        order_obj = self.env['purchase.order']
+        if vals and 'product_id' in vals:
+            product_id = product_obj.search([('id', '=', vals['product_id'])])
+
+        if vals and 'picking_id' in vals:
+            picking_id = self.env['stock.picking'].search([('id', '=', vals['picking_id'])])
+            if picking_id:
+                order_id = order_obj.search([('name', '=', picking_id.origin)])
+                for line in order_id.order_line:
+                    if line.product_id.id == product_id.id and line.approx_weight:
+                        vals['weight'] = line.approx_weight
+        res = super(PackOperation, self).create(vals)
+        return res

@@ -12,7 +12,6 @@
                   <field name="taxes_duties"/>
               </xpath>
 
-
               <!-- Add new fields on purchase order line tree view -->
               <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
                   <field name="serial_no"/>
@@ -29,9 +28,9 @@
               <xpath expr="//field[@name='order_line']/tree/field[@name='date_planned']" position="attributes">
                   <attribute name="string">Date Req</attribute>
               </xpath>
-              <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="attributes">
+              <!-- <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="attributes">
                   <attribute name="string">Amount</attribute>
-              </xpath>
+              </xpath> -->
               <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']" position="attributes">
                   <attribute name="string">Per</attribute>
               </xpath>
@@ -51,6 +50,15 @@
               <xpath expr="//field[@name='order_line']/form/sheet/group/group/field[@name='date_planned']" position="attributes">
                   <attribute name="string">Date Req</attribute>
               </xpath>
+              <!-- To hide amount field-->
+              <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
+              <!-- Move Amount colum before tax column -->
+              <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="before">
+                  <field name="price_subtotal" string="Amount"/>
+              </xpath>
+              
 
             </field>
         </record>

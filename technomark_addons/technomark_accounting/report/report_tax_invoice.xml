@@ -101,13 +101,14 @@
 
                     <tr>
                       <td width="50%" class="td_formating">
-                        Consignee<br/>
-                        <strong><span t-if="o.partner_id" t-field="o.partner_id"/></strong><br/>
-                        <span t-if="o.partner_id.street" t-field="o.partner_id.street"/><br/>
-                        <span t-if="o.partner_id.street2" t-field="o.partner_id.street2"/>
-                        <span t-if="o.partner_id.city" t-field="o.partner_id.city"/>-
-                        <span t-if="o.partner_id.zip" t-field="o.partner_id.zip"/><br/>
-                        MOB:-<span t-if="o.partner_id.mobile" t-field="o.partner_id.mobile"/><br/>
+                        <!--Show delivery address here -->
+                        <span>Consignee</span><br/>
+                        <strong><span t-if="o.partner_shipping_id" t-field="o.partner_shipping_id"/></strong><br/>
+                        <span t-if="o.partner_shipping_id.street" t-field="o.partner_shipping_id.street"/><br/>
+                        <span t-if="o.partner_shipping_id.street2" t-field="o.partner_shipping_id.street2"/>
+                        <span t-if="o.partner_shipping_id.city" t-field="o.partner_shipping_id.city"/>-
+                        <span t-if="o.partner_shipping_id.zip" t-field="o.partner_shipping_id.zip"/><br/>
+                        MOB:-<span t-if="o.partner_shipping_id.mobile" t-field="o.partner_shipping_id.mobile"/><br/>
                       </td>
 
                       <td width="50%" style="padding:0px !important;" class="td_formating">
@@ -121,21 +122,23 @@
 
                               <td class="td_formating" width="50%">
                                 Dated<br/>
-                                <strong><span t-if="o.date_due" t-field="o.date_due"/></strong>
-                                <strong><span t-if="not o.date_due"><br/></span></strong>
+                                <strong><span t-if="o.date_invoice" t-field="o.date_invoice"/></strong>
+                                <strong><span t-if="not o.date_invoice"><br/></span></strong>
                               </td>
                           </tr>
 
                           <tr>
                               <td class="td_formating" width="50%">
                                 Despatch Document No.<br/>
-                                <strong><span t-if="o.despateched_doc_no" t-field="o.despateched_doc_no"/></strong>
-                                <strong><span t-if="not o.despateched_doc_no"><br/></span></strong>
+                                <t t-set="order_info" t-value="o.get_delivery_date(o.origin)" />
+                                <strong><span t-if="order_info" t-field="order_info.name"/></strong>
+                                <strong><span t-if="not order_info"><br/></span></strong>
                               </td>
 
                               <td class="td_formating" width="50%">
                                 Delivery Note Date<br/>
-                                <strong><span t-esc="o.get_delivery_date(o.origin)"/></strong>
+                                <t t-set="order_info" t-value="o.get_delivery_date(o.origin)" />
+                                <strong><span t-if="order_info" t-esc="o.date_converted(order_info.min_date)"/></strong>
                               </td>
                           </tr>
 
@@ -158,7 +161,8 @@
 
                     <tr>
                       <td width="50%">
-                        Buyer (if other than consignee)<br/>
+                        <!--Show Invoice address here -->
+                        <span>Buyer (if other than consignee)</span><br/>
                         <strong><span t-if="o.partner_id" t-field="o.partner_id"/></strong><br/>
                         <span t-if="o.partner_id.street" t-field="o.partner_id.street"/><br/>
                         <span t-if="o.partner_id.street2" t-field="o.partner_id.street2"/>
@@ -169,7 +173,11 @@
 
                       <td width="50%" class="td_formating">
                         Terms of Delivery<br/>
+                        <!-- <t t-set="order_info" t-value="o.get_delivery_date(o.origin)" /> -->
                         <strong><span t-esc="o.get_order_data(o.origin)"/></strong>
+                        <!-- <t t-foreach='order_info' t-as='pick'>
+                          <strong><span t-if="pick" t-esc="pick.delivery_type"/></strong>
+                        </t> -->
                       </td>
                     </tr>
 
@@ -200,16 +208,15 @@
                                         <t t-if="o.origin" t-set="product_info" t-value="o.get_product_line_info(o.origin, invoice.product_id)"/>
                                           <!-- Print vore, valve , valve operation, pn, case file no, seril no, etc-->
                                           <span t-if="product_info"><br/></span>
-                                          <span t-if="product_info">FOR-</span><span t-if="product_info" t-field="product_info.bore"/>
-                                          <span t-if="product_info">,</span>
-                                          <span t-if="product_info" t-field="product_info.valve_operation"/>
-                                          <span t-if="product_info">,</span>
-                                          <span t-if="product_info" t-field="product_info.pn"/><br/>
+                                          <span t-if="product_info">For:</span><span t-if="product_info" t-field="product_info.valve"/><span t-if="product_info.valve">,</span>
+                                          <span t-if="product_info" t-field="product_info.valve_operation"/><span t-if="product_info">,</span>
+                                          PN:<span t-if="product_info" t-field="product_info.pn"/><br/>
                                           Case File: <span  t-if="product_info" t-field="product_info.case_file_number"/><br/>
-                                          Bore: <span t-if="product_info" t-field="product_info.bore"/><br/>
+                                          Bore: <span t-if="product_info" t-field="product_info.bore"/>
+                                          <span t-if="product_info.bore"> mm</span><br/>
                                           <!-- Logic to print lot serail number for product in Tax Invoice-->
                                           <t t-if="o.origin" t-set="lot_data" t-value="o.get_lot_serial_number(o.origin, invoice.product_id)" />
-                                          Serial No(s) :
+                                          SR. NO(s) :
                                           <t t-foreach="lot_data" t-as="lot_id">
                                             <span t-if="lot_id" t-esc="lot_id"/>
                                           </t>
@@ -292,7 +299,7 @@
                                 <tr t-if="o.amount_total">
                                     <td colspan="6">
                                       Amount Chargeable(In Words)<br/>
-                                      <strong>Indian Rupees</strong> <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> <strong>Only</strong>
+                                      <strong>Indian Rupees <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> only</strong>
                                     </td>
                                 </tr>
                                 <tr t-if="not o.amount_total">
@@ -362,13 +369,14 @@
                         </td>
                         <td t-if="o.company_id" id="bank_account_details" class="td_formating">
                             <t t-set="bank_info" t-value="o.get_bank_details(o.company_id, o.company_id.partner_id)" />
-                            Company's Bank details<br/>
-                            <t t-foreach="bank_info" t-as="bank">
-                              Bank Name: <strong><span t-esc="bank.bank_id.name"/></strong><br/>
-                              A/c No: <strong><span t-esc="bank.acc_number"/></strong><br/>
-                              Branch And IFSC Code : <strong><span t-esc="bank.bank_id.bic"/></strong><br/>
+                            Company's Bank details
+                            <br/>
+                            <!-- <t t-foreach="bank_info" t-as="bank">  remove this to show only one bank-->
+                              <span>Bank Name:</span> <strong><span t-if="bank_info" t-esc="bank_info[0].bank_id.name"/></strong><br/>
+                              A/c No: <strong><span t-if="bank_info" t-esc="bank_info[0].acc_number"/></strong><br/>
+                              Branch And IFSC Code : <strong><span t-if="bank_info" t-esc="bank_info[0].bank_id.bic"/></strong><br/>
                               <br/>
-                            </t>
+                            <!-- </t> -->
                             <br/><br/>
                         </td>
                     </tr>
@@ -377,6 +385,7 @@
                           Customer's Seal and Signature
                         </td>
                         <td style="text-align:right;" class="td_formating">
+
                             <span>For</span> <strong><span t-if="o.company_id" t-esc="o.company_id.name"/></strong>
                             <br/>
                             <br/>

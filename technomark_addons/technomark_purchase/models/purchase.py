@@ -39,7 +39,7 @@ class PurchaseOrder(models.Model):
         """ This function convert amount in words format on PO qweb report"""
         if total:
             amount_in_words = num2words(total)
-            return amount_in_words
+            return amount_in_words.title()
 
     @api.model
     def date_converted(self, date):
@@ -77,9 +77,13 @@ class PurchaseOrderLine(models.Model):
         self.date_planned = datetime.today().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         self.price_unit = self.product_qty = 0.0
         self.product_uom = self.product_id.uom_po_id or self.product_id.uom_id
-        ## LOgic to set weight to POL on chnage of product id and if weight set is true
-        if self.product_id.is_weight_applicable:
-            self.approx_weight = self.product_id.weight or 0.0
+        # pass material value on PO line if there
+        if self.product_id and self.product_id.material:
+            self.material = self.product_id.material
+        # ## LOgic to set weight to POL on chnage of product id and if weight set is true
+        ## rewrite bellow keep for reference only no use for now
+        # if self.product_id.is_weight_applicable:
+        #     self.approx_weight = self.product_id.weight * self.product_qty or 0.0
         result['domain'] = {'product_uom': [('category_id', '=', self.product_id.uom_id.category_id.id)]}
 
         product_lang = self.product_id.with_context({
@@ -99,7 +103,9 @@ class PurchaseOrderLine(models.Model):
 
         self._suggest_quantity()
         self._onchange_quantity()
-
+        ## Logic to set weight to POL on chnage of product id and if weight set is true
+        if self.product_id.is_weight_applicable:
+            self.approx_weight = self.product_id.weight * self.product_qty or 0.0
         return result
 
 
@@ -108,8 +114,12 @@ class PurchaseOrderLine(models.Model):
     def write(self, vals):
         """ Logic for change approx_weight in PO line and apply new sub total"""
         """ Inherit write method to validate POL qty field it should be > 0"""
+        if vals and 'product_qty' in vals and self.product_id.is_weight_applicable:
+            vals.update({'approx_weight': self.product_id.weight * vals['product_qty']})
+            vals.update({'price_subtotal': self.approx_weight * self.price_unit})
         if vals and 'approx_weight' in vals and self.product_id.is_weight_applicable:
-            vals.update({'price_subtotal': vals['approx_weight'] * self.product_qty * self.price_unit})
+            # hide for now keep for future ref vals.update({'price_subtotal': vals['approx_weight'] * self.product_qty * self.price_unit})
+            vals.update({'price_subtotal': vals['approx_weight'] * self.price_unit})
         if vals and 'product_qty' in vals and vals['product_qty'] == 0:
             raise UserError(_('You cannot enter product quantity as Zero'))
         res = super(PurchaseOrderLine, self).write(vals)
@@ -157,11 +167,12 @@ class PurchaseOrderLine(models.Model):
         for line in self:
             taxes = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
             if line.product_id.is_weight_applicable:
-                # product_weight = line.product_id.weight
+                product_weight = line.product_id.weight * line.product_qty
                 line.update({
                     'price_tax': taxes['total_included'] - taxes['total_excluded'],
                     'price_total': taxes['total_included'],
-                    'price_subtotal': taxes['total_excluded'] * line.approx_weight,
+                    # 'price_subtotal': taxes['total_excluded'] * line.approx_weight, keep for future ref
+                    'price_subtotal': line.price_unit * product_weight, ## subtotal is unit proce * total approx weight(unit weight * product qty)
                 })
             else:
                 ## Else default flow
@@ -176,4 +187,4 @@ class PurchaseOrderLine(models.Model):
     material = fields.Char(string="Material")
     approx_weight = fields.Float(string="Approx Weight(kg)")
     ## Inherit product_qty to make it Integer to remove all deciaml points
-    product_qty = fields.Integer(string='Quantity', required=True)
+    # product_qty = fields.Integer(string='Quantity', required=True)

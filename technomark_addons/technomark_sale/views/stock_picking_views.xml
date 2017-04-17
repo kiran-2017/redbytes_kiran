@@ -7,7 +7,12 @@
             <field name="inherit_id" ref="stock.view_picking_form"/>
             <field name="arch" type="xml">
 
-              <!-- Screen for entering Other Info details like Vehical reg. no, LR no ect...-->
+              <!-- Add weight field on Dc for PO approx weight -->
+              <xpath expr="//field[@name='pack_operation_product_ids']/tree/field[@name='product_uom_id']" position="after">
+                  <field name="weight"/>
+              </xpath>
+
+              <!-- Screen for entering Other Info details like Vehicle reg. no, LR no ect...-->
               <xpath expr="//page[@name='extra']" position="after">
                 <page string="Other Info" name="other_info" attrs="{'invisible': [('picking_type_flag','=',True)]}">
                     <group>
@@ -18,7 +23,7 @@
                             <field name="lr_no"/>
                             <field name="lr_date"/>
                             <field name="vehical_registration_no"/>
-                            <field name="basic_of_freight"/>
+                            <field name="basis_of_freight"/>
                             <field name="road_permit_no"/>
                             <field name="delivery_type"/>
                             <field name="dc_mode"/>

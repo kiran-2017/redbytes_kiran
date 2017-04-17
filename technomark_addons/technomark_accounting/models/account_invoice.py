@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models
 from num2words import num2words
+import datetime
 
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
@@ -46,7 +47,7 @@ class AccountInvoice(models.Model):
             return "Zero"
         if total:
             amount_in_words = num2words(total)
-            return amount_in_words
+            return amount_in_words.title()
 
     @api.model
     def get_bank_details(self, company_id, partner_id):
@@ -85,18 +86,29 @@ class AccountInvoice(models.Model):
                     return po_id.incoterm_id.name
 
     @api.model
+    def date_converted(self, date):
+        """ This function convert date %Y-%m-%d %H:%M:%S to  %m/%d/%Y remove time from date"""
+        if date:
+            converted_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%m/%d/%Y')
+            return converted_date
+
+    @api.model
     def get_delivery_date(self, origin):
         """ This function return data for SO or PO form on qweb report of Tax invoice"""
         so_obj = self.env['sale.order']
         po_obj = self.env['purchase.order']
         if origin:
             so_id = so_obj.search([('name', '=', origin)])
-            if so_id:
-                return so_id.delivery_date
+            for pick in so_id.picking_ids:
+                return pick
+            # if so_id: Hide for now keep for future
+            #     return so_id.delivery_date
             else:
                 po_id = po_obj.search([('name', '=', origin)])
-                if po_id:
-                    return po_id.date_planned
+                # if po_id: Hide for now keep for future
+                #     return po_id.date_planned
+                for pick in po_id.picking_ids:
+                    return pick
 
     @api.model
     def get_delivery_note(self, origin):

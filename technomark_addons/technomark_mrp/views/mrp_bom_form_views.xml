@@ -12,7 +12,19 @@
                   <field name="serial_no"/>
               </xpath>
               <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_uom_id']" position="after">
+                  <field name="material"/>
+                  <field name="casting_drawing_no"/>
+                  <field name="machine_drawing_no"/>
+                  <field name="size"/>
                   <field name="used_for"/>
+              </xpath>
+              <!-- To change  product qty text in to Qty-->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_qty']" position="attributes">
+                  <attribute name="string">Qty</attribute>
+              </xpath>
+              <!-- To change Price Unit to Unit-->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_uom_id']" position="attributes">
+                  <attribute name="string">Unit</attribute>
               </xpath>
             </field>
         </record>
