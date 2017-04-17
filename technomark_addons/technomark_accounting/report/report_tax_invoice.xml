@@ -100,7 +100,7 @@
                     </tr>
 
                     <tr>
-                      <td width="50%" class="td_formating">
+                      <td width="50%" class="td_formating" t-if="o.partner_shipping_id">
                         <!--Show delivery address here -->
                         <span>Consignee</span><br/>
                         <strong><span t-if="o.partner_shipping_id" t-field="o.partner_shipping_id"/></strong><br/>
@@ -109,6 +109,16 @@
                         <span t-if="o.partner_shipping_id.city" t-field="o.partner_shipping_id.city"/>-
                         <span t-if="o.partner_shipping_id.zip" t-field="o.partner_shipping_id.zip"/><br/>
                         MOB:-<span t-if="o.partner_shipping_id.mobile" t-field="o.partner_shipping_id.mobile"/><br/>
+                      </td>
+                      <td width="50%" class="td_formating" t-if="not o.partner_shipping_id">
+                        <!--Show delivery address here -->
+                        <span>Consignee</span><br/>
+                        <strong><span t-if="o.partner_id" t-field="o.partner_id"/></strong><br/>
+                        <span t-if="o.partner_id.street" t-field="o.partner_id.street"/><br/>
+                        <span t-if="o.partner_id.street2" t-field="o.partner_id.street2"/>
+                        <span t-if="o.partner_id.city" t-field="o.partner_id.city"/>-
+                        <span t-if="o.partner_id.zip" t-field="o.partner_id.zip"/><br/>
+                        MOB:-<span t-if="o.partner_id.mobile" t-field="o.partner_id.mobile"/><br/>
                       </td>
 
                       <td width="50%" style="padding:0px !important;" class="td_formating">
