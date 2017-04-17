@@ -208,12 +208,12 @@
                                         <t t-if="o.origin" t-set="product_info" t-value="o.get_product_line_info(o.origin, invoice.product_id)"/>
                                           <!-- Print vore, valve , valve operation, pn, case file no, seril no, etc-->
                                           <span t-if="product_info"><br/></span>
-                                          <span t-if="product_info">For:</span><span t-if="product_info" t-field="product_info.valve"/><span t-if="product_info">,</span>
+                                          <span t-if="product_info">For:</span><span t-if="product_info" t-field="product_info.valve"/><span t-if="product_info.valve">,</span>
                                           <span t-if="product_info" t-field="product_info.valve_operation"/><span t-if="product_info">,</span>
                                           PN:<span t-if="product_info" t-field="product_info.pn"/><br/>
                                           Case File: <span  t-if="product_info" t-field="product_info.case_file_number"/><br/>
                                           Bore: <span t-if="product_info" t-field="product_info.bore"/>
-                                          <span t-if="product_info.bore"> mm</span><br/>
+                                          <span t-if="product_info"> mm</span><br/>
                                           <!-- Logic to print lot serail number for product in Tax Invoice-->
                                           <t t-if="o.origin" t-set="lot_data" t-value="o.get_lot_serial_number(o.origin, invoice.product_id)" />
                                           SR. NO(s) :
