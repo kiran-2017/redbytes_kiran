@@ -14,10 +14,11 @@ You could use this simplified accounting in case you work with an (external) acc
     """,
     'category': 'mrp',
     'website': 'https://www.odoo.com/page/billing',
-    'depends' : ['mrp', 'product'],
+    'depends' : ['mrp', 'product', 'hr'],
     'data': [
             'views/product_views.xml',
             'views/mrp_bom_form_views.xml',
+            'views/mrp_workorder_views.xml',
     ],
     'demo': [
     ],
