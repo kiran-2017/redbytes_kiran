@@ -62,6 +62,10 @@ class PurchaseOrderLine(models.Model):
         if vals and 'product_qty' in vals and vals['product_qty'] == 0:
             raise UserError(_('You cannot enter product quantity as Zero'))
         res = super(PurchaseOrderLine, self).create(vals)
+        ## Logic to change subtotal while creating PO
+        if res and res.product_id.is_weight_applicable:
+            res.approx_weight = res.product_id.weight * res.product_qty
+            res.price_subtotal = res.approx_weight * res.price_unit
         return res
 
 
