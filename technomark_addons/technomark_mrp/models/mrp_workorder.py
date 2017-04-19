@@ -8,4 +8,5 @@ from odoo import api, fields, models, _
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
-    user_id = fields.Many2one('hr.employee', string="User")#, default=lambda self:self._context.get('active_id', False)
+    ## Add new field on work order form
+    user_id = fields.Many2one('res.users', string="User")
