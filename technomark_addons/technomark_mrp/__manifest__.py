@@ -18,7 +18,7 @@ You could use this simplified accounting in case you work with an (external) acc
     'data': [
             'views/product_views.xml',
             'views/mrp_bom_form_views.xml',
-            'views/mrp_workorder_views.xml',
+            # 'views/mrp_workorder_views.xml',no need for now
             'report/mrp_bom_structure_report_template.xml',
             'report/mrp_report_view_main.xml',
     ],
