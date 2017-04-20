@@ -28,7 +28,12 @@ class MrpBomLine(models.Model):
             first_line_rec = self.browse(self.ids[0])
             for line_rec in first_line_rec.bom_id.bom_line_ids:
                 line_rec.serial_no = line_num
+                ## to write serial number on bom lines
+                # to relove issue for chnging sequnce for bom line components
+                query = """update mrp_bom_line set serial_no = %s where id = %s"""
+                self.env.cr.execute(query, (line_num, line_rec.id,))
                 line_num += 1
+
 
     serial_no = fields.Integer(compute="_get_line_seq", string="Sr No", default="1")
     used_for = fields.Char(string="Used For")
