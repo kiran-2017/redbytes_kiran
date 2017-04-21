@@ -6,6 +6,7 @@ from odoo import api, fields, models
 
 class MrpBomLine(models.Model):
     _inherit = "mrp.bom.line"
+    # _order = "serial_no"
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -19,23 +20,30 @@ class MrpBomLine(models.Model):
             self.casting_drawing_no = self.product_id.casting_drawing_no
             self.size = self.product_id.size
 
-    @api.multi
-    def _get_line_seq(self):
-        """ This funcion generate PO line serial number sequence
-            For each different PO sr. no. seq start from 1 for PO Line"""
-        line_num = 1
-        if self.ids:
-            first_line_rec = self.browse(self.ids[0])
-            for line_rec in first_line_rec.bom_id.bom_line_ids:
-                line_rec.serial_no = line_num
-                ## to write serial number on bom lines
-                # to relove issue for chnging sequnce for bom line components
-                query = """update mrp_bom_line set serial_no = %s where id = %s"""
-                self.env.cr.execute(query, (line_num, line_rec.id,))
-                line_num += 1
+    ## Using default sequnce field from BOM line keep for future
+    # @api.multi
+    # def _get_line_seq(self):
+    #     """ This funcion generate PO line serial number sequence
+    #         For each different PO sr. no. seq start from 1 for PO Line"""
+    #     line_num = 1
+    #     if self.ids:
+    #         first_line_rec = self.browse(self.ids[0])
+    #         for line_rec in first_line_rec.bom_id.bom_line_ids:
+    #             line_rec.serial_no = line_num
+    #             line_num += 1
 
+    @api.model
+    def create(self, vals):
+        """ Inherit create function to pass sequnce value to serial number and relove issue for relocation of bom line"""
+        if vals and 'sequence' in vals:
+            vals['serial_no'] = vals['sequence']
+        res = super(MrpBomLine, self).create(vals)
+        return res
+    
 
-    serial_no = fields.Integer(compute="_get_line_seq", string="Sr No", default="1")
+    ## Using default sequnce field to relove bom line relocation issue keep for future ref
+    # serial_no = fields.Integer(compute="_get_line_seq", string="Sr No", default="1")
+    serial_no = fields.Integer(string="Sr No", default="1")
     used_for = fields.Char(string="Used For")
     size = fields.Char(string="Size")
     material = fields.Char(string="Material")

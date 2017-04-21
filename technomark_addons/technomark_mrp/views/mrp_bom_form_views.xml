@@ -9,7 +9,7 @@
 
               <!-- Add sr no and used for fields on bom components -->
               <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='sequence']" position="before">
-                  <field name="serial_no"/>
+                  <field name="serial_no" readonly="1"/>
               </xpath>
               <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_uom_id']" position="after">
                   <field name="material"/>
