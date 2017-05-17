@@ -10,3 +10,6 @@ class ProductTemplate(models.Model):
     material = fields.Char(string="Material")
     machine_drawing_no = fields.Char(string="Machine Drawing No")
     casting_drawing_no = fields.Char(string="Casting Drawing No")
+    od = fields.Char(string="OD (mm)")
+    l = fields.Char(string="l (mm)")
+    b_id = fields.Char(string="ID (mm)")

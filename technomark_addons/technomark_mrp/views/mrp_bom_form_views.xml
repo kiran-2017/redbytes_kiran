@@ -17,6 +17,9 @@
                   <field name="machine_drawing_no"/>
                   <field name="size"/>
                   <field name="used_for"/>
+                  <field name="od"/>
+                  <field name="l"/>
+                  <field name="b_id"/>
               </xpath>
               <!-- To change  product qty text in to Qty-->
               <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_qty']" position="attributes">

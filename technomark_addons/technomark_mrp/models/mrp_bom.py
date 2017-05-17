@@ -19,6 +19,9 @@ class MrpBomLine(models.Model):
             self.machine_drawing_no = self.product_id.machine_drawing_no
             self.casting_drawing_no = self.product_id.casting_drawing_no
             self.size = self.product_id.size
+            self.od = self.product_id.od or False
+            self.l = self.product_id.l or False
+            self.b_id = self.product_id.b_id or False
 
     ## Using default sequnce field from BOM line keep for future
     # @api.multi
@@ -39,7 +42,7 @@ class MrpBomLine(models.Model):
             vals['serial_no'] = vals['sequence']
         res = super(MrpBomLine, self).create(vals)
         return res
-    
+
 
     ## Using default sequnce field to relove bom line relocation issue keep for future ref
     # serial_no = fields.Integer(compute="_get_line_seq", string="Sr No", default="1")
@@ -49,3 +52,6 @@ class MrpBomLine(models.Model):
     material = fields.Char(string="Material")
     machine_drawing_no = fields.Char(string="Machine Drawing")
     casting_drawing_no = fields.Char(string="Casting Drawing")
+    od = fields.Char(string="OD(mm)")
+    l = fields.Char(string="l(mm)")
+    b_id = fields.Char(string="ID(mm)")
