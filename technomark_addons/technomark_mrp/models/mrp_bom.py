@@ -53,5 +53,5 @@ class MrpBomLine(models.Model):
     machine_drawing_no = fields.Char(string="Machine Drawing")
     casting_drawing_no = fields.Char(string="Casting Drawing")
     od = fields.Char(string="OD(mm)")
-    l = fields.Char(string="l(mm)")
+    l = fields.Char(string="L(mm)")
     b_id = fields.Char(string="ID(mm)")
