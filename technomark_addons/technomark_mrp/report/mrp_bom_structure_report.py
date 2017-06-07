@@ -33,6 +33,7 @@ class BomStructureReport(models.AbstractModel):
                 res['casting_drawing_no'] = l.casting_drawing_no
                 res['size'] = l.size
                 res['used_for'] = l.used_for
+                res['serial_no'] = l.serial_no
 
                 result.append(res)
                 if l.child_line_ids:
