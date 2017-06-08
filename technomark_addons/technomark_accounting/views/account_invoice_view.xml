@@ -28,6 +28,11 @@
                     <field name="destination"/>
                     <field name="other_ref"/>
               </xpath>
+
+              <!-- Add Approx Weight field in account invoice line -->
+              <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='quantity']" position="before">
+                  <field name="inv_actual_weight"/>
+              </xpath>
             </field>
         </record>
 </odoo>

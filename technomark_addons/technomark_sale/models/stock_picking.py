@@ -137,6 +137,7 @@ class PackOperation(models.Model):
     _inherit = "stock.pack.operation"
 
     weight = fields.Float(string='Weight')
+    actual_weight = fields.Float(string="Actual Weight(kg)")
 
     @api.model
     def create(self, vals):

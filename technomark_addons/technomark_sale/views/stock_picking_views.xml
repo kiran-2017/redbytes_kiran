@@ -10,6 +10,7 @@
               <!-- Add weight field on Dc for PO approx weight -->
               <xpath expr="//field[@name='pack_operation_product_ids']/tree/field[@name='product_uom_id']" position="after">
                   <field name="weight"/>
+                  <field name="actual_weight"/>
               </xpath>
 
               <!-- Screen for entering Other Info details like Vehicle reg. no, LR no ect...-->

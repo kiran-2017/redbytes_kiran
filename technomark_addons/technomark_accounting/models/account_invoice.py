@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models,_
 from num2words import num2words
 import datetime
+from odoo.exceptions import UserError, ValidationError
 
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
@@ -136,3 +137,58 @@ class AccountInvoice(models.Model):
                             for lot_id in pack_operation_id.pack_lot_ids:
                                 pack_id_list.append(lot_id.lot_id.name)
         return pack_id_list
+
+
+
+class AccountInvoiceLine(models.Model):
+    _inherit = 'account.invoice.line'
+
+    """ Inherit this class to add new fields in invoice lines"""
+
+    inv_actual_weight = fields.Float(string="Actual Weight(kg)")
+
+    @api.model
+    def create(self, vals):
+        """ Inherit this function to calculate invoice  amount
+            on basic of picking weight and received qty
+        """
+        inv_line = []
+        if vals and 'purchase_line_id' in vals:
+            ## Fetched all moves related to PO
+            stock_move_ids = self.env['stock.move'].search([('purchase_line_id', '=', vals.get('purchase_line_id')),('state', '=', 'done')])
+            ## Get picking ids from stock_moves
+            picking_ids = [rec.picking_id for rec in stock_move_ids]
+            ## Get operation ids from picking
+            stock_pack_operation_ids = self.env['stock.pack.operation'].search([('picking_id', 'in', [picking_id.id for picking_id in picking_ids])])
+        ## Create Invoice
+        res = super(AccountInvoiceLine, self).create(vals)
+        if res:
+            inv_line.append(res)
+
+        ## Logic to apply new actual weight and chnage invoice total
+        for operation_id in stock_pack_operation_ids:
+            for line in inv_line:
+                if line.product_id.id == operation_id.product_id.id:
+                    line.inv_actual_weight = operation_id.actual_weight
+                    line.price_subtotal = line.price_unit * line.quantity * operation_id.actual_weight
+                    self._compute_price()
+        return res
+
+    @api.one
+    @api.depends('price_unit', 'discount', 'invoice_line_tax_ids', 'quantity',
+        'product_id', 'invoice_id.partner_id', 'invoice_id.currency_id', 'invoice_id.company_id',
+        'invoice_id.date_invoice', 'inv_actual_weight')
+    def _compute_price(self):
+        """ Inherit this function to add actual weight calculation for invoice """
+
+        currency = self.invoice_id and self.invoice_id.currency_id or None
+        price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
+        taxes = False
+        if self.invoice_line_tax_ids:
+            taxes = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
+        ## Add actual_weight here in this field
+        self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] * self.inv_actual_weight if taxes else self.quantity * price
+        if self.invoice_id.currency_id and self.invoice_id.company_id and self.invoice_id.currency_id != self.invoice_id.company_id.currency_id:
+            price_subtotal_signed = self.invoice_id.currency_id.with_context(date=self.invoice_id.date_invoice).compute(price_subtotal_signed, self.invoice_id.company_id.currency_id)
+        sign = self.invoice_id.type in ['in_refund', 'out_refund'] and -1 or 1
+        self.price_subtotal_signed = price_subtotal_signed * sign
