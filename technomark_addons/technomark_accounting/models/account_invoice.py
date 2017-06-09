@@ -166,12 +166,13 @@ class AccountInvoiceLine(models.Model):
             inv_line.append(res)
 
         ## Logic to apply new actual weight and chnage invoice total
-        for operation_id in stock_pack_operation_ids:
-            for line in inv_line:
-                if line.product_id.id == operation_id.product_id.id:
-                    line.inv_actual_weight = operation_id.actual_weight
-                    line.price_subtotal = line.price_unit * line.quantity * operation_id.actual_weight
-                    self._compute_price()
+        if vals and 'purchase_line_id' in vals:
+            for operation_id in stock_pack_operation_ids:
+                for line in inv_line:
+                    if line.product_id.id == operation_id.product_id.id:
+                        line.inv_actual_weight = operation_id.actual_weight
+                        line.price_subtotal = line.price_unit * line.quantity * operation_id.actual_weight
+                        self._compute_price()
         return res
 
     @api.one
