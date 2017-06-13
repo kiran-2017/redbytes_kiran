@@ -29,6 +29,12 @@
               <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_uom_id']" position="attributes">
                   <attribute name="string">Unit</attribute>
               </xpath>
+
+
+              <!-- To Hide Variant Field from bom line -->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='attribute_value_ids']" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
             </field>
         </record>
     </data>
