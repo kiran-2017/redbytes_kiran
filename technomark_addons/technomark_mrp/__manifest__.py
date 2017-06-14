@@ -21,6 +21,7 @@ You could use this simplified accounting in case you work with an (external) acc
             # 'views/mrp_workorder_views.xml',no need for now
             'report/mrp_bom_structure_report_template.xml',
             'report/mrp_report_view_main.xml',
+            'wizard/mrp_product_produce_view.xml',
     ],
     'demo': [
     ],

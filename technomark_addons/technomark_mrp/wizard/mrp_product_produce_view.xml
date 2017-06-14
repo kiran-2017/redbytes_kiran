@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_mrp_product_produce_wizard_inherited" model="ir.ui.view">
+            <field name="name">MRP Product Produce</field>
+            <field name="model">mrp.product.produce</field>
+            <field name="inherit_id" ref="mrp.view_mrp_product_produce_wizard"/>
+            <field name="arch" type="xml">
+              <!-- To change attributes for lot id make it not required and invisible
+                    lot is created autometicaly not mannualy
+              -->
+                <xpath expr="//field[@name='lot_id']" position="replace">
+                    <field name="lot_id" invisible="1" required="0" domain="[('product_id','=',product_id)]" context="{'default_product_id': product_id}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
