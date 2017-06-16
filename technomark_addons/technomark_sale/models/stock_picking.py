@@ -42,27 +42,37 @@ class StockPicking(models.Model):
                             if pack.pack_lot_ids:
                                 pack.pack_lot_ids.unlink()
 
-                            ## Logic for creating new sequence number for lot assign product in SO DC
-                            lot_ids = self.env['stock.production.lot'].search([('product_id', '=', pack.product_id.id)])
-                            for lot_id in lot_ids:
-                                lot_id_list.append(lot_id)
-                            for i in range(int(pack.product_qty)):
-                                if lot_id_list and i <= (len(lot_id_list)-1):
-                                    new_lot_ids.append(lot_id_list[i])
-                                """
-                                # No need for now
-                                # serial no. fetching from MO orders
-                                # update logic
-                                # Keep it for future referance and use
-                                # next_sequence = self.env['ir.sequence'].get('stock.lot.serial')
-                                # seq_vals = {
-                                #         'name' : next_sequence,
-                                #         'product_id': pack.product_id.id,
-                                #         }
-                                # new_lot_id = stock_product_lot_obj.create(seq_vals)
-                                ## append all created new lot ids to this list
-                                # new_lot_ids.append(new_lot_id.id)
-                                """
+                            ## Logic to search MO for So and assign lot id from tht MO
+                            ## Convert origin to map with MO origin
+                            new_origin = self.origin + ':WH: Stock -> CustomersMTO'
+                            mo_ids = self.env['mrp.production'].search([('origin', '=', new_origin),('state', '=', 'done')])
+                            if mo_ids:
+                                for mo_id in mo_ids:
+                                    stock_move_lot_ids = self.env['stock.move.lots'].search([('production_id', '=', mo_id.id), ('product_id', '=', pack.product_id.id)])
+                                    for stock_move_lot_id in stock_move_lot_ids:
+                                        new_lot_ids.append(stock_move_lot_id.lot_id)
+                            else:
+                                ## Logic for creating new sequence number for lot assign product in SO DC
+                                lot_ids = self.env['stock.production.lot'].search([('product_id', '=', pack.product_id.id)])
+                                for lot_id in lot_ids:
+                                    lot_id_list.append(lot_id)
+                                for i in range(int(pack.product_qty)):
+                                    if lot_id_list and i <= (len(lot_id_list)-1):
+                                        new_lot_ids.append(lot_id_list[i])
+                                    """
+                                    # No need for now
+                                    # serial no. fetching from MO orders
+                                    # update logic
+                                    # Keep it for future referance and use
+                                    # next_sequence = self.env['ir.sequence'].get('stock.lot.serial')
+                                    # seq_vals = {
+                                    #         'name' : next_sequence,
+                                    #         'product_id': pack.product_id.id,
+                                    #         }
+                                    # new_lot_id = stock_product_lot_obj.create(seq_vals)
+                                    ## append all created new lot ids to this list
+                                    # new_lot_ids.append(new_lot_id.id)
+                                    """
 
                             ## If there is exact serial no. present then it will direct validate DO
                             ## If Serial no less than order qty user need to manually save allocation and then
@@ -70,7 +80,7 @@ class StockPicking(models.Model):
                             for new_lot_id in new_lot_ids:
                                 ## Logic to assign newly created lot id to related pack operation
                                 op_vals = {'lot_id': new_lot_id.id, 'qty_todo': 1, 'qty': 1, 'operation_id': pack.id}
-                                new_ids_write = {'lot_id': new_lot_id}
+                                new_ids_write = {'lot_id': new_lot_id.id}
                                 op_id = stock_pack_op_lot_obj.create(op_vals)
                                 stock_pack_op_lot_obj.write({'lot_id': new_ids_write})
                 view = self.env.ref('stock.view_immediate_transfer')
