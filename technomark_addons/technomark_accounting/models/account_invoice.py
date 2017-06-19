@@ -170,7 +170,7 @@ class AccountInvoiceLine(models.Model):
         if vals and 'purchase_line_id' in vals:
             for operation_id in stock_pack_operation_ids:
                 for line in inv_line:
-                    if line.product_id.id == operation_id.product_id.id:
+                    if line.product_id.is_weight_applicable and line.product_id.id == operation_id.product_id.id:
                         line.inv_actual_weight = operation_id.actual_weight
                         line.price_subtotal = line.price_unit * line.quantity * operation_id.actual_weight
                         self._compute_price()
@@ -201,3 +201,27 @@ class AccountInvoiceLine(models.Model):
             price_subtotal_signed = self.invoice_id.currency_id.with_context(date=self.invoice_id.date_invoice).compute(price_subtotal_signed, self.invoice_id.company_id.currency_id)
         sign = self.invoice_id.type in ['in_refund', 'out_refund'] and -1 or 1
         self.price_subtotal_signed = price_subtotal_signed * sign
+
+    def _set_additional_fields(self, invoice):
+        """ Some modules, such as Purchase, provide a feature to add automatically pre-filled
+            invoice lines. However, these modules might not be aware of extra fields which are
+            added by extensions of the accounting module.
+            This method is intended to be overridden by these extensions, so that any new field can
+            easily be auto-filled as well.
+            :param invoice : account.invoice corresponding record
+            :rtype line : account.invoice.line record
+        """
+        ## Add logic to assign Actual Weight from Incoming Shipment
+        ## Fetched all moves related to PO
+        if self.purchase_line_id:
+            stock_move_ids = self.env['stock.move'].search([('purchase_line_id', '=', self.purchase_line_id.id),('state', '=', 'done')])
+            ## Get picking ids from stock_moves
+            picking_ids = [rec.picking_id for rec in stock_move_ids]
+            ## Get operation ids from picking
+            stock_pack_operation_ids = self.env['stock.pack.operation'].search([('picking_id', 'in', [picking_id.id for picking_id in picking_ids])])
+            for operation_id in stock_pack_operation_ids:
+                for line in self:
+                    if line.product_id.is_weight_applicable and line.product_id.id == operation_id.product_id.id:
+                        ## Assign Actual Weight to each line of Invoice id weight is allow to product
+                        line.inv_actual_weight = operation_id.actual_weight
+        pass
