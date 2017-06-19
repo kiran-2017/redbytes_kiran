@@ -190,7 +190,10 @@ class AccountInvoiceLine(models.Model):
             taxes = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
         ## Add actual_weight here in this field
         if self.invoice_id.type == 'in_invoice' or self.invoice_id.type == 'in_refund':
-            self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] * self.inv_actual_weight if taxes else self.quantity * price
+            if self.product_id.is_weight_applicable:
+                self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] * self.inv_actual_weight if taxes else self.quantity * price
+            else:
+                self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else self.quantity * price
         elif self.invoice_id.type == 'out_invoice' or self.invoice_id.type == 'out_refund':
             self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else self.quantity * price
 
