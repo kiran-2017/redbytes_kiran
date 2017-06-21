@@ -90,7 +90,7 @@ class AccountInvoice(models.Model):
     def date_converted(self, date):
         """ This function convert date %Y-%m-%d %H:%M:%S to  %m/%d/%Y remove time from date"""
         if date:
-            converted_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%m/%d/%Y')
+            converted_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
             return converted_date
 
     @api.model
