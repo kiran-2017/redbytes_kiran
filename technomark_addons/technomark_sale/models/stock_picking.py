@@ -45,12 +45,11 @@ class StockPicking(models.Model):
                             ## Logic to search MO for So and assign lot id from tht MO
                             ## Convert origin to map with MO origin
                             new_origin = self.origin + ':WH: Stock -> CustomersMTO'
-                            mo_ids = self.env['mrp.production'].search([('origin', '=', new_origin),('state', '=', 'done')])
-                            if mo_ids:
-                                for mo_id in mo_ids:
-                                    stock_move_lot_ids = self.env['stock.move.lots'].search([('production_id', '=', mo_id.id), ('product_id', '=', pack.product_id.id)])
-                                    for stock_move_lot_id in stock_move_lot_ids:
-                                        new_lot_ids.append(stock_move_lot_id.lot_id)
+                            mo_id = self.env['mrp.production'].search([('origin', '=', new_origin),('state', '=', 'done'),('product_id', '=', pack.product_id.id)])
+                            if mo_id:
+                                stock_move_lot_ids = self.env['stock.move.lots'].search([('production_id', '=', mo_id.id), ('product_id', '=', pack.product_id.id)])
+                                for stock_move_lot_id in stock_move_lot_ids:
+                                    new_lot_ids.append(stock_move_lot_id.lot_id)
                             else:
                                 ## Logic for creating new sequence number for lot assign product in SO DC
                                 lot_ids = self.env['stock.production.lot'].search([('product_id', '=', pack.product_id.id)])
@@ -59,6 +58,20 @@ class StockPicking(models.Model):
                                 for i in range(int(pack.product_qty)):
                                     if lot_id_list and i <= (len(lot_id_list)-1):
                                         new_lot_ids.append(lot_id_list[i])
+                            ## Keep this for future referance
+                            # if mo_ids:
+                            #     for mo_id in mo_ids:
+                            #         stock_move_lot_ids = self.env['stock.move.lots'].search([('production_id', '=', mo_id.id), ('product_id', '=', pack.product_id.id)])
+                            #         for stock_move_lot_id in stock_move_lot_ids:
+                            #             new_lot_ids.append(stock_move_lot_id.lot_id)
+                            # else:
+                            #     ## Logic for creating new sequence number for lot assign product in SO DC
+                            #     lot_ids = self.env['stock.production.lot'].search([('product_id', '=', pack.product_id.id)])
+                            #     for lot_id in lot_ids:
+                            #         lot_id_list.append(lot_id)
+                            #     for i in range(int(pack.product_qty)):
+                            #         if lot_id_list and i <= (len(lot_id_list)-1):
+                            #             new_lot_ids.append(lot_id_list[i])
                                     """
                                     # No need for now
                                     # serial no. fetching from MO orders
