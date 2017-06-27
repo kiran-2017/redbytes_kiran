@@ -157,6 +157,11 @@ class PurchaseOrderLine(models.Model):
         if self.product_id.is_weight_applicable:
             self._compute_amount()
 
+    @api.onchange('product_qty')
+    def _onchange_product_qty(self):
+        """ This function calculate total amount for PO after change of Quantity """
+        if self.product_qty:
+            self.approx_weight = self.product_id.weight * self.product_qty
 
     # @api.multi
     # def _calculate_approx_weight(self):
