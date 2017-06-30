@@ -11,6 +11,39 @@ class AccountInvoice(models.Model):
     """ Inherit this call for adding new fields on TAX INVOICE"""
 
     @api.multi
+    def get_taxes_values(self):
+        """
+            Inherit function to calculate tax on basic of
+            actual_weight, price and qty on Account Invoice
+        """
+        tax_grouped = {}
+        for line in self.invoice_line_ids:
+            """
+            ## This keep for future referance
+            # if line.product_id.is_weight_applicable:
+            #     ## calculate tax by adding actual_weight
+            #     price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0) * line.inv_actual_weight
+            # else:
+            #     ##Default tax calculation
+            #     price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            """
+            price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            if line.product_id.is_weight_applicable:
+                taxes = line.invoice_line_tax_ids.compute_all(price_unit, self.currency_id, line.inv_actual_weight, line.product_id, self.partner_id)['taxes']
+            else:
+                taxes = line.invoice_line_tax_ids.compute_all(price_unit, self.currency_id, line.quantity, line.product_id, self.partner_id)['taxes']
+            for tax in taxes:
+                val = self._prepare_tax_line_vals(line, tax)
+                key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+
+                if key not in tax_grouped:
+                    tax_grouped[key] = val
+                else:
+                    tax_grouped[key]['amount'] += val['amount']
+                    tax_grouped[key]['base'] += val['base']
+        return tax_grouped
+
+    @api.multi
     def invoice_print(self):
         """ Print the invoice and mark it as sent, so that we can see more
             easily the next step of the workflow Inherited to pass Tax Invoice ID
@@ -185,17 +218,30 @@ class AccountInvoiceLine(models.Model):
 
         currency = self.invoice_id and self.invoice_id.currency_id or None
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
+        """
+        #### Keep it for future Referance
+        # if self.product_id.is_weight_applicable:
+        #     price = self.price_unit * (1 - (self.discount or 0.0) / 100.0) * self.inv_actual_weight
+        # else:
+        #     price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
+        """
         taxes = False
         if self.invoice_line_tax_ids:
-            taxes = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
-        ## Add actual_weight here in this field
-        if self.invoice_id.type == 'in_invoice' or self.invoice_id.type == 'in_refund':
             if self.product_id.is_weight_applicable:
-                self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] * self.inv_actual_weight if taxes else self.quantity * price
+                taxes = self.invoice_line_tax_ids.compute_all(price, currency, self.inv_actual_weight, product=self.product_id, partner=self.invoice_id.partner_id)
             else:
-                self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else self.quantity * price
-        elif self.invoice_id.type == 'out_invoice' or self.invoice_id.type == 'out_refund':
-            self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else self.quantity * price
+                taxes = self.invoice_line_tax_ids.compute_all(price, currency, self.quantity, product=self.product_id, partner=self.invoice_id.partner_id)
+        self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else self.quantity * price
+
+        ## Keep for future Referance
+        # ## Add actual_weight here in this field
+        # if self.invoice_id.type == 'in_invoice' or self.invoice_id.type == 'in_refund':
+        #     if self.product_id.is_weight_applicable:
+        #         self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] * self.inv_actual_weight if taxes else self.quantity * price
+        #     else:
+        #         self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else self.quantity * price
+        # elif self.invoice_id.type == 'out_invoice' or self.invoice_id.type == 'out_refund':
+        #     self.price_subtotal = price_subtotal_signed = taxes['total_excluded'] if taxes else self.quantity * price
 
         if self.invoice_id.currency_id and self.invoice_id.company_id and self.invoice_id.currency_id != self.invoice_id.company_id.currency_id:
             price_subtotal_signed = self.invoice_id.currency_id.with_context(date=self.invoice_id.date_invoice).compute(price_subtotal_signed, self.invoice_id.company_id.currency_id)

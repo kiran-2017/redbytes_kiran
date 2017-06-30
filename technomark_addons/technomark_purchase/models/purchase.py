@@ -178,7 +178,8 @@ class PurchaseOrderLine(models.Model):
             if line.product_id.is_weight_applicable:
                 product_weight = line.product_id.weight * line.product_qty
                 line.update({
-                    'price_tax': taxes['total_included'] - taxes['total_excluded'],
+                    ## Logic to calculate total tax on Approx Weight * rate * qty
+                    'price_tax': (taxes['total_included'] * line.product_id.weight) - (taxes['total_excluded'] * line.product_id.weight),
                     'price_total': taxes['total_included'],
                     # 'price_subtotal': taxes['total_excluded'] * line.approx_weight, keep for future ref
                     'price_subtotal': line.price_unit * product_weight, ## subtotal is unit proce * total approx weight(unit weight * product qty)
