@@ -35,6 +35,35 @@
               <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='attribute_value_ids']" position="attributes">
                   <attribute name="invisible">1</attribute>
               </xpath>
+
+              <!-- To add bom cost tab -->
+              <xpath expr="//notebook" position="inside">
+                  <page string="BOM Cost" name="bom_cost_lies">
+                      <field name="is_load_bom_cost_lines" invisible="1"/>
+                      <!-- Buttons to load and update bom lines -->
+                      <button name="load_bom_cost_lines" string="Load Bom Cost Lines" type="object" class="oe_highlight" attrs="{'invisible': [('is_load_bom_cost_lines','=',True)]}"/>
+                      <button name="update_bom_cost_lines" string="Update Bom Cost Lines" type="object" class="oe_highlight" attrs="{'invisible': [('is_load_bom_cost_lines','=',False)]}"/>
+                      <field name="bom_cost_lines_ids" widget="one2many_list">
+                        <tree string="Bom Cost" editable="bottom">
+                            <field name="product_id" readonly="1"/>
+                            <field name="quantity" readonly="1"/>
+                            <field name="unit_cost" readonly="1"/>
+                            <field name="weight" readonly="1"/>
+                            <field name="total_cost"/>
+                            <field name="mrp_bom_id" invisible="1"/>
+                        </tree>
+                      </field>
+                      <!-- show total calculation for bom cost lines -->
+                      <group class="oe_subtotal_footer oe_right">
+                          <div class="oe_subtotal_footer_separator oe_inline">
+                              <label for="total_cost_of_raw_material" class="text-bold"/>
+                          </div>
+                          <field name="total_cost_of_raw_material" nolabel="1" sum="Total Cost of Raw Materials" class="oe_subtotal_footer_separator"/>
+                      </group>
+                      <div class="oe_clear"/>
+                  </page>
+              </xpath>
+
             </field>
         </record>
     </data>

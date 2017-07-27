@@ -9,5 +9,15 @@
             file="technomark_mrp.report.mrp_bom_templates"
             report_type="qweb-pdf"
         />
+
+        <report
+            string="BOM Cost"
+            id="mrp.action_report_bom_price"
+            model="mrp.bom"
+            name="mrp_bom_cost"
+            file="technomark_mrp.mrp_bom_cost_report_templates"
+            report_type="qweb-html"
+        />
+
     </data>
 </odoo>
