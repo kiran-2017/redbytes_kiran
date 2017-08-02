@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited sale view to add new fields for Delivery Information-->
+        <record id="view_order_form_iv_inherited" model="ir.ui.view">
+            <field name="name">view.order.form.inherited</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+
+
+
+
+              <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="iv_project_id"/>
+              </xpath>
+
+              <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="is_gad"/>
+                <field name="is_adv"/>
+              </xpath>
+              <!-- Add new group under other information for delivery info -->
+              <xpath expr="//group[@name='sales_person']" position="after">
+                  <group string="Delivery" name="delivery_info">
+                      <field name="delivery"/>
+                      <field name="freight"/>
+                      <field name="insurance"/>
+                      <field name="transporter"/>
+                      <field name="performance_guarantee"/>
+                      <field name="delivery_instructions"/>
+                      <field name="shipping_policy"/>
+                  </group>
+                </xpath>
+
+                <!-- Hide address from customer name -->
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                  <attribute name="context">{'search_default_customer':1, 'show_address': 0}</attribute>
+                </xpath>
+
+                <!-- To rename page name -->
+                <xpath expr="//notebook/page" position="attributes">
+                    <attribute name="string">VALVE LIST</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']" position="before">
+                    <group col="4" colspan="4">
+                        <field name="inspection"/>
+                        <field name="painting"/>
+                        <field name="flange_drilling"/>
+                        <field name="packing"/>
+                        <field name="material_standard"/>
+                        <field name="special_mfg_instruction"/>
+                        <field name="agency_name" attrs="{'invisible': [('inspection','=','NO')], 'required': [('inspection','=','YES')]}"/>
+                    </group>
+                </xpath>
+
+                <!-- Add new fields in sale order line tree view -->
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                  <field name="size"/>
+                  <field name="moc"/>
+                  <field name="operation"/>
+                  <field name="pn"/>
+                </xpath>
+
+                <!-- Add new fields in sale order line  form view -->
+                <xpath expr="//field[@name='order_line']/form/group/group/field[@name='product_id']" position="after">
+                    <field name="size"/>
+                    <field name="moc"/>
+                    <field name="operation"/>
+                    <field name="pn"/>
+                    <field name="line_delivery_date"/>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
+                    <field name="line_delivery_date"/>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="attributes">
+                    <attribute name="string">Rate(₹)</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="attributes">
+                    <attribute name="string">Qty</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="attributes">
+                    <attribute name="string">Amount</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='qty_delivered']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='qty_invoiced']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <!-- Add stages and buttons for ORDER STATUS-->
+                <xpath expr="//field[@name='state']" position="attributes">
+                    <attribute name="statusbar_visible">draft,sent,sale</attribute>
+                </xpath>
+                <button name="action_quotation_send" type="object" states="sent,sale" position="replace">
+                  <button name="action_quotation_send" string="Send by Email" type="object" states="sent,sale" invisible="1"/>
+                </button>
+                <!-- <xpath expr="//button[@name='action_quotation_send']" position="attributes">
+                    <attribute name="states">draft</attribute>
+                </xpath> -->
+
+                <xpath expr="//button[@name='action_quotation_send']" position="attributes">
+                    <attribute name="states">draft</attribute>
+                </xpath>
+                <xpath expr="//button[@name='print_quotation']" position="attributes">
+                    <attribute name="states">Advance Received,GAD Approved,QAP Approved</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_confirm']" position="attributes">
+                    <attribute name="states">sent</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_cancel']" position="attributes">
+                    <attribute name="states">Advance Received,GAD Approved,QAP Approved,sale,sent,draft</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_done']" position="attributes">
+                    <attribute name="states">Advance Received,GAD Approved,QAP Approved</attribute>
+                </xpath>
+
+                <!-- <xpath expr="//button[@name='action_confirm']" position="before">
+                    <button name="rfq_received" states="draft,sent" string="RFQ Received" class="btn-primary" type="object" />
+                </xpath> -->
+                <xpath expr="//button[@name='action_confirm']" position="after">
+                    <!-- <button name="customer_po_received" states="sale,Advance Received,GAD Approved,QAP Approved" string="Customer PO Received" class="btn-primary" type="object"/> -->
+                    <button name="create_advance_received" string="Advance Received" class="btn-primary" type="object" attrs="{'invisible': [('is_adv','in',('N','NA'))]}"/>
+                    <button name="gad_approved" string="GAD Approved" class="btn-primary" type="object" attrs="{'invisible': [('is_gad','in',('N','NA'))]}"/>
+                    <button name="create_qap_approved" states="sale,Advance Received,GAD Approved" string="QAP Approved" class="btn-primary" type="object"/>
+                </xpath>
+
+                <!-- Add ORDER STATUS page to sale view-->
+                <xpath expr="//page" position="after">
+                  <page string="ORDER STATUS" name="iv_order_status">
+                    <group>
+                        <group string="RFQ Received">
+                            <field name="rfq_received_date" class="oe_inline" readonly="1"/>
+                            <field name="rfq_received_by" class="oe_inline" readonly="1"/>
+                        </group>
+                        <group string="Quotation Sent">
+                            <field name="quotation_sent" class="oe_inline" readonly="1"/>
+                            <field name="quotation_sent_date" class="oe_inline" readonly="1" attrs="{'invisible': [('quotation_sent','=','N')]}"/>
+                            <field name="quotation_sent_by" class="oe_inline" readonly="1" attrs="{'invisible': [('quotation_sent','=','N')]}"/>
+                            <field name="quotation_sent_no" class="oe_inline" readonly="1" attrs="{'invisible': [('quotation_sent','=','N')]}"/>
+                        </group>
+
+                        <group string="Customer PO Received">
+                            <field name="customer_po_received_date" class="oe_inline" readonly="1"/>
+                            <field name="customer_po_received_by" class="oe_inline" readonly="1"/>
+                            <field name="customer_po_received_no" class="oe_inline"/>
+                        </group>
+
+                        <group string="Order Accepted">
+                            <field name="order_accepted" class="oe_inline" readonly="1"/>
+                            <field name="order_accepted_date" class="oe_inline" readonly="1" attrs="{'invisible': [('order_accepted','=','N')]}"/>
+                            <field name="order_accepted_by" class="oe_inline" readonly="1" attrs="{'invisible': [('order_accepted','=','N')]}"/>
+                        </group>
+
+                        <group string="Advance Received">
+                            <field name="advance_received" class="oe_inline" readonly="1"/>
+                            <field name="advance_received_date" class="oe_inline" readonly="1" attrs="{'invisible': [('advance_received','in',('N','NA'))]}"/>
+                            <field name="advance_received_by" class="oe_inline" readonly="1" attrs="{'invisible': [('advance_received','in',('N','NA'))]}"/>
+                            <field name="advance_received_amount_inr" class="oe_inline" attrs="{'invisible': [('advance_received','in',('N','NA'))]}"/>
+                            <field name="advance_received_per" class="oe_inline" attrs="{'invisible': [('advance_received','in',('N','NA'))]}"/>
+                        </group>
+                        <!-- Use in phase 3 keep it hide for now
+                          <group string="GA Drawing Ready">
+                              <field name="ga_drawing_ready" class="oe_inline"/>
+                              <field name="ga_drawing_ready_date" class="oe_inline"/>
+                              <field name="ga_drawing_ready_by" class="oe_inline"/>
+                          </group>
+
+                          <group string="GA Drawing Sent">
+                              <field name="ga_drawing_sent" class="oe_inline"/>
+                              <field name="ga_drawing_sent_date" class="oe_inline"/>
+                              <field name="ga_drawing_sent_by" class="oe_inline"/>
+                          </group>
+
+                      -->
+
+                      <group string="GA Drawing Approved">
+                          <field name="ga_drawing_approved" class="oe_inline" readonly="1"/>
+                          <field name="ga_drawing_approved_date" class="oe_inline" readonly="1" attrs="{'invisible': [('ga_drawing_approved','in',('N','NA'))]}"/>
+                          <field name="ga_drawing_approved_by" class="oe_inline" readonly="1" attrs="{'invisible': [('ga_drawing_approved','in',('N','NA'))]}"/>
+                      </group>
+
+                      <!-- use in phase 3
+                      <group string="QAP Sent">
+                          <field name="qap_sent" class="oe_inline"/>
+                          <field name="qap_sent_date" class="oe_inline"/>
+                          <field name="qap_sent_by" class="oe_inline"/>
+                      </group>
+                      -->
+
+                      <group string="QAP Approved">
+                          <field name="qap_approved" class="oe_inline" readonly="1"/>
+                          <field name="qap_approved_date" class="oe_inline" readonly="1" attrs="{'invisible': [('qap_approved','in',('N','NA'))]}"/>
+                          <field name="qap_approved_by" class="oe_inline" readonly="1" attrs="{'invisible': [('qap_approved','in',('N','NA'))]}"/>
+                      </group>
+                      <group string="Order Completed">
+                          <field name="order_completed" class="oe_inline" readonly="1"/>
+                          <field name="order_completed_date" class="oe_inline" readonly="1" attrs="{'invisible': [('order_completed','=','N')]}"/>
+                          <field name="order_completed_by" class="oe_inline" readonly="1" attrs="{'invisible': [('order_completed','=','N')]}"/>
+                      </group>
+
+                      <group string="Order Cancelled">
+                          <field name="order_cancelled" class="oe_inline" readonly="1"/>
+                          <field name="order_cancelled_date" class="oe_inline" readonly="1" attrs="{'invisible': [('order_cancelled','=','N')]}"/>
+                          <field name="order_cancelled_by" class="oe_inline" readonly="1" attrs="{'invisible': [('order_cancelled','=','N')]}"/>
+                      </group>
+
+                      <!-- <group string="Manufacturing Order Issued">
+
+                      </group> -->
+                    </group>
+                    <group string="Manufacturing Order Issued">
+                      <field name="mo_issued_lines" string="Manufacturing Order Issued" class="oe_inline" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="mo_issued"/>
+                            <field name="mo_issued_date"/>
+                            <field name="mo_issued_by"/>
+                            <field name="mo_issued_no" />
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+
+                    <group string="PO Sent">
+                      <field name="po_sent_lines" string="PO Sent" class="oe_inline" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="po_sent"/>
+                            <field name="po_sent_date"/>
+                            <field name="po_sent_by"/>
+                            <field name="po_sent_vendor_name" />
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+
+                    <group string="Raw Materials Received">
+                      <field name="raw_material_received_lines" class="oe_inline" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="raw_material_received"/>
+                            <field name="raw_material_received_date"/>
+                            <field name="raw_material_received_by"/>
+                            <field name="raw_material_received_vendor_name" />
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+
+                    <group string="MO Production Completed">
+                      <field name="mo_production_completed_lines" class="oe_inline" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="mo_production_completed"/>
+                            <field name="mo_production_completed_date"/>
+                            <field name="mo_production_completed_by"/>
+                            <field name="mo_production_completed_mo_no" />
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+
+                    <group string="Payment Received">
+                      <field name="payment_received_lines" class="oe_inline" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="payment_received"/>
+                            <field name="payment_received_date"/>
+                            <field name="payment_received_by"/>
+                            <field name="payment_received_amt_inr" />
+                            <field name="payment_received_amt_per" />
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+                    <group string="Dispatch">
+                      <field name="dispatch_lines" class="oe_inline" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="dispatch"/>
+                            <field name="dispatch_date"/>
+                            <field name="dispatch_by"/>
+                            <field name="dispatch_dc_no" />
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+
+
+
+                   </page>
+                   <!-- DOCUMENTS -->
+                   <page string="DOCUMENTS" name="iv_documents">
+                         <!-- need add fields here -->
+                           <field name="document_lines" nolabel="1">
+                             <tree editable="bottom">
+                                <field name="document_type" required="1"/>
+                                <field name="document_date" required="1"/>
+                                <field name="document_no"/>
+                                <field name="document_filename" invisible="1"/>
+                                <field name="document_attachment" filename="document_filename"/>
+                             </tree>
+                           </field>
+                        <!-- <group string="ERP">
+                          <field name="erp_docs_lines" nolabel="1">
+                            <tree editable="bottom">
+                               <field name="quote_date"/>
+                               <field name="quote_no"/>
+                               <field name="order_acc_date"/>
+                               <field name="order_acc_no"/>
+                               <field name="tpi_call_date"/>
+                               <field name="test_cert_date"/>
+                               <field name="delivery_challan_date"/>
+                               <field name="delivery_challan_no"/>
+                               <field name="invoice_date"/>
+                               <field name="invoice_no"/>
+                               <field name="warr_certificate"/>
+                            </tree>
+                          </field>
+                       </group>
+
+                       <group string="IV USER">
+                         <field name="iv_user_docs_lines" nolabel="1">
+                           <tree editable="bottom">
+                              <field name="ga_drawing_phase3"/>
+                              <field name="qa_plan_date_phase3"/>
+                           </tree>
+                         </field>
+                      </group> -->
+                    </page>
+                </xpath>
+                <!-- Hide Fiscal Position -->
+                <xpath expr="//field[@name='fiscal_position_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+            </field>
+        </record>
+
+        <!-- Inherited sale stock view to add new fields-->
+          <record id="view_order_form_inherit_sale_stock_iv_inherited" model="ir.ui.view">
+              <field name="name">view.order.form.inherited</field>
+              <field name="model">sale.order</field>
+              <field name="inherit_id" ref="sale_stock.view_order_form_inherit_sale_stock"/>
+              <field name="arch" type="xml">
+
+                  <!-- Rename Shipping Information to COMMERCIAL-->
+                  <xpath expr="//group[@name='sale_shipping']" position="attributes">
+                    <attribute name="string">COMMERCIAL</attribute>
+                  </xpath>
+                  <!-- to rename incoterm string to price -->
+                  <xpath expr="//field[@name='incoterm']" position="attributes">
+                    <attribute name="string">Price</attribute>
+                  </xpath>
+                  <!-- to add new things  -->
+                  <xpath expr="//field[@name='picking_policy']" position="after">
+                      <field name="advance_bg_required"/>
+                      <field name="advance_bg_details" attrs="{'invisible': [('advance_bg_required','in',('NO','BLANK'))], 'required': [('advance_bg_required','=','YES')]}"/>
+                      <field name="warranty"/>
+                  </xpath>
+              </field>
+          </record>
+
+</odoo>

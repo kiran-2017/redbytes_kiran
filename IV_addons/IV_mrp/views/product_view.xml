@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited Product Template view to add new fields for BOM data import-->
+        <record id="view_template_property_form_Iv_inherited_bom" model="ir.ui.view">
+            <field name="name">product.template.form.view.bom.inherited</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.view_template_property_form"/>
+            <field name="arch" type="xml">
+              <xpath expr="//page[@name='general_information']" position="after">
+                <page string="BOM">
+                  <group>
+                      <field name='machine_filename' invisible="1"/>
+                      <field name='casting_filename' invisible="1"/>
+                      <group col="4" colspan="4">
+                        <field name="material"/>
+                        <field name="machine_drawing_no"/>
+                        <field name="machine_drawing_no_file" filename="machine_filename"/>
+                        <field name="casting_drawing_no"/>
+                        <field name="casting_drawing_no_file" filename="casting_filename"/>
+                        <field name="raw_size"/>
+                        <field name="finished_size"/>
+                        <field name="od"/>
+                        <field name="b_id"/>
+                        <field name="l"/>
+                      </group>
+                  </group>
+                </page>
+              </xpath>
+            </field>
+        </record>
+</odoo>

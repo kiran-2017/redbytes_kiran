@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <!-- Inherit mrp bom form view -->
+        <record id="mrp_bom_form_view_inherited" model="ir.ui.view">
+            <field name="name">mrp.bom.form.view</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+
+              <!-- Add sr no and used for fields on bom components -->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='sequence']" position="before">
+                  <field name="serial_no" readonly="1"/>
+              </xpath>
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_qty']" position="before">
+                  <field name="used_for"/>
+              </xpath>
+              <!-- Add fields to bom lines auto populates from product -->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_qty']" position="after">
+                <field name="material"/>
+                <field name='machine_filename' invisible="1"/>
+                <field name="machine_drawing_no"/>
+                <field name="machine_drawing_file" filename="machine_filename" readonly="1"/>
+                <field name='casting_filename' invisible="1"/>
+                <field name="casting_drawing_no"/>
+                <field name="casting_drawing_file" filename="casting_filename" readonly="1"/>
+                <field name="finished_size"/>
+                <field name="raw_size"/>
+              </xpath>
+              <!-- To change  product qty text in to Qty-->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_qty']" position="attributes">
+                  <attribute name="string">Qty</attribute>
+              </xpath>
+              <!-- To change Price Unit to Unit-->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='product_uom_id']" position="attributes">
+                  <attribute name="string">Unit</attribute>
+              </xpath>
+              <!-- To Hide Variant Field from bom line -->
+              <xpath expr="//notebook/page/field[@name='bom_line_ids']/tree/field[@name='attribute_value_ids']" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
+
+              <!-- To add bom cost tab -->
+              <xpath expr="//notebook" position="inside">
+                  <page string="BOM Cost" name="bom_cost_lies">
+                      <field name="is_load_bom_cost_lines" invisible="1"/>
+                      <!-- Buttons to load and update bom lines -->
+                      <button name="load_bom_cost_lines" string="Load Bom Cost Lines" type="object" class="oe_highlight" attrs="{'invisible': [('is_load_bom_cost_lines','=',True)]}"/>
+                      <button name="update_bom_cost_lines" string="Update Bom Cost Lines" type="object" class="oe_highlight" attrs="{'invisible': [('is_load_bom_cost_lines','=',False)]}"/>
+                      <field name="bom_cost_lines_ids" widget="one2many_list">
+                        <tree string="Bom Cost" editable="bottom">
+                            <field name="product_id" readonly="1"/>
+                            <field name="quantity" readonly="1"/>
+                            <field name="unit_cost" readonly="1"/>
+                            <field name="weight" readonly="1"/>
+                            <field name="total_cost"/>
+                            <field name="mrp_bom_id" invisible="1"/>
+                        </tree>
+                      </field>
+                      <!-- show total calculation for bom cost lines -->
+                      <group class="oe_subtotal_footer oe_right">
+                          <div class="oe_subtotal_footer_separator oe_inline">
+                              <label for="total_cost_of_raw_material" class="text-bold"/>
+                          </div>
+                          <field name="total_cost_of_raw_material" nolabel="1" sum="Total Cost of Raw Materials" class="oe_subtotal_footer_separator"/>
+                      </group>
+                      <div class="oe_clear"/>
+                  </page>
+              </xpath>
+            </field>
+        </record>
+</odoo>

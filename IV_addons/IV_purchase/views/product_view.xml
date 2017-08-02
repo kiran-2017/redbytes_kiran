@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited Product Template view to add new fields for Delivery Information-->
+        <record id="view_template_property_form_iv_inherited" model="ir.ui.view">
+            <field name="name">product.template.form.view.iv.inherited</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.view_template_property_form"/>
+            <field name="arch" type="xml">
+              <xpath expr="//label[@for='weight']" position="before">
+                <field name="is_weight_applicable"/>
+              </xpath>
+            </field>
+        </record>
+</odoo>

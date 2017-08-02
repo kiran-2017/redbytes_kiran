@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+            string="BOM Structure"
+            id="mrp.action_report_bom_structure"
+            model="mrp.bom"
+            name="mrp.report_mrpbomstructure"
+            file="IV_mrp.report.mrp_bom_templates"
+            report_type="qweb-pdf"
+        />
+        <!-- qweb-html -->
+        <report
+            string="BOM Cost"
+            id="mrp.action_report_bom_price"
+            model="mrp.bom"
+            name="mrp_bom_cost"
+            file="IV_mrp.mrp_bom_cost_report_templates"
+            report_type="qweb-pdf"
+        />
+
+    </data>
+</odoo>

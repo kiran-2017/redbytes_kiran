@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited Product Template view to add new fields for BOM data import-->
+        <record id="view_template_property_form_Iv_inherited_bom" model="ir.ui.view">
+            <field name="name">product.template.form.view.bom.inherited</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.view_template_property_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='sale_condition']" position="after">
+                    <group name="valve_info" string="VALVE INFO">
+                        <field name="pro_size"/>
+                        <field name="pro_pn"/>
+                        <field name="pro_material"/>
+                        <field name="pro_operation"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Inherit product search view to add new filter for Internal Referance -->
+        <record id="product_template_search_view_internal_referance" model="ir.ui.view">
+             <field name="name">product.template.search.internal.ref</field>
+             <field name="model">product.template</field>
+             <field name="inherit_id" ref="product.product_template_search_view"/>
+             <field name="arch" type="xml">
+                <xpath expr="//filter[@name='consumable']" position="after">
+                  <field name="default_code"/>
+                </xpath>
+                <xpath expr="//filter[@name='consumable']" position="after">
+                   <separator/>
+                  <filter string="Internal Referance" name="default_code" domain="[('default_code','ilike',self)]"/>
+                </xpath>
+             </field>
+        </record>
+        
+</odoo>
