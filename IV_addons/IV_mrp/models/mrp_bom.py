@@ -75,28 +75,12 @@ class MrpBom(models.Model):
 class MrpBomLine(models.Model):
     _inherit = "mrp.bom.line"
 
-    @api.onchange('product_id')
-    def onchange_product_id(self):
-        """ Inherit onchange function to pass material, size , etc values
-        from product form while selecting product on BOM line"""
-        if self.product_id:
-            self.product_uom_id = self.product_id.uom_id.id or False
-            ## Pass all values from prodcut form onchange of product id
-            self.material = self.product_id.material or False
-            self.machine_filename = self.product_id.machine_filename or False
-            self.machine_drawing_no = self.product_id.machine_drawing_no or False
-            self.machine_drawing_file = self.product_id.machine_drawing_no_file or False
 
-            self.casting_filename = self.product_id.casting_filename or False
-            self.casting_drawing_no = self.product_id.casting_drawing_no or False
-            self.casting_drawing_file = self.product_id.casting_drawing_no_file or False
-
-            self.raw_size = self.product_id.raw_size or False
-            self.finished_size = self.product_id.finished_size or False
 
     @api.model
     def create(self, vals):
         """ Inherit create function to pass sequnce value to serial number and relove issue for relocation of bom line"""
+        print vals,'---vals'
         if vals and 'sequence' in vals:
             vals['serial_no'] = vals['sequence']
         res = super(MrpBomLine, self).create(vals)
@@ -109,8 +93,28 @@ class MrpBomLine(models.Model):
     finished_size = fields.Char(string="Size(Finished)")
     material = fields.Char(string="Material")
     machine_drawing_no = fields.Char(string="Machine Drawing")
-    machine_drawing_file = fields.Binary(string="Machine Drawing File")
-    machine_filename = fields.Char('Machine File name', store=True)
+    machine_filename = fields.Char(related="product_id.machine_filename", string='Machine File name', store=True)
+    machine_drawing_file = fields.Binary(related="product_id.machine_drawing_no_file", string="Machine Drawing File", store=True)
     casting_drawing_no = fields.Char(string="Casting Drawing")
-    casting_drawing_file = fields.Binary(string="Casting Drawing")
-    casting_filename = fields.Char('Casting File name', store=True)
+    casting_filename = fields.Char(related="product_id.casting_filename", string='Casting File name', store=True)
+    casting_drawing_file = fields.Binary(related="product_id.casting_drawing_no_file", string="Casting Drawing", store=True)
+
+
+    @api.onchange('product_id')
+    def onchange_product_id(self):
+        """ Inherit onchange function to pass material, size , etc values
+        from product form while selecting product on BOM line"""
+        if self.product_id:
+            self.product_uom_id = self.product_id.uom_id.id or False
+            ## Pass all values from prodcut form onchange of product id
+            self.material = self.product_id.material or False
+            # self.machine_filename = self.product_id.machine_filename
+            self.machine_drawing_no = self.product_id.machine_drawing_no or False
+            # self.machine_drawing_file = self.product_id.machine_drawing_no_file
+
+            # self.casting_filename = self.product_id.casting_filename
+            self.casting_drawing_no = self.product_id.casting_drawing_no or False
+            # self.casting_drawing_file = self.product_id.casting_drawing_no_file
+
+            self.raw_size = self.product_id.raw_size or False
+            self.finished_size = self.product_id.finished_size or False

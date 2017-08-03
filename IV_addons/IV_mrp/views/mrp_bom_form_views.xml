@@ -19,7 +19,7 @@
                 <field name="material"/>
                 <field name='machine_filename' invisible="1"/>
                 <field name="machine_drawing_no"/>
-                <field name="machine_drawing_file" filename="machine_filename" readonly="1"/>
+                <field name="machine_drawing_file" readonly="1" filename="machine_filename"/>
                 <field name='casting_filename' invisible="1"/>
                 <field name="casting_drawing_no"/>
                 <field name="casting_drawing_file" filename="casting_filename" readonly="1"/>
