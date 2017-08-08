@@ -216,7 +216,7 @@
                       </group> -->
                     </group>
                     <group string="Manufacturing Order Issued">
-                      <field name="mo_issued_lines" string="Manufacturing Order Issued" class="oe_inline" nolabel="1">
+                      <field name="mo_issued_lines" string="Manufacturing Order Issued" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="mo_issued"/>
                             <field name="mo_issued_date"/>
@@ -228,7 +228,7 @@
                     </group>
 
                     <group string="PO Sent">
-                      <field name="po_sent_lines" string="PO Sent" class="oe_inline" nolabel="1">
+                      <field name="po_sent_lines" string="PO Sent" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="po_sent"/>
                             <field name="po_sent_date"/>
@@ -240,7 +240,7 @@
                     </group>
 
                     <group string="Raw Materials Received">
-                      <field name="raw_material_received_lines" class="oe_inline" nolabel="1">
+                      <field name="raw_material_received_lines" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="raw_material_received"/>
                             <field name="raw_material_received_date"/>
@@ -252,7 +252,7 @@
                     </group>
 
                     <group string="MO Production Completed">
-                      <field name="mo_production_completed_lines" class="oe_inline" nolabel="1">
+                      <field name="mo_production_completed_lines" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="mo_production_completed"/>
                             <field name="mo_production_completed_date"/>
@@ -264,7 +264,7 @@
                     </group>
 
                     <group string="Payment Received">
-                      <field name="payment_received_lines" class="oe_inline" nolabel="1">
+                      <field name="payment_received_lines" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="payment_received"/>
                             <field name="payment_received_date"/>
@@ -276,7 +276,7 @@
                       </field>
                     </group>
                     <group string="Dispatch">
-                      <field name="dispatch_lines" class="oe_inline" nolabel="1">
+                      <field name="dispatch_lines" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="dispatch"/>
                             <field name="dispatch_date"/>

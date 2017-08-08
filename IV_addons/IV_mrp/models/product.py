@@ -7,6 +7,9 @@ from odoo.exceptions import UserError, AccessError
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    # This field allow to use product weight in Sale order Line
+    is_weight_applicable = fields.Boolean(string="Allow To Use Weight")
+
     raw_size = fields.Char(string="Size (Raw)")
     finished_size = fields.Char(string="Size (Finished)")
     material = fields.Char(string="Material")
@@ -27,17 +30,18 @@ class ProductTemplate(models.Model):
             for Machine Drawing File
         """
         attachment_obj = self.env['ir.attachment']
-        ir_attachment_vals = {
-            'name': self.machine_drawing_no + '-' + self.machine_filename,
-            'type': 'binary',
-            'datas_fname': self.machine_filename,
-            'datas': self.machine_drawing_no_file,
-            'res_model': 'product.template',
-            'res_id': self.id,
-            'res_name': self.name,
-        }
-        attachment_id = attachment_obj.create(ir_attachment_vals)
-        return attachment_id
+        if self.machine_filename:
+            ir_attachment_vals = {
+                'name': self.machine_filename + '-' + self.machine_drawing_no,
+                'type': 'binary',
+                'datas_fname': self.machine_filename,
+                'datas': self.machine_drawing_no_file,
+                'res_model': 'product.template',
+                'res_id': self.id,
+                'res_name': self.name,
+            }
+            attachment_id = attachment_obj.create(ir_attachment_vals)
+            return attachment_id
 
     @api.multi
     def _create_attachment_for_casting(self):
@@ -46,17 +50,18 @@ class ProductTemplate(models.Model):
             For Casting Drawing File
         """
         attachment_obj = self.env['ir.attachment']
-        ir_attachment_vals = {
-            'name': self.casting_drawing_no + '-' + self.casting_filename,
-            'type': 'binary',
-            'datas_fname': self.casting_filename,
-            'datas': self.casting_drawing_no_file,
-            'res_model': 'product.template',
-            'res_id': self.id,
-            'res_name': self.name,
-        }
-        attachment_id = attachment_obj.create(ir_attachment_vals)
-        return attachment_id
+        if self.casting_filename:
+            ir_attachment_vals = {
+                'name': self.casting_filename + '-' + self.casting_drawing_no,
+                'type': 'binary',
+                'datas_fname': self.casting_filename,
+                'datas': self.casting_drawing_no_file,
+                'res_model': 'product.template',
+                'res_id': self.id,
+                'res_name': self.name,
+            }
+            attachment_id = attachment_obj.create(ir_attachment_vals)
+            return attachment_id
 
     @api.multi
     def write(self, vals):
@@ -69,14 +74,16 @@ class ProductTemplate(models.Model):
                 raise UserError(_('Please Enter Machine Drawing No'))
             attachment_id = self._create_attachment_for_machine()
             ## Assign new name to uploaded file e.g Machine No + file name
-            self.machine_filename = attachment_id.name
+            if attachment_id:
+                self.machine_filename = attachment_id.name
         if vals and 'casting_drawing_no_file' in vals:
             ## Create attachment For Casting Drawing
             if not self.casting_drawing_no:
                 raise UserError(_('Please Enter Catsting Drawing No'))
             attachment_id = self._create_attachment_for_casting()
             ## Assign new name to uploaded file e.g Casting No + file name
-            self.casting_filename = attachment_id.name
+            if attachment_id:
+                self.casting_filename = attachment_id.name
         return res
 
     @api.model
