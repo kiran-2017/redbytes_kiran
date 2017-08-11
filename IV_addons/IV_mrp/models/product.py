@@ -31,8 +31,11 @@ class ProductTemplate(models.Model):
         """
         attachment_obj = self.env['ir.attachment']
         if self.machine_filename:
+            split_file_name = self.machine_filename.split('.')
+            print split_file_name[-1],'---------split_file_name'
+            conct_file_name = split_file_name[-2] + '_' + self.machine_drawing_no + '.' + split_file_name[-1]
             ir_attachment_vals = {
-                'name': self.machine_filename + '-' + self.machine_drawing_no,
+                'name': conct_file_name,#self.machine_filename + '-' + self.machine_drawing_no,
                 'type': 'binary',
                 'datas_fname': self.machine_filename,
                 'datas': self.machine_drawing_no_file,
@@ -50,9 +53,19 @@ class ProductTemplate(models.Model):
             For Casting Drawing File
         """
         attachment_obj = self.env['ir.attachment']
+        f_name = ''
         if self.casting_filename:
+            print self.casting_filename,'-------self.casting_filename'
+            split_file_name = self.casting_filename.split('.')
+            print len(split_file_name),'---split_file_name'
+            # jkjdfkjdjjjkkkkk
+            # print split_file_name[-2],'---------split_file_name'
+            # for i in range(len(split_file_name)-1)
+            #     f_name =
+            conct_file_name = split_file_name[-2] + '_' + self.casting_drawing_no + '.' + split_file_name[-1]
+            print conct_file_name,'----------conct_file_name'
             ir_attachment_vals = {
-                'name': self.casting_filename + '-' + self.casting_drawing_no,
+                'name': conct_file_name, #self.casting_filename + '-' + self.casting_drawing_no,
                 'type': 'binary',
                 'datas_fname': self.casting_filename,
                 'datas': self.casting_drawing_no_file,
@@ -65,6 +78,8 @@ class ProductTemplate(models.Model):
 
     @api.multi
     def write(self, vals):
+        attachment_obj = self.env['ir.attachment']
+
         res = super(ProductTemplate, self).write(vals)
 
         """ Logic for to create ir.attachment from uploaded file"""
@@ -76,6 +91,18 @@ class ProductTemplate(models.Model):
             ## Assign new name to uploaded file e.g Machine No + file name
             if attachment_id:
                 self.machine_filename = attachment_id.name
+
+        ## Logic for deleting attachment when file is deleted
+        if vals and 'machine_drawing_no_file' in vals and vals.get('machine_drawing_no_file') == False:
+            ## Delete attachment object in no file name is there
+            attachment_ids = attachment_obj.search([('res_id','=',self.id),('res_model','=','product.template')])
+            for attachment_id in attachment_ids:
+                ## AS we are considering machine_drawing_no and casting_drawing_no name
+                ## will be different always
+                res = self.machine_drawing_no in attachment_id.name
+                if res:
+                    attachment_id.unlink()
+
         if vals and 'casting_drawing_no_file' in vals:
             ## Create attachment For Casting Drawing
             if not self.casting_drawing_no:
@@ -84,6 +111,18 @@ class ProductTemplate(models.Model):
             ## Assign new name to uploaded file e.g Casting No + file name
             if attachment_id:
                 self.casting_filename = attachment_id.name
+
+        ## Logic for deleting attachment when file is deleted
+        if vals and 'casting_drawing_no_file' in vals and vals.get('casting_drawing_no_file') == False:
+            ## Delete attachment object in no file name is there
+            attachment_ids = attachment_obj.search([('res_id','=',self.id),('res_model','=','product.template')])
+            for attachment_id in attachment_ids:
+                ## AS we are considering machine_drawing_no and casting_drawing_no name
+                ## will be different always
+                res = self.casting_drawing_no in attachment_id.name
+                if res:
+                    attachment_id.unlink()
+
         return res
 
     @api.model

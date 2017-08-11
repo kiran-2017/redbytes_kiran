@@ -7,7 +7,26 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
 
+              <!-- Hide Customer Referace -->
+              <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="new_revision_so_no"/>
+              </xpath>
 
+              <!-- Hide Customer Referace -->
+              <xpath expr="//field[@name='client_order_ref']" position="attributes">
+                <attribute name="invisible">1</attribute>
+              </xpath>
+
+              <!-- Hide Customer Referace -->
+              <xpath expr="//field[@name='picking_policy']" position="attributes">
+                <attribute name="invisible">1</attribute>
+              </xpath>
+
+
+              <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="delivery_date"/>
+                <field name="client_order_ref"/>
+              </xpath>
 
 
               <xpath expr="//field[@name='partner_id']" position="after">
@@ -27,7 +46,7 @@
                       <field name="transporter"/>
                       <field name="performance_guarantee"/>
                       <field name="delivery_instructions"/>
-                      <field name="shipping_policy"/>
+                      <field name="picking_policy"/>
                   </group>
                 </xpath>
 
@@ -67,12 +86,12 @@
                     <field name="moc"/>
                     <field name="operation"/>
                     <field name="pn"/>
-                    <field name="line_delivery_date"/>
+                    <!-- <field name="line_delivery_date"/> -->
                 </xpath>
 
-                <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
+                <!-- keep for future <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
                     <field name="line_delivery_date"/>
-                </xpath>
+                </xpath> -->
 
                 <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="attributes">
                     <attribute name="string">Rate(₹)</attribute>
@@ -125,7 +144,8 @@
                     <button name="rfq_received" states="draft,sent" string="RFQ Received" class="btn-primary" type="object" />
                 </xpath> -->
                 <xpath expr="//button[@name='action_confirm']" position="after">
-                    <!-- <button name="customer_po_received" states="sale,Advance Received,GAD Approved,QAP Approved" string="Customer PO Received" class="btn-primary" type="object"/> -->
+                    <button name="revise_so" confirm="Are you sure you want to Revise Sale Order?" states="sale,sent" string="Revise SO" class="btn-primary" type="object"/>
+                    <button name="sent_revise_so" confirm="Are you sure you want to send Revise Sale Order?" states="sale,sent" string="Sent Revise SO" class="btn-primary" type="object"/>
                     <button name="create_advance_received" string="Advance Received" class="btn-primary" type="object" attrs="{'invisible': [('is_adv','in',('N','NA'))]}"/>
                     <button name="gad_approved" string="GAD Approved" class="btn-primary" type="object" attrs="{'invisible': [('is_gad','in',('N','NA'))]}"/>
                     <button name="create_qap_approved" states="sale,Advance Received,GAD Approved" string="QAP Approved" class="btn-primary" type="object"/>
@@ -139,18 +159,9 @@
                             <field name="rfq_received_date" class="oe_inline" readonly="1"/>
                             <field name="rfq_received_by" class="oe_inline" readonly="1"/>
                         </group>
-                        <group string="Quotation Sent">
-                            <field name="quotation_sent" class="oe_inline" readonly="1"/>
-                            <field name="quotation_sent_date" class="oe_inline" readonly="1" attrs="{'invisible': [('quotation_sent','=','N')]}"/>
-                            <field name="quotation_sent_by" class="oe_inline" readonly="1" attrs="{'invisible': [('quotation_sent','=','N')]}"/>
-                            <field name="quotation_sent_no" class="oe_inline" readonly="1" attrs="{'invisible': [('quotation_sent','=','N')]}"/>
-                        </group>
 
-                        <group string="Customer PO Received">
-                            <field name="customer_po_received_date" class="oe_inline" readonly="1"/>
-                            <field name="customer_po_received_by" class="oe_inline" readonly="1"/>
-                            <field name="customer_po_received_no" class="oe_inline"/>
-                        </group>
+
+
 
                         <group string="Order Accepted">
                             <field name="order_accepted" class="oe_inline" readonly="1"/>
@@ -215,13 +226,38 @@
 
                       </group> -->
                     </group>
+
+                    <group string="Quotation Sent">
+                      <field name="quotation_sent_line_ids" nolabel="1" readonly="1">
+                        <tree editable="bottom">
+                            <field name="quotation_sent_date"/>
+                            <field name="quotation_sent_by"/>
+                            <field name="quotation_sent_no" />
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+
+                    <group string="Customer PO Received">
+                      <field name="customer_po_received_line_ids" nolabel="1" readonly="0">
+                        <tree editable="bottom">
+                            <field name="customer_po_received_date"/>
+                            <field name="customer_po_received_by"/>
+                            <field name="customer_po_received_no"/>
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+
+
                     <group string="Manufacturing Order Issued">
                       <field name="mo_issued_lines" string="Manufacturing Order Issued" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
-                            <field name="mo_issued"/>
+                            <!-- <field name="mo_issued"/> -->
                             <field name="mo_issued_date"/>
                             <field name="mo_issued_by"/>
                             <field name="mo_issued_no" />
+                            <field name="mo_production_completed"/>
                             <field name="sale_order_id" invisible="1"/>
                         </tree>
                       </field>
@@ -251,7 +287,7 @@
                       </field>
                     </group>
 
-                    <group string="MO Production Completed">
+                    <!-- <group string="MO Production Completed">
                       <field name="mo_production_completed_lines" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="mo_production_completed"/>
@@ -261,7 +297,7 @@
                             <field name="sale_order_id" invisible="1"/>
                         </tree>
                       </field>
-                    </group>
+                    </group> -->
 
                     <group string="Payment Received">
                       <field name="payment_received_lines" class="oe_inline" nolabel="1" readonly="1">
@@ -278,10 +314,9 @@
                     <group string="Dispatch">
                       <field name="dispatch_lines" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
-                            <field name="dispatch"/>
+                            <field name="dispatch_dc_no" />
                             <field name="dispatch_date"/>
                             <field name="dispatch_by"/>
-                            <field name="dispatch_dc_no" />
                             <field name="sale_order_id" invisible="1"/>
                         </tree>
                       </field>

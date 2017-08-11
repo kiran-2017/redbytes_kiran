@@ -19,6 +19,7 @@ You could use this simplified accounting in case you work with an (external) acc
             'security/ir.model.access.csv',
             'views/sale_view.xml',
             'views/stock_picking_views.xml',
+            'views/product_template_views.xml',
             # 'views/res_partner_views.xml',
     ],
     'demo': [

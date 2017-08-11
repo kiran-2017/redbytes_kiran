@@ -10,6 +10,12 @@ class SaleOrder(models.Model):
     _inherit = "sale.order"
     """ Inherit class for adding new fields on sale order"""
 
+
+    @api.multi
+    def write(self, vals):
+        res = super(SaleOrder, self).write(vals)
+        return res
+
     ## Add data fields here
     ## Inherit states to add more states to SO form
     state = fields.Selection([
@@ -46,22 +52,20 @@ class SaleOrder(models.Model):
     transporter = fields.Char(string="Transporter")
     performance_guarantee = fields.Selection([('BLANK', '[BLANK]'), ('Performance BG', 'Performance BG'), ('Corporate Bond', 'Corporate Bond')], 'Performance Guarantee', default='BLANK')
     delivery_instructions = fields.Text(string="Delivery Instructions")
-    shipping_policy = fields.Char(string="Shipping Policy", default="Deliver each product when available")
+    # shipping_policy = fields.Char(string="Shipping Policy", default="Deliver each product when available")
 
     document_lines = fields.One2many('document.lines', 'sale_order_id', string="Documents")
 
     ## ORDER STATUS fields
-    rfq_received_date = fields.Date(string="Date")
-    rfq_received_by = fields.Char(string="By")
+    rfq_received_date = fields.Date(string="Date", copy=False)
+    rfq_received_by = fields.Char(string="By", copy=False)
 
-    quotation_sent = fields.Selection([('Y','Y'),('N','N')], string="Quotation Sent", default='N')
-    quotation_sent_date = fields.Date(string="Date")
-    quotation_sent_by = fields.Char(string="By")
-    quotation_sent_no = fields.Char(string="No")
+    # quotation_sent = fields.Selection([('Y','Y'),('N','N')], string="Quotation Sent", default='N')
+    quotation_sent_line_ids = fields.One2many('quotation.sent.line', 'sale_order_id', string="Quotation Sent")
+    customer_po_received_line_ids = fields.One2many('customer.po.received.line', 'sale_order_id', string="Quotation Sent")
 
-    customer_po_received_date = fields.Date(string="Date")
-    customer_po_received_by = fields.Char(string="By")
-    customer_po_received_no = fields.Char(related="client_order_ref", string="No")
+
+
 
     order_accepted = fields.Selection([('Y','Y'),('N','N')], string="Order Accepted", default='N')
     order_accepted_date = fields.Date(string="Date")
@@ -106,10 +110,80 @@ class SaleOrder(models.Model):
     mo_issued_lines = fields.One2many('mo.issued.lines', 'sale_order_id', string="MO Issued Lines")
     po_sent_lines = fields.One2many('po.sent.lines', 'sale_order_id', string="PO Sent")
     raw_material_received_lines = fields.One2many('raw.material.received.lines', 'sale_order_id', string="Raw Materials Received")
-    mo_production_completed_lines = fields.One2many('mo.production.completed.lines', 'sale_order_id', string="MO Production Completed")
+    # mo_production_completed_lines = fields.One2many('mo.production.completed.lines', 'sale_order_id', string="MO Production Completed")
     payment_received_lines = fields.One2many('payment.received.lines', 'sale_order_id', string="Payment Received")
     dispatch_lines = fields.One2many('dispatch.lines', 'sale_order_id', string="Dispatch")
 
+    ## Revise So Fields
+    new_revision_so_no = fields.Char(string="SO Revision No", readonly="1", copy=False)
+
+
+
+    @api.multi
+    def revise_so(self):
+        """
+        Logic for revising SO and assign increment no to new genearted Revesion
+        """
+        ## Get sequence for SO Revision
+        inc_seq = 1
+        if self.new_revision_so_no:
+            split_name = self.new_revision_so_no.split('#')
+            if self.name in split_name:
+                # print int(split_name[-1]), type(int(split_name[-1])),'-----------split_name'
+                inc_seq = int(split_name[-1]) + 1
+                print inc_seq,'-----------inc_seq'
+                self.new_revision_so_no = self.name + '#' + str(inc_seq)
+        else:
+            self.new_revision_so_no = self.name + '#' + str(inc_seq)
+        return True
+
+    @api.multi
+    def sent_revise_so(self):
+        '''
+            This function opens a window to compose an email, with the edi sale template message loaded by default
+            this function send revise templates emails
+
+        '''
+        self.ensure_one()
+        ir_model_data = self.env['ir.model.data']
+        try:
+            template_id = ir_model_data.get_object_reference('sale', 'email_template_edi_sale')[1]
+        except ValueError:
+            template_id = False
+        try:
+            compose_form_id = ir_model_data.get_object_reference('mail', 'email_compose_message_wizard_form')[1]
+        except ValueError:
+            compose_form_id = False
+        ctx = dict()
+        ctx.update({
+            'default_model': 'sale.order',
+            'default_res_id': self.ids[0],
+            'default_use_template': bool(template_id),
+            'default_template_id': template_id,
+            'default_composition_mode': 'comment',
+            'mark_so_as_sent': True,
+            'custom_layout': "sale.mail_template_data_notification_email_sale_order"
+        })
+        ## Update Quotation Sent values for order status
+        quotation_sent_vals = {
+            'quotation_sent_date': self._get_current_date(),
+            'quotation_sent_by': self._get_current_user(),
+            'quotation_sent_no': self.new_revision_so_no,
+            'sale_order_id': self.id
+        }
+        ## Create new line every time for quotation sent Revision
+        self.quotation_sent_line_ids = [[0,0, quotation_sent_vals]]
+
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'mail.compose.message',
+            'views': [(compose_form_id, 'form')],
+            'view_id': compose_form_id,
+            'target': 'new',
+            'context': ctx,
+        }
 
 
 
@@ -176,13 +250,15 @@ class SaleOrder(models.Model):
             'custom_layout': "sale.mail_template_data_notification_email_sale_order"
         })
         ## Update Quotation Sent values for order status
-        self.update({
-        'quotation_sent':'Y',
-        'quotation_sent_date': self._get_current_date(),
-        'quotation_sent_by': self._get_current_user(),
-        'quotation_sent_no': self.name,
-        'state': 'sent',
-        })
+        quotation_sent_vals = {
+            'quotation_sent_date': self._get_current_date(),
+            'quotation_sent_by': self._get_current_user(),
+            'quotation_sent_no': self.name,
+            'sale_order_id': self.id
+        }
+        ## Create new line every time for quotation sent Revision
+        self.quotation_sent_line_ids = [[0,0, quotation_sent_vals]]
+
         return {
             'type': 'ir.actions.act_window',
             'view_type': 'form',
@@ -195,18 +271,90 @@ class SaleOrder(models.Model):
         }
 
     @api.multi
+    def _get_po_received_for_so(self):
+        return "Test"
+
+    @api.multi
+    def _get_mo(self):
+        """
+            Get Related MO for SO
+        """
+        mrp_obj = self.env['mrp.production']
+        new_origin = self.name + ':WH: Stock -> CustomersMTO'
+        mo_ids = mrp_obj.search([('origin','=',new_origin)])
+        return mo_ids
+
+    @api.multi
+    def _get_po(self):
+        """
+            Get Related PO for SO
+        """
+        po_obj = self.env['procurement.order']
+        new_origin = self.name + ':WH: Stock -> CustomersMTO'
+        po_ids = po_obj.search([('origin','=',new_origin)])
+        return po_ids
+
+    @api.multi
+    def _get_delivery_order(self):
+        """
+            Get Delivery Order for SO
+        """
+        picking_obj = self.env['stock.picking']
+        picking_ids = picking_obj.search([('origin','=',self.name)])
+        return picking_ids
+
+    @api.multi
     def action_confirm(self):
         """
             Inherit function to add entries for order status
         """
         res = super(SaleOrder, self).action_confirm()
+        ## Create PO receives lines for SO
+        ## Customer PO received is same SO
+        po_ids = self._get_po()
+        for po_id in self:
+            po_received_vals = {
+                    'customer_po_received_date': self._get_current_date(),
+                    'customer_po_received_by': self._get_current_user(),
+                    'customer_po_received_no': po_id.name,
+                    'sale_order_id':po_id.id,
+                }
+            ## Create lines and append here
+            self.customer_po_received_line_ids=[[0, 0, po_received_vals]]
+
+        ## Write values for order Acceptance of SO
         self.write({
             'order_accepted': 'Y',
             'order_accepted_date': self._get_current_date(),
             'order_accepted_by': self._get_current_user(),
-            'customer_po_received_date': self._get_current_date(),
-            'customer_po_received_by': self._get_current_user(),
         })
+
+        ## Logic to get MO for related SO
+        mo_ids = self._get_mo()
+        for mo_id in mo_ids:
+            mo_issued_vals = {
+                    'mo_issued_date': self._get_current_date(),
+                    'mo_issued_by': self._get_current_user(),
+                    'mo_issued_no': mo_id.name,
+                    'mo_production_completed': 'Y' if mo_id.state == 'done' else 'N',
+                    'mrp_id': mo_id.id,
+                    'sale_order_id':self.id,
+                }
+            ## Create lines and append here
+            self.mo_issued_lines = [[0, 0, mo_issued_vals]]
+
+        ## Logic to get MO for related SO
+        picking_ids = self._get_delivery_order()
+        for pick_id in picking_ids:
+            picking_vals = {
+                    'dispatch_date': self._get_current_date(),
+                    'dispatch_by': self._get_current_user(),
+                    'dispatch_dc_no': pick_id.name,
+                    'stock_pick_id': pick_id.id,
+                    'sale_order_id':self.id,
+                }
+            ## Create lines and append here
+            self.dispatch_lines = [[0, 0, picking_vals]]
         return res
 
     # @api.multi
@@ -319,11 +467,13 @@ class IvUserDocLines(models.Model):
 class MOIssuedLines(models.Model):
     _name = "mo.issued.lines"
 
-    mo_issued = fields.Selection([('Y','Y'),('N','N')], string="MO Issued")
+    # mo_issued = fields.Selection([('Y','Y'),('N','N')], string="MO Issued")
     mo_issued_date = fields.Date(string="Date")
     mo_issued_by = fields.Char(string="By")
     mo_issued_no = fields.Char(string="No")
+    mo_production_completed = fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="MO Production Completed")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+    mrp_id = fields.Many2one('mrp.production', string="MRP Id")
 
 class POSentLines(models.Model):
     _name = "po.sent.lines"
@@ -343,14 +493,14 @@ class RawMaterailReceivedLines(models.Model):
     raw_material_received_vendor_name = fields.Char(string="Vendor Name")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
 
-class MOProductionCompletedLines(models.Model):
-    _name = "mo.production.completed.lines"
-
-    mo_production_completed= fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="MO Production Completed")
-    mo_production_completed_date = fields.Date(string="Date")
-    mo_production_completed_by = fields.Char(string="By")
-    mo_production_completed_mo_no = fields.Char(string="Mo No")
-    sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+# class MOProductionCompletedLines(models.Model):
+#     _name = "mo.production.completed.lines"
+#
+#     mo_production_completed= fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="MO Production Completed")
+#     mo_production_completed_date = fields.Date(string="Date")
+#     mo_production_completed_by = fields.Char(string="By")
+#     mo_production_completed_mo_no = fields.Char(string="Mo No")
+#     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
 
 class PaymentReceivedLines(models.Model):
     _name = "payment.received.lines"
@@ -365,11 +515,12 @@ class PaymentReceivedLines(models.Model):
 class DispatchLines(models.Model):
     _name = "dispatch.lines"
 
-    dispatch = fields.Selection([('Y','Y'),('N','N')], string="Dispatch")
     dispatch_date = fields.Date(string="Date")
     dispatch_by = fields.Char(string="By")
     dispatch_dc_no = fields.Char(string="DC No")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+    ## Add referance of stock.delivery
+    stock_pick_id = fields.Many2one('stock.picking', string="Sale Order")
 
 class DocumentLines(models.Model):
     _name = "document.lines"
@@ -743,3 +894,21 @@ class DocumentLines(models.Model):
         if vals and 'document_attachment' in vals and vals.get('document_attachment') != False:
             self._create_attachment_for_updated_documents(vals)
         return res
+
+
+class QuotationSentLine(models.Model):
+    _name = 'quotation.sent.line'
+
+    quotation_sent_date = fields.Date(string="Date")
+    quotation_sent_by = fields.Char(string="By")
+    quotation_sent_no = fields.Char(string="No")
+    sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+
+
+class CustomerPoReceivedLine(models.Model):
+    _name = 'customer.po.received.line'
+
+    customer_po_received_date = fields.Date(string="Date")
+    customer_po_received_by = fields.Char(string="By")
+    customer_po_received_no = fields.Char(string="No")
+    sale_order_id = fields.Many2one('sale.order', string="Sale Order")
