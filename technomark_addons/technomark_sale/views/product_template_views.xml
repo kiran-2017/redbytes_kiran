@@ -23,4 +23,16 @@
                 </xpath>
               </field>
           </record>
+
+          <!-- Inherited product supplier view to add HSN code -->
+            <record id="product_supplierinfo_form_view_hsn_inherited" model="ir.ui.view">
+                <field name="name">product.supplierinfo.form.view.inherited</field>
+                <field name="model">product.supplierinfo</field>
+                <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
+                <field name="arch" type="xml">
+                  <xpath expr="//field[@name='product_code']" position="attributes">
+                    <attribute name="string">HSN Code</attribute>
+                  </xpath>
+                </field>
+            </record>
 </odoo>

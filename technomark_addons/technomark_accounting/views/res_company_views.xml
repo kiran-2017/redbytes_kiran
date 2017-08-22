@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <field name="vat" position="after">
                 <field name="cst" string="CST TIN"/>
+                <field name="gstin"/>
             </field>
 
             <xpath expr="//field[@name='vat']" position="attributes">

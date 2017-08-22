@@ -158,7 +158,7 @@ class StockPicking(models.Model):
     lr_no = fields.Char(string="L.R. No")
     lr_date = fields.Date(string="L.R. Date")
     vehical_registration_no = fields.Char(string="Vehicle Reg. No")
-    basis_of_freight = fields.Selection([('to_pay', 'To Pay'), ('paid', 'Paid')], 'Basis Of Freight', default='')
+    basis_of_freight = fields.Selection([('To Pay', 'To Pay'), ('Paid', 'Paid')], 'Basis Of Freight', default='')
     road_permit_no = fields.Char(string="Road Permit No")
     delivery_type = fields.Selection([('door_delivery', 'DOOR DELIVERY'), ('godown_delivery', 'GODOWN DELIVERY')], 'Delivery Type', default='door_delivery')
     dc_mode = fields.Selection([('returnable', 'Returnable'), ('non_returnable', 'Non-Returnable')], 'Delivery Mode')

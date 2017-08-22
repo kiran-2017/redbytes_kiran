@@ -11,3 +11,5 @@ class ResCompany(models.Model):
     #Add cst on company view
     cst = fields.Char(string="CST")
     declaration = fields.Text(string="Declaration")
+    ## Add new fields for GST
+    gstin = fields.Char(string="GSTIN")

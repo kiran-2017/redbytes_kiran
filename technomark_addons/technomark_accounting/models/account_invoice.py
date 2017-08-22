@@ -127,6 +127,24 @@ class AccountInvoice(models.Model):
             return converted_date
 
     @api.model
+    def get_orders(self, origin):
+        """ This function return data for SO or PO form on qweb report of Tax invoice"""
+        so_obj = self.env['sale.order']
+        po_obj = self.env['purchase.order']
+        if origin:
+            so_id = so_obj.search([('name', '=', origin)])
+            if so_id:
+                return so_id
+            # if so_id: Hide for now keep for future
+            #     return so_id.delivery_date
+            else:
+                po_id = po_obj.search([('name', '=', origin)])
+                # if po_id: Hide for now keep for future
+                #     return po_id.date_planned
+                if po_id:
+                    return po_id
+
+    @api.model
     def get_delivery_date(self, origin):
         """ This function return data for SO or PO form on qweb report of Tax invoice"""
         so_obj = self.env['sale.order']

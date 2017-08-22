@@ -7,6 +7,12 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='message_bounce']" position="after">
                     <field name="partner_vat_tin"/>
+                    <field name="partner_gstin"/>
+                </xpath>
+                <!-- Add place of supply here for GST -->
+                <xpath expr="//field[@name='country_id']" position="before">
+                    <br/>
+                    <field name="place_of_supply" placeholder="Place of Supply/State code"/>
                 </xpath>
             </field>
         </record>
