@@ -18,6 +18,7 @@ You could use this simplified accounting in case you work with an (external) acc
     'data': [
         'views/sale_view.xml',
         'views/product_view.xml',
+        'views/account_invoice_view.xml',
     ],
     'demo': [
     ],

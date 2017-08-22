@@ -17,6 +17,15 @@
                 <attribute name="invisible">1</attribute>
               </xpath>
 
+              <!-- Convert datetime to date for date order field on SO-->
+              <xpath expr="//field[@name='date_order']" position="attributes">
+                <attribute name="widget">date</attribute>
+              </xpath>
+              <!-- Convert datetime to date for Confirmation order field on SO-->
+              <xpath expr="//field[@name='confirmation_date']" position="attributes">
+                <attribute name="widget">date</attribute>
+              </xpath>
+
               <!-- Hide Customer Referace -->
               <xpath expr="//field[@name='picking_policy']" position="attributes">
                 <attribute name="invisible">1</attribute>
@@ -149,6 +158,7 @@
                     <button name="create_advance_received" string="Advance Received" class="btn-primary" type="object" attrs="{'invisible': [('is_adv','in',('N','NA'))]}"/>
                     <button name="gad_approved" string="GAD Approved" class="btn-primary" type="object" attrs="{'invisible': [('is_gad','in',('N','NA'))]}"/>
                     <button name="create_qap_approved" states="sale,Advance Received,GAD Approved" string="QAP Approved" class="btn-primary" type="object"/>
+                    <button name="create_payment_received" states="sale,Advance Received,GAD Approved,QAP Approved" string="Payments" class="btn-primary" type="object"/>
                 </xpath>
 
                 <!-- Add ORDER STATUS page to sale view-->
@@ -239,7 +249,7 @@
                     </group>
 
                     <group string="Customer PO Received">
-                      <field name="customer_po_received_line_ids" nolabel="1" readonly="0">
+                      <field name="customer_po_received_line_ids" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="customer_po_received_date"/>
                             <field name="customer_po_received_by"/>
@@ -266,11 +276,11 @@
                     <group string="PO Sent">
                       <field name="po_sent_lines" string="PO Sent" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
-                            <field name="po_sent"/>
+                            <field name="po_sent_no"/>
                             <field name="po_sent_date"/>
                             <field name="po_sent_by"/>
-                            <field name="po_sent_vendor_name" />
                             <field name="sale_order_id" invisible="1"/>
+                            <field name="purchase_id" invisible="1"/>
                         </tree>
                       </field>
                     </group>
@@ -278,11 +288,12 @@
                     <group string="Raw Materials Received">
                       <field name="raw_material_received_lines" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
-                            <field name="raw_material_received"/>
+                            <field name="raw_material_received_no"/>
                             <field name="raw_material_received_date"/>
                             <field name="raw_material_received_by"/>
-                            <field name="raw_material_received_vendor_name" />
+                            <field name="raw_material_received"/>
                             <field name="sale_order_id" invisible="1"/>
+                            <field name="incoming_pick_id" invisible="1"/>
                         </tree>
                       </field>
                     </group>
@@ -302,7 +313,7 @@
                     <group string="Payment Received">
                       <field name="payment_received_lines" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
-                            <field name="payment_received"/>
+                            <field name="payment_received_no"/>
                             <field name="payment_received_date"/>
                             <field name="payment_received_by"/>
                             <field name="payment_received_amt_inr" />
@@ -317,6 +328,7 @@
                             <field name="dispatch_dc_no" />
                             <field name="dispatch_date"/>
                             <field name="dispatch_by"/>
+                            <field name="dispatch_state"/>
                             <field name="sale_order_id" invisible="1"/>
                         </tree>
                       </field>

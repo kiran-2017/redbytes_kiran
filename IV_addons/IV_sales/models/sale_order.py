@@ -5,6 +5,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 import time
 import datetime
+from datetime import datetime, timedelta
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
@@ -30,93 +31,92 @@ class SaleOrder(models.Model):
         ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
     delivery_date = fields.Date(string="Delivery Date")
-    is_gad = fields.Selection([('Y', 'Y'), ('N', 'N'), ('NA', 'NA')],string="GAD", help="Will show the value of this field (Whether GA Drawing approved or not)", default='N')
-    is_adv = fields.Selection([('Y', 'Y'), ('N', 'N'), ('NA', 'NA')], string="Advance", help="Will show the value of this field (Whether advance received or not)", default='N')
-    iv_project_id = fields.Many2one("project.project", string="Project")
+    is_gad = fields.Selection([('Y', 'Y'), ('N', 'N'), ('NA', 'NA')],string="GAD", help="Will show the value of this field (Whether GA Drawing approved or not)", default='N', copy=False)
+    is_adv = fields.Selection([('Y', 'Y'), ('N', 'N'), ('NA', 'NA')], string="Advance", help="Will show the value of this field (Whether advance received or not)", default='N', copy=False)
+    iv_project_id = fields.Many2one("project.project", string="Project", copy=False)
     ## Add VALVE LIST values here
-    inspection = fields.Selection([('YES', 'YES'), ('NO', 'NO')], 'Inspection', default='NO')
-    agency_name = fields.Char(string="Agency Name")
-    painting = fields.Char(string="Painting")
-    flange_drilling = fields.Char(string="Flange Drilling")
+    inspection = fields.Selection([('YES', 'YES'), ('NO', 'NO')], 'Inspection', default='NO', copy=False)
+    agency_name = fields.Char(string="Agency Name", copy=False)
+    painting = fields.Char(string="Painting", copy=False)
+    flange_drilling = fields.Char(string="Flange Drilling", copy=False)
     packing = fields.Char(string="Packing")
-    material_standard = fields.Selection([('IS', 'IS'), ('DIN', 'DIN')], 'Material Standard', default='')
-    special_mfg_instruction = fields.Char(string="Special Mfg Instruction")
+    material_standard = fields.Selection([('IS', 'IS'), ('DIN', 'DIN')], 'Material Standard', default='', copy=False)
+    special_mfg_instruction = fields.Char(string="Special Mfg Instruction", copy=False)
     ## Add COMMERCIAL group fields here
     advance_bg_required = fields.Selection([('BLANK', '[BLANK]'), ('YES', 'YES'), ('NO', 'NO')], 'Advance BG Required', default='BLANK')
-    advance_bg_details = fields.Text(string="Advance BG details")
-    warranty = fields.Integer(string="Warranty(Months)", default="12")
+    advance_bg_details = fields.Text(string="Advance BG details", copy=False)
+    warranty = fields.Integer(string="Warranty(Months)", default="12", copy=False)
     ## Add Delivery group fields
     delivery = fields.Selection([('BLANK', '[BLANK]'), ('Door Delivery', 'Door Delivery'), ('Godown Delivery', 'Godown Delivery')], 'Delivery', default='BLANK')
     freight = fields.Selection([('BLANK', '[BLANK]'), ('To Pay', 'To Pay'), ('Paid', 'Paid')], 'Freight', default='BLANK')
     insurance = fields.Selection([('BLANK', '[BLANK]'), ('NA', 'NA'), ('Our Account', 'Our Account'), ('Client Account', 'Client Account')], 'Insurance', default='BLANK')
-    transporter = fields.Char(string="Transporter")
+    transporter = fields.Char(string="Transporter", copy=False)
     performance_guarantee = fields.Selection([('BLANK', '[BLANK]'), ('Performance BG', 'Performance BG'), ('Corporate Bond', 'Corporate Bond')], 'Performance Guarantee', default='BLANK')
-    delivery_instructions = fields.Text(string="Delivery Instructions")
+    delivery_instructions = fields.Text(string="Delivery Instructions", copy=False)
     # shipping_policy = fields.Char(string="Shipping Policy", default="Deliver each product when available")
 
-    document_lines = fields.One2many('document.lines', 'sale_order_id', string="Documents")
+    document_lines = fields.One2many('document.lines', 'sale_order_id', string="Documents", copy=False)
 
     ## ORDER STATUS fields
     rfq_received_date = fields.Date(string="Date", copy=False)
     rfq_received_by = fields.Char(string="By", copy=False)
 
     # quotation_sent = fields.Selection([('Y','Y'),('N','N')], string="Quotation Sent", default='N')
-    quotation_sent_line_ids = fields.One2many('quotation.sent.line', 'sale_order_id', string="Quotation Sent")
-    customer_po_received_line_ids = fields.One2many('customer.po.received.line', 'sale_order_id', string="Quotation Sent")
+    quotation_sent_line_ids = fields.One2many('quotation.sent.line', 'sale_order_id', string="Quotation Sent", copy=False)
+    customer_po_received_line_ids = fields.One2many('customer.po.received.line', 'sale_order_id', string="Quotation Sent", copy=False)
 
 
 
 
-    order_accepted = fields.Selection([('Y','Y'),('N','N')], string="Order Accepted", default='N')
-    order_accepted_date = fields.Date(string="Date")
-    order_accepted_by = fields.Char(string="By")
+    order_accepted = fields.Selection([('Y','Y'),('N','N')], string="Order Accepted", default='N', copy=False)
+    order_accepted_date = fields.Date(string="Date", copy=False)
+    order_accepted_by = fields.Char(string="By", copy=False)
 
-    advance_received = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="Advance Received", default='N')
-    advance_received_date = fields.Date(string="Date")
-    advance_received_by = fields.Char(string="By")
-    advance_received_amount_inr = fields.Float(string="Amount INR")
-    advance_received_per = fields.Float(string="Amount %")
+    advance_received = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="Advance Received", default='N', copy=False)
+    advance_received_date = fields.Date(string="Date", copy=False)
+    advance_received_by = fields.Char(string="By", copy=False)
+    advance_received_amount_inr = fields.Float(string="Amount INR", copy=False)
+    advance_received_per = fields.Float(string="Amount %", copy=False)
 
     ## Use in Phase 3
     ga_drawing_ready = fields.Selection([('Y','Y'),('N','N')], string="GA Drawing Ready", default="N")
-    ga_drawing_ready_date = fields.Date(string="Date")
-    ga_drawing_ready_by = fields.Char(string="By")
+    ga_drawing_ready_date = fields.Date(string="Date", copy=False)
+    ga_drawing_ready_by = fields.Char(string="By", copy=False)
     ## Use in Phase 3
     ga_drawing_sent = fields.Selection([('Y','Y'),('N','N')], string="GA Drawing Sent", default="N")
     ga_drawing_sent_date = fields.Date(string="Date")
     ga_drawing_sent_by = fields.Char(string="By")
 
     ga_drawing_approved = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="GA Drawing Approved", default='N')
-    ga_drawing_approved_date = fields.Date(string="Date")
-    ga_drawing_approved_by = fields.Char(string="By")
+    ga_drawing_approved_date = fields.Date(string="Date", copy=False)
+    ga_drawing_approved_by = fields.Char(string="By", copy=False)
 
     ## Use in Phase 3
     qap_sent = fields.Selection([('Y','Y'),('N','N')], string="QAP Sent", default="N")
-    qap_sent_date = fields.Date(string="Date")
-    qap_sent_by = fields.Char(string="By")
+    qap_sent_date = fields.Date(string="Date", copy=False)
+    qap_sent_by = fields.Char(string="By", copy=False)
 
     qap_approved = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="QAP Approved", default="N")
-    qap_approved_date = fields.Date(string="Date")
-    qap_approved_by = fields.Char(string="By")
+    qap_approved_date = fields.Date(string="Date", copy=False)
+    qap_approved_by = fields.Char(string="By", copy=False)
 
     order_completed = fields.Selection([('Y','Y'),('N','N')], string="Order Completed", default="N")
-    order_completed_date = fields.Date(string="Date")
-    order_completed_by = fields.Char(string="By")
+    order_completed_date = fields.Date(string="Date", copy=False)
+    order_completed_by = fields.Char(string="By", copy=False)
 
     order_cancelled = fields.Selection([('Y','Y'),('N','N')], string="Order Cancelled", default="N")
-    order_cancelled_date = fields.Date(string="Date")
-    order_cancelled_by = fields.Char(string="By")
+    order_cancelled_date = fields.Date(string="Date", copy=False)
+    order_cancelled_by = fields.Char(string="By", copy=False)
 
-    mo_issued_lines = fields.One2many('mo.issued.lines', 'sale_order_id', string="MO Issued Lines")
-    po_sent_lines = fields.One2many('po.sent.lines', 'sale_order_id', string="PO Sent")
-    raw_material_received_lines = fields.One2many('raw.material.received.lines', 'sale_order_id', string="Raw Materials Received")
+    mo_issued_lines = fields.One2many('mo.issued.lines', 'sale_order_id', string="MO Issued Lines", copy=False)
+    po_sent_lines = fields.One2many('po.sent.lines', 'sale_order_id', string="PO Sent", copy=False)
+    raw_material_received_lines = fields.One2many('raw.material.received.lines', 'sale_order_id', string="Raw Materials Received", copy=False)
     # mo_production_completed_lines = fields.One2many('mo.production.completed.lines', 'sale_order_id', string="MO Production Completed")
-    payment_received_lines = fields.One2many('payment.received.lines', 'sale_order_id', string="Payment Received")
-    dispatch_lines = fields.One2many('dispatch.lines', 'sale_order_id', string="Dispatch")
+    payment_received_lines = fields.One2many('payment.received.lines', 'sale_order_id', string="Payment Received", copy=False)
+    dispatch_lines = fields.One2many('dispatch.lines', 'sale_order_id', string="Dispatch", copy=False)
 
     ## Revise So Fields
     new_revision_so_no = fields.Char(string="SO Revision No", readonly="1", copy=False)
-
 
 
     @api.multi
@@ -197,7 +197,7 @@ class SaleOrder(models.Model):
     @api.multi
     def _get_current_date(self):
         """ Get current date """
-        current_date = datetime.datetime.now()
+        current_date = datetime.now()
         return current_date
 
     @api.model
@@ -304,11 +304,51 @@ class SaleOrder(models.Model):
         return picking_ids
 
     @api.multi
+    def _get_po_sent_lies(self):
+        """
+            Get PO Sent for SO
+        """
+        procurement_obj = self.env['procurement.order']
+        po_obj = self.env['purchase.order']
+        po_group_obj = self.env['procurement.group']
+
+        purchase_list = []
+        po_group_id = po_group_obj.search([('name','=', self.name)])
+        print po_group_id,'--------po_group_ids'
+        if po_group_id:
+            procurement_ids = procurement_obj.search([('group_id','=',po_group_id.id)])
+            for procurement_id in procurement_ids:
+                if procurement_id.purchase_line_id.order_id not in purchase_list:
+                    print procurement_id.purchase_line_id.order_id,'-------procurement_id.purchase_line_id.order_id'
+                    purchase_list.append(procurement_id.purchase_line_id.order_id)
+            print purchase_list,'---------purchase_list'
+        return purchase_list
+
+
+    @api.multi
     def action_confirm(self):
         """
             Inherit function to add entries for order status
         """
         res = super(SaleOrder, self).action_confirm()
+
+        ## Logic to check Customer PO document Attached in Documents or not
+        ## If not show warning Message
+        customer_po_doc_list = []
+        if not self.document_lines:
+            raise UserError(_('Please upload Customer PO Received(RFQ) Documents.'))
+        else:
+            for line in self.document_lines:
+                if line.document_type == 'RFQ':
+                    customer_po_doc_list.append(line)
+            if customer_po_doc_list:
+                for line in customer_po_doc_list:
+                    if not line.document_attachment:
+                        raise UserError(_('Please upload Customer PO Received(RFQ) Documents.'))
+            else:
+                raise UserError(_('Please upload Customer PO Received(RFQ) Documents.'))
+
+
         ## Create PO receives lines for SO
         ## Customer PO received is same SO
         po_ids = self._get_po()
@@ -336,7 +376,8 @@ class SaleOrder(models.Model):
                     'mo_issued_date': self._get_current_date(),
                     'mo_issued_by': self._get_current_user(),
                     'mo_issued_no': mo_id.name,
-                    'mo_production_completed': 'Y' if mo_id.state == 'done' else 'N',
+                    # 'mo_production_completed': 'Y' if mo_id.state == 'done' else 'N',
+                    'mo_production_completed': mo_id.state,
                     'mrp_id': mo_id.id,
                     'sale_order_id':self.id,
                 }
@@ -355,6 +396,19 @@ class SaleOrder(models.Model):
                 }
             ## Create lines and append here
             self.dispatch_lines = [[0, 0, picking_vals]]
+        ## Logic o get So related PO
+        po_sent_ids = self._get_po_sent_lies()
+        for po_sent_id in po_sent_ids:
+            if po_sent_id:
+                po_sent_vals = {
+                        'po_sent_date': self._get_current_date(),
+                        'po_sent_by': self._get_current_user(),
+                        'po_sent_no': po_sent_id.name,
+                        'purchase_id': po_sent_id.id,
+                        'sale_order_id':self.id,
+                    }
+                ## Create lines and append here
+                self.po_sent_lines = [[0, 0, po_sent_vals]]
         return res
 
     # @api.multi
@@ -376,6 +430,24 @@ class SaleOrder(models.Model):
 
     @api.multi
     def gad_approved(self):
+
+        ## Before genarating GAD Approved entries check
+        ## GAD Document is uploaded in Documents Tab or not
+        gad_doc_list = []
+        if not self.document_lines:
+            raise UserError(_('Please upload Approved GA Drawing Documents.'))
+        else:
+            for line in self.document_lines:
+                if line.document_type == 'Approved GA Drawing':
+                    gad_doc_list.append(line)
+            if gad_doc_list:
+                for line in gad_doc_list:
+                    if not line.document_attachment:
+                        raise UserError(_('Please upload Approved GA Drawing Documents.'))
+            else:
+                raise UserError(_('Please upload Approved GA Drawing Documents.'))
+
+
         self.write({
         'state': 'GAD Approved',
         'ga_drawing_approved': 'Y',
@@ -385,12 +457,64 @@ class SaleOrder(models.Model):
 
     @api.multi
     def create_qap_approved(self):
+
+        ## Logic to check/provide restriction on QAP Approved Button
+        ## upload document first before proceed
+        qap_doc_list = []
+        if not self.document_lines:
+            raise UserError(_('Please upload QAP Approved Documents.'))
+        else:
+            for line in self.document_lines:
+                if line.document_type == 'Approved QA Plan':
+                    qap_doc_list.append(line)
+            if qap_doc_list:
+                for line in qap_doc_list:
+                    if not line.document_attachment:
+                        raise UserError(_('Please upload QAP Approved Documents.'))
+            else:
+                raise UserError(_('Please upload QAP Approved Documents.'))
+
         self.write({
         'state': 'QAP Approved',
         'qap_approved': 'Y',
         'qap_approved_date': self._get_current_date(),
         'qap_approved_by': self._get_current_user(),
         })
+
+    @api.multi
+    def _get_payment_lies(self):
+        """
+            Get Payments Done for SO
+        """
+        account_obj = self.env['account.account']
+        payment_obj = self.env['account.payment']
+
+        payment_list = []
+        for invoice_id in self.invoice_ids:
+            for pay_id in invoice_id.payment_ids:
+                payment_list.append(pay_id)
+        return payment_list
+
+    @api.multi
+    def create_payment_received(self):
+        payment_line_obj = self.env['payment.received.lines']
+
+        payment_ids = self._get_payment_lies()
+        for payment_id in payment_ids:
+            payment_vals = {
+                    'payment_received_date': self._get_current_date(),
+                    'payment_received_by': self._get_current_user(),
+                    'payment_received_no': payment_id.name,
+                    'payment_received_amt_inr': payment_id.amount,
+                    'payment_received_amt_per':payment_id.invoice_ids.per_amt,
+                    'payment_id': payment_id.id,
+                    'sale_order_id':self.id,
+                }
+            ## Create lines and append here
+            payment_line_ids = payment_line_obj.search([('payment_received_no', '=', payment_id.name)])
+            if not payment_line_ids:
+                self.payment_received_lines = [[0, 0, payment_vals]]
+
 
     @api.multi
     def action_done(self):
@@ -471,27 +595,32 @@ class MOIssuedLines(models.Model):
     mo_issued_date = fields.Date(string="Date")
     mo_issued_by = fields.Char(string="By")
     mo_issued_no = fields.Char(string="No")
-    mo_production_completed = fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="MO Production Completed")
+    # mo_production_completed = fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="MO Production Completed")
+    mo_production_completed = fields.Selection(related="mrp_id.state", string="State")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
     mrp_id = fields.Many2one('mrp.production', string="MRP Id")
+
 
 class POSentLines(models.Model):
     _name = "po.sent.lines"
 
-    po_sent = fields.Selection([('Y','Y'),('N','N')], string="PO Sent")
+    # po_sent = fields.Selection([('Y','Y'),('N','N')], string="PO Sent")
     po_sent_date = fields.Date(string="Date")
     po_sent_by = fields.Char(string="By")
-    po_sent_vendor_name = fields.Char(string="Vendor Name")
+    po_sent_no = fields.Char(string="Vendor Name")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+    purchase_id = fields.Many2one('purchase.order', string="Purchase Order")
 
 class RawMaterailReceivedLines(models.Model):
     _name = "raw.material.received.lines"
 
-    raw_material_received = fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="Raw Materials Received")
+    # raw_material_received = fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="Raw Materials Received")
     raw_material_received_date = fields.Date(string="Date")
     raw_material_received_by = fields.Char(string="By")
-    raw_material_received_vendor_name = fields.Char(string="Vendor Name")
+    raw_material_received_no = fields.Char(string="Vendor Name")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+    incoming_pick_id = fields.Many2one('stock.picking', string="Incoming Shipment")
+    raw_material_received = fields.Selection(related="incoming_pick_id.state", string="State")
 
 # class MOProductionCompletedLines(models.Model):
 #     _name = "mo.production.completed.lines"
@@ -505,11 +634,13 @@ class RawMaterailReceivedLines(models.Model):
 class PaymentReceivedLines(models.Model):
     _name = "payment.received.lines"
 
-    payment_received = fields.Selection([('Y','Y'),('N','N')], string="Payment Received")
+    # payment_received = fields.Selection([('Y','Y'),('N','N')], string="Payment Received")
+    payment_received_no = fields.Char(string='Payment No')
     payment_received_date = fields.Date(string="Date")
     payment_received_by = fields.Char(string="By")
     payment_received_amt_inr = fields.Float(string=" Amount INR")
     payment_received_amt_per = fields.Float(string="Amount %")
+    payment_id = fields.Many2one('account.payment', string="Payments")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
 
 class DispatchLines(models.Model):
@@ -521,6 +652,7 @@ class DispatchLines(models.Model):
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
     ## Add referance of stock.delivery
     stock_pick_id = fields.Many2one('stock.picking', string="Sale Order")
+    dispatch_state = fields.Selection(related="stock_pick_id.state", string="State")
 
 class DocumentLines(models.Model):
     _name = "document.lines"
@@ -573,7 +705,7 @@ class DocumentLines(models.Model):
         if vals and 'document_type' in vals and vals.get('document_attachment') != False:
             ## RFQ
             if vals.get('document_type') == 'RFQ':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -586,7 +718,7 @@ class DocumentLines(models.Model):
 
             ##PO
             if vals.get('document_type') == 'PO':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -596,7 +728,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## Approved GA Drawing
             if vals.get('document_type') == 'Approved GA Drawing':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -606,7 +738,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ##Approved QA Plan
             if vals.get('document_type') == 'Approved QA Plan':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -616,7 +748,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ##Quotation
             if vals.get('document_type') == 'Quotation':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -626,7 +758,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ##Order Acceptance
             if vals.get('document_type') == 'Order Acceptance':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -636,7 +768,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ##TPI Call
             if vals.get('document_type') == 'TPI Call':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -646,7 +778,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ##Test Certificates
             if vals.get('document_type') == 'Test Certificates':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -656,7 +788,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## Delivery Challan
             if vals.get('document_type') == 'Delivery Challan':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -666,7 +798,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## Invoice
             if vals.get('document_type') == 'Invoice':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -676,7 +808,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## Warranty Certificate
             if vals.get('document_type') == 'Warranty Certificate':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -686,7 +818,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## GA Drawing
             if vals.get('document_type') == 'GA Drawing':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -696,7 +828,7 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## QA Plan
             if vals.get('document_type') == 'QA Plan':
-                doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+                doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -734,9 +866,9 @@ class DocumentLines(models.Model):
             }
 
         if vals and 'document_date' in vals:
-            doc_dt = datetime.datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
+            doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
         else:
-            doc_dt = datetime.datetime.strptime(self.document_date, '%Y-%m-%d').strftime("%b %d %Y")
+            doc_dt = datetime.strptime(self.document_date, '%Y-%m-%d').strftime("%b %d %Y")
 
         ## RFQ
         if self.document_type == 'RFQ':

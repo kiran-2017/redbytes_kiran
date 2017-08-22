@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited  view to add Amount% to pass on payment lines -->
+        <record id="account_invoice_form_inherited" model="ir.ui.view">
+            <field name="name">account.invoice.inherited</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='payment_term_id']" position="after">
+                    <field name="per_amt" invisible="1"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- <record id="account_view_account_payment_form_inherited" model="ir.ui.view">
+            <field name="name">account.payment.inherited</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='amount']" position="after">
+                    <field name="amt_per"/>
+                </xpath>
+            </field>
+        </record> -->
+</odoo>
