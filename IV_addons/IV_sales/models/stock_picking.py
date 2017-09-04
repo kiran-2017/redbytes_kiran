@@ -14,6 +14,19 @@ from odoo.exceptions import UserError
 class Picking(models.Model):
     _inherit = "stock.picking"
 
+
+    ## Add this fields on DC form to print on DC report
+    transporter_name_id = fields.Many2one('transporter.name', string="Transporter Name")
+    lr_no = fields.Char(string="L.R. No")
+    lr_date = fields.Date(string="L.R. Date")
+    vehical_registration_no = fields.Char(string="Vehicle Reg. No")
+    basis_of_freight = fields.Selection([('To Pay', 'To Pay'), ('Paid', 'Paid')], 'Freight Term', default='')
+    road_permit_no = fields.Char(string="Road Permit No")
+    delivery_type = fields.Selection([('door_delivery', 'DOOR DELIVERY'), ('godown_delivery', 'GODOWN DELIVERY')], 'Delivery Type', default='door_delivery')
+    dc_mode = fields.Selection([('returnable', 'Returnable'), ('non_returnable', 'Non-Returnable')], 'Delivery Mode')
+    eway_bill_no = fields.Char(string="E-Way Bill No")
+
+
     @api.multi
     def _create_dispatched_lines(self, backorder_picking, picking):
         sale_order_obj = self.env['sale.order']
@@ -37,8 +50,8 @@ class Picking(models.Model):
         ## Logic for Incoming shipment lines on SO
         po_ids = purchase_order_obj.search([('name','=',picking.origin)])
         for po_id in po_ids:
-            po_sent_id = po_sent_obj.search([('purchase_id','=',po_id.id)])
-            if po_sent_id:
+            po_sent_ids = po_sent_obj.search([('purchase_id','=',po_id.id)])
+            for po_sent_id in po_sent_ids:
                 picking_vals = {
                         'raw_material_received_date': sale_order_obj._get_current_date(),
                         'raw_material_received_by': sale_order_obj._get_current_user(),
@@ -79,3 +92,11 @@ class Picking(models.Model):
             backorder_picking.action_assign()
             backorders |= backorder_picking
         return backorders
+
+
+class TransporterName(models.Model):
+    _name = "transporter.name"
+
+    """ Newly added class to reate entries for transporter used on DC form"""
+
+    name = fields.Char(string="Name")

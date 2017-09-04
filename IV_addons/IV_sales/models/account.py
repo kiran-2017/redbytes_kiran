@@ -5,7 +5,7 @@ from odoo import api, fields, models,_
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
-    ## Add field to store down payment %
+    ## Add field to store down payment % this will show on payment lines on so 
     per_amt = fields.Char(string="Amount(%)")
 
 

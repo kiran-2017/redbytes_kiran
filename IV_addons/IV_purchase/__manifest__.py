@@ -14,10 +14,12 @@ You could use this simplified accounting in case you work with an (external) acc
     """,
     'category': 'Sale',
     'website': 'https://www.odoo.com/page/billing',
-    'depends' : ['base','product', 'purchase', 'stock'],
+    'depends' : ['base','product', 'purchase', 'stock','IV_reports'],
     'data': [
         'views/product_view.xml',
         'views/purchase_view.xml',
+        'report/purchase_report.xml',
+        'report/purchase_order_template_view.xml',
     ],
     'demo': [
     ],

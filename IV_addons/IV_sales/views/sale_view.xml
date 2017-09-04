@@ -12,11 +12,6 @@
                 <field name="new_revision_so_no"/>
               </xpath>
 
-              <!-- Hide Customer Referace -->
-              <xpath expr="//field[@name='client_order_ref']" position="attributes">
-                <attribute name="invisible">1</attribute>
-              </xpath>
-
               <!-- Convert datetime to date for date order field on SO-->
               <xpath expr="//field[@name='date_order']" position="attributes">
                 <attribute name="widget">date</attribute>
@@ -26,15 +21,30 @@
                 <attribute name="widget">date</attribute>
               </xpath>
 
-              <!-- Hide Customer Referace -->
+              <!-- Hide Shipping Policy  -->
               <xpath expr="//field[@name='picking_policy']" position="attributes">
                 <attribute name="invisible">1</attribute>
               </xpath>
 
+              <!-- Hide Expiration date -->
+              <xpath expr="//field[@name='validity_date']" position="attributes">
+                <attribute name="invisible">1</attribute>
+              </xpath>
+
+              <xpath expr="//field[@name='confirmation_date']" position="after">
+                <!-- Logic to change date color to red if delivery date is getting expire and out of date -->
+                <!-- this is Boolean field only for field visibility-->
+                <field name="check_for_delivery_date" invisible="1"/>
+                <label for="delivery_date" string="Delivery Date" attrs="{'invisible': [('check_for_delivery_date','=',True)]}"/>
+                <field name="delivery_date" nolabel="1" attrs="{'invisible': [('check_for_delivery_date','=',True)]}"/>
+                <label for="old_delivery_date" string="Delivery Date" style="color:red;" attrs="{'invisible': [('check_for_delivery_date','=',False)]}"/>
+                <field name="old_delivery_date" style="color:red;" nolabel="1" attrs="{'invisible': [('check_for_delivery_date','=',False)]}"/>
+                <!-- End Here-->
+              </xpath>
 
               <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="delivery_date"/>
-                <field name="client_order_ref"/>
+                <field name="is_gad"/>
+                <field name="is_adv"/>
               </xpath>
 
 
@@ -42,9 +52,14 @@
                 <field name="iv_project_id"/>
               </xpath>
 
-              <xpath expr="//field[@name='payment_term_id']" position="after">
-                <field name="is_gad"/>
-                <field name="is_adv"/>
+              <!-- Hide payment term form top part of SO-->
+              <xpath expr="//field[@name='payment_term_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+              </xpath>
+
+              <!-- Add payment term to commertial group-->
+              <xpath expr="//field[@name='incoterm']" position="after">
+                  <field name="payment_term_id"/>
               </xpath>
               <!-- Add new group under other information for delivery info -->
               <xpath expr="//group[@name='sales_person']" position="after">
@@ -55,6 +70,7 @@
                       <field name="transporter"/>
                       <field name="performance_guarantee"/>
                       <field name="delivery_instructions"/>
+                      <field name="mode_of_shipment"/>
                       <field name="picking_policy"/>
                   </group>
                 </xpath>
@@ -95,7 +111,6 @@
                     <field name="moc"/>
                     <field name="operation"/>
                     <field name="pn"/>
-                    <!-- <field name="line_delivery_date"/> -->
                 </xpath>
 
                 <!-- keep for future <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
@@ -169,8 +184,6 @@
                             <field name="rfq_received_date" class="oe_inline" readonly="1"/>
                             <field name="rfq_received_by" class="oe_inline" readonly="1"/>
                         </group>
-
-
 
 
                         <group string="Order Accepted">
@@ -277,6 +290,7 @@
                       <field name="po_sent_lines" string="PO Sent" class="oe_inline" nolabel="1" readonly="1">
                         <tree editable="bottom">
                             <field name="po_sent_no"/>
+                            <field name="vendor_id"/>
                             <field name="po_sent_date"/>
                             <field name="po_sent_by"/>
                             <field name="sale_order_id" invisible="1"/>
@@ -292,6 +306,7 @@
                             <field name="raw_material_received_date"/>
                             <field name="raw_material_received_by"/>
                             <field name="raw_material_received"/>
+                            <field name="purchase_id"/>
                             <field name="sale_order_id" invisible="1"/>
                             <field name="incoming_pick_id" invisible="1"/>
                         </tree>
@@ -406,6 +421,23 @@
                       <field name="advance_bg_details" attrs="{'invisible': [('advance_bg_required','in',('NO','BLANK'))], 'required': [('advance_bg_required','=','YES')]}"/>
                       <field name="warranty"/>
                   </xpath>
+              </field>
+          </record>
+
+          <record id="view_order_tree_inherited" model="ir.ui.view">
+              <field name="model">sale.order</field>
+              <field name="inherit_id" ref="sale.view_order_tree"/>
+              <field name="arch" type="xml">
+
+                  <xpath expr="//field[@name='date_order']" position="after">
+                    <field name="delivery_date"/>
+                  </xpath>
+
+                  <xpath expr="//field[@name='invoice_status']" position="after">
+                      <field name="is_gad"/>
+                      <field name="is_adv"/>
+                  </xpath>
+
               </field>
           </record>
 

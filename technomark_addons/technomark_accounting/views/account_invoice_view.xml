@@ -8,8 +8,8 @@
             <field name="arch" type="xml">
               <xpath expr="//field[@name='date_due']" position="after">
                     <field name="buyer_order_no"/>
-                    <field name="despateched_doc_no"/>
-                    <field name="despatched_through"/>
+                    <!-- <field name="despateched_doc_no"/> -->
+                    <field name="tax_payable"/>
                     <field name="destination"/>
                     <field name="other_ref"/>
               </xpath>
@@ -23,8 +23,8 @@
             <field name="arch" type="xml">
               <xpath expr="//field[@name='payment_term_id']" position="after">
                     <field name="buyer_order_no"/>
-                    <field name="despateched_doc_no"/>
-                    <field name="despatched_through"/>
+                    <!-- <field name="despateched_doc_no"/> -->
+                    <field name="tax_payable"/>
                     <field name="destination"/>
                     <field name="other_ref"/>
               </xpath>

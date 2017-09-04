@@ -10,8 +10,15 @@
               <!-- Add taxes/duties field on PO form-->
               <xpath expr="//field[@name='incoterm_id']" position="after">
                   <field name="taxes_duties"/>
+                  <field name="insurance_term"/>
+              </xpath>
+              <xpath expr="//field[@name='incoterm_id']" position="attributes">
+                  <attribute name="string">Terms of Delivery</attribute>
               </xpath>
 
+              <xpath expr="//field[@name='date_approve']" position="after">
+                  <field name="freight_term"/>
+              </xpath>
               <!-- Add new fields on purchase order line tree view -->
               <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
                   <field name="serial_no"/>
@@ -58,7 +65,7 @@
               <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="before">
                   <field name="price_subtotal" string="Amount"/>
               </xpath>
-              
+
 
             </field>
         </record>

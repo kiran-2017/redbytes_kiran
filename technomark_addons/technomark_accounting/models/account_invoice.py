@@ -54,8 +54,8 @@ class AccountInvoice(models.Model):
 
     ## Add new fields to print on TAX Invoice On Invoice object
     buyer_order_no = fields.Char(string="Buyer Order No")
-    despateched_doc_no = fields.Char(string="Dispatched Document Number")
-    despatched_through = fields.Char(string="Despatched Through")
+    # despateched_doc_no = fields.Char(string="E-Way Bill No")
+    tax_payable = fields.Selection([('YES','YES'),('NO','NO')], string="Tax Payable on Reverse charge")
     destination = fields.Char(string="Destination")
     other_ref = fields.Char(string="Other Ref")
 
@@ -127,6 +127,48 @@ class AccountInvoice(models.Model):
             return converted_date
 
     @api.model
+    def get_eway_bill_no(self, origin):
+        """ This function return data for SO or PO form on qweb report of Tax invoice"""
+        so_obj = self.env['sale.order']
+        if origin:
+            so_id = so_obj.search([('name', '=', origin)])
+            if so_id:
+                return so_id.eway_bill_no
+            else:
+                return 'NA'
+    @api.model
+    def get_insurance(self, origin):
+        """ This function return data for SO or PO form on qweb report of Tax invoice"""
+        so_obj = self.env['sale.order']
+        if origin:
+            so_id = so_obj.search([('name', '=', origin)])
+            if so_id:
+                return so_id.insurance.name
+            else:
+                return 'NA'
+
+    @api.model
+    def get_delivery_instructions(self, origin):
+        """ This function return data for SO or PO form on qweb report of Tax invoice"""
+        so_obj = self.env['sale.order']
+        if origin:
+            so_id = so_obj.search([('name', '=', origin)])
+            if so_id:
+                return so_id.delivery_instructions.name
+            else:
+                return 'NA'
+    @api.model
+    def get_mode_of_shipment(self, origin):
+        """ This function return data for SO or PO form on qweb report of Tax invoice"""
+        so_obj = self.env['sale.order']
+        if origin:
+            so_id = so_obj.search([('name', '=', origin)])
+            if so_id:
+                return so_id.mode_of_shipment.name
+            else:
+                return 'NA'
+
+    @api.model
     def get_orders(self, origin):
         """ This function return data for SO or PO form on qweb report of Tax invoice"""
         so_obj = self.env['sale.order']
@@ -151,16 +193,23 @@ class AccountInvoice(models.Model):
         po_obj = self.env['purchase.order']
         if origin:
             so_id = so_obj.search([('name', '=', origin)])
-            for pick in so_id.picking_ids:
-                return pick
-            # if so_id: Hide for now keep for future
-            #     return so_id.delivery_date
+            if so_id:
+                for pick in so_id.picking_ids:
+                    if pick.state == 'done':
+                        return pick
+                    else:
+                        return pick
+                # if so_id: Hide for now keep for future
+                #     return so_id.delivery_date
             else:
                 po_id = po_obj.search([('name', '=', origin)])
                 # if po_id: Hide for now keep for future
                 #     return po_id.date_planned
                 for pick in po_id.picking_ids:
-                    return pick
+                    if pick.state == 'done':
+                        return pick
+                    else:
+                        return pick
 
     @api.model
     def get_delivery_note(self, origin):
@@ -169,7 +218,7 @@ class AccountInvoice(models.Model):
         if origin:
             so_id = so_obj.search([('name', '=', origin)])
             if so_id:
-                return so_id.special_remarks
+                return so_id.mode_of_shipment.name
 
     @api.model
     def get_lot_serial_number(self, origin, product_id):

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+      <!-- Hide default Invoices menu from account invoice -->
+      <report
+          id="account.account_invoices"
+          model="account.invoice"
+          string="Invoices"
+          report_type="qweb-pdf"
+          name="account.report_invoice"
+          file="account.report_invoice"
+          attachment_use="True"
+          attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+          menu="False"
+        />
+
+        <!-- Add TAx Invoice Menu -->
+        <report
+            string="Tax Invoice"
+            id="action_report_tax_invoice"
+            model="account.invoice"
+            report_type="qweb-pdf"
+            name="IV_accounting.report_tax_invoice"
+            file="IV_accounting.report_tax_invoice"
+            menu="True"
+        />
+
+    </data>
+</odoo>

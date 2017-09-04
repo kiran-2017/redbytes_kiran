@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="company_form_inherited" model="ir.ui.view">
+        <field name="name">res.company.form.inherited</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+
+          <!-- Rename vat to GSTIN-->
+            <xpath expr="//field[@name='vat']" position="attributes">
+              <attribute name="string">GSTIN</attribute>
+            </xpath>
+            <xpath expr="//field[@name='company_registry']" position="attributes">
+              <attribute name="string">Company PAN</attribute>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+               <page name="declaration" string="Declaration">
+                   <group>
+                       <field name="declaration"/>
+                   </group>
+               </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

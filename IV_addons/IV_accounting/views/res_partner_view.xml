@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_partner_form_inherited_new" model="ir.ui.view">
+            <field name="name">res.partner.inherit.new</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='message_bounce']" position="after">
+                    <field name="partner_gstin"/>
+                </xpath>
+                <!-- Add place of supply here for GST -->
+                <!-- <xpath expr="//field[@name='country_id']" position="before">
+                    <br/>
+                    <field name="place_of_supply" placeholder="Place of Supply/State code"/>
+                </xpath> -->
+
+                <xpath expr="//field[@name='child_ids']/form/sheet/group/group/div/div/field[@name='country_id']" position="before">
+                  <br/>
+                  <!-- <field name="place_of_supply" placeholder="Place of Supply/State code"/> -->
+                  <field name="partner_gstin" placeholder="GSTIN"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="view_partner_address_form_inherited" model="ir.ui.view">
+            <field name="name">res.partner.inherit.address</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_address_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='type']" position="before">
+                  <br/>
+                  <!-- <field name="place_of_supply" placeholder="Place of Supply/State code"/> -->
+                  <field name="partner_gstin" placeholder="GSTIN"/>
+                </xpath>
+
+            </field>
+        </record>
+
+
+</odoo>

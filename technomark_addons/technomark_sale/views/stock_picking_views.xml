@@ -22,7 +22,7 @@
                         <group col="4" colspan="4">
                             <field name="transporter_name_id"/>
                             <field name="lr_no"/>
-                            <field name="lr_date"/>
+                            <!-- <field name="lr_date"/> -->
                             <field name="vehical_registration_no"/>
                             <field name="basis_of_freight"/>
                             <field name="road_permit_no"/>

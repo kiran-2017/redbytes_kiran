@@ -17,6 +17,25 @@ class SaleOrder(models.Model):
         res = super(SaleOrder, self).write(vals)
         return res
 
+    @api.depends('delivery_date', 'old_delivery_date')
+    def _check_delivery_date(self):
+        ## Logic to change date color if delivery date is getting expire and out of date
+
+        for rec in self:
+            print datetime.now(), rec.delivery_date, type(rec.delivery_date),'-datetime now-----rec.delivery_date---datetime.now'
+            current_date = str(datetime.now())[0:10]#datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
+            print rec.delivery_date < current_date,'---rec.delivery_date < = datetime.now()'
+            if rec.delivery_date < current_date:
+                rec.check_for_delivery_date = True
+            else:
+                rec.check_for_delivery_date = False
+            ## Logic to chnage old date to new one
+            if rec.old_delivery_date < current_date:
+                rec.check_for_delivery_date = True
+            else:
+                rec.check_for_delivery_date = False
+
+
     ## Add data fields here
     ## Inherit states to add more states to SO form
     state = fields.Selection([
@@ -31,6 +50,9 @@ class SaleOrder(models.Model):
         ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
     delivery_date = fields.Date(string="Delivery Date")
+    ## Add old date to visible of color and handdle expiry of delivery date
+    old_delivery_date = fields.Date(related="delivery_date", string="Delivery Date")
+    check_for_delivery_date = fields.Boolean(compute="_check_delivery_date", string="Check For Delivery Date", default=True)
     is_gad = fields.Selection([('Y', 'Y'), ('N', 'N'), ('NA', 'NA')],string="GAD", help="Will show the value of this field (Whether GA Drawing approved or not)", default='N', copy=False)
     is_adv = fields.Selection([('Y', 'Y'), ('N', 'N'), ('NA', 'NA')], string="Advance", help="Will show the value of this field (Whether advance received or not)", default='N', copy=False)
     iv_project_id = fields.Many2one("project.project", string="Project", copy=False)
@@ -52,7 +74,8 @@ class SaleOrder(models.Model):
     insurance = fields.Selection([('BLANK', '[BLANK]'), ('NA', 'NA'), ('Our Account', 'Our Account'), ('Client Account', 'Client Account')], 'Insurance', default='BLANK')
     transporter = fields.Char(string="Transporter", copy=False)
     performance_guarantee = fields.Selection([('BLANK', '[BLANK]'), ('Performance BG', 'Performance BG'), ('Corporate Bond', 'Corporate Bond')], 'Performance Guarantee', default='BLANK')
-    delivery_instructions = fields.Text(string="Delivery Instructions", copy=False)
+    delivery_instructions = fields.Many2one('delivery.mode', string="Mode of delivery")
+    mode_of_shipment = fields.Many2one('shipment.mode', string="Mode Of Shipment")
     # shipping_policy = fields.Char(string="Shipping Policy", default="Deliver each product when available")
 
     document_lines = fields.One2many('document.lines', 'sale_order_id', string="Documents", copy=False)
@@ -124,6 +147,10 @@ class SaleOrder(models.Model):
         """
         Logic for revising SO and assign increment no to new genearted Revesion
         """
+        ## Declare class obj here
+        mo_issued_lines_obj = self.env['mo.issued.lines']
+        po_set_lines_obj = self.env['po.sent.lines']
+
         ## Get sequence for SO Revision
         inc_seq = 1
         if self.new_revision_so_no:
@@ -135,6 +162,57 @@ class SaleOrder(models.Model):
                 self.new_revision_so_no = self.name + '#' + str(inc_seq)
         else:
             self.new_revision_so_no = self.name + '#' + str(inc_seq)
+
+        """ Logic to crete revised customer po lines after each revision on PO"""
+        ## Create Customer PO Received lines for each revised SO in any
+        # po_ids = self._get_po()
+        # for po_id in po_ids:
+        po_received_vals = {
+                'customer_po_received_date': self._get_current_date(),
+                'customer_po_received_by': self._get_current_user(),
+                'customer_po_received_no': self.new_revision_so_no,
+                'sale_order_id':self.id,
+            }
+        ## Create lines and append here
+        self.customer_po_received_line_ids=[[0, 0, po_received_vals]]
+
+
+        """ Logic to create reviesed MO records to mo issued lines """
+        ## Create MO lines for revised so if any
+        mo_ids = self._get_mo()
+        for mo_id in mo_ids:
+            mrp_id = mo_issued_lines_obj.search([('mrp_id','=',mo_id.id)])
+            if not mrp_id:
+                mo_issued_vals = {
+                        'mo_issued_date': self._get_current_date(),
+                        'mo_issued_by': self._get_current_user(),
+                        'mo_issued_no': mo_id.name,
+                        # 'mo_production_completed': 'Y' if mo_id.state == 'done' else 'N',
+                        'mo_production_completed': mo_id.state,
+                        'mrp_id': mo_id.id,
+                        'sale_order_id':self.id,
+                    }
+                ## Create lines and append here
+                self.mo_issued_lines = [[0, 0, mo_issued_vals]]
+
+        """ Logic to create revised PO records to PO sent lines """
+        ## Create Po sent lines for revised so if any and
+        ## previous po is in confirm state
+        po_sent_ids = self._get_po_sent_lies()
+        for po_sent_id in po_sent_ids:
+            if po_sent_id:
+                purchase_id = po_set_lines_obj.search([('purchase_id','=',po_sent_id.id)])
+                if not purchase_id:
+                    po_sent_vals = {
+                            'po_sent_date': self._get_current_date(),
+                            'po_sent_by': self._get_current_user(),
+                            'po_sent_no': po_sent_id.name,
+                            'purchase_id': po_sent_id.id,
+                            'sale_order_id':self.id,
+                        }
+                    ## Create lines and append here
+                    self.po_sent_lines = [[0, 0, po_sent_vals]]
+
         return True
 
     @api.multi
@@ -336,31 +414,31 @@ class SaleOrder(models.Model):
         ## If not show warning Message
         customer_po_doc_list = []
         if not self.document_lines:
-            raise UserError(_('Please upload Customer PO Received(RFQ) Documents.'))
+            raise UserError(_('Please upload Customer PO Received(PO) Documents.'))
         else:
             for line in self.document_lines:
-                if line.document_type == 'RFQ':
+                if line.document_type == 'PO':
                     customer_po_doc_list.append(line)
             if customer_po_doc_list:
                 for line in customer_po_doc_list:
                     if not line.document_attachment:
-                        raise UserError(_('Please upload Customer PO Received(RFQ) Documents.'))
+                        raise UserError(_('Please upload Customer PO Received(RO) Documents.'))
             else:
-                raise UserError(_('Please upload Customer PO Received(RFQ) Documents.'))
+                raise UserError(_('Please upload Customer PO Received(RO) Documents.'))
 
 
         ## Create PO receives lines for SO
         ## Customer PO received is same SO
-        po_ids = self._get_po()
-        for po_id in self:
-            po_received_vals = {
-                    'customer_po_received_date': self._get_current_date(),
-                    'customer_po_received_by': self._get_current_user(),
-                    'customer_po_received_no': po_id.name,
-                    'sale_order_id':po_id.id,
-                }
-            ## Create lines and append here
-            self.customer_po_received_line_ids=[[0, 0, po_received_vals]]
+        # po_ids = self._get_po()
+        # for po_id in po_ids:
+        po_received_vals = {
+                'customer_po_received_date': self._get_current_date(),
+                'customer_po_received_by': self._get_current_user(),
+                'customer_po_received_no': self.name,
+                'sale_order_id':self.id,
+            }
+        ## Create lines and append here
+        self.customer_po_received_line_ids=[[0, 0, po_received_vals]]
 
         ## Write values for order Acceptance of SO
         self.write({
@@ -607,9 +685,10 @@ class POSentLines(models.Model):
     # po_sent = fields.Selection([('Y','Y'),('N','N')], string="PO Sent")
     po_sent_date = fields.Date(string="Date")
     po_sent_by = fields.Char(string="By")
-    po_sent_no = fields.Char(string="Vendor Name")
+    po_sent_no = fields.Char(string="PO No")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
     purchase_id = fields.Many2one('purchase.order', string="Purchase Order")
+    vendor_id = fields.Many2one(related="purchase_id.partner_id", string="Vendor Name")
 
 class RawMaterailReceivedLines(models.Model):
     _name = "raw.material.received.lines"
@@ -617,10 +696,12 @@ class RawMaterailReceivedLines(models.Model):
     # raw_material_received = fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="Raw Materials Received")
     raw_material_received_date = fields.Date(string="Date")
     raw_material_received_by = fields.Char(string="By")
-    raw_material_received_no = fields.Char(string="Vendor Name")
+    raw_material_received_no = fields.Char(string="No")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+
     incoming_pick_id = fields.Many2one('stock.picking', string="Incoming Shipment")
     raw_material_received = fields.Selection(related="incoming_pick_id.state", string="State")
+    purchase_id = fields.Char(related="incoming_pick_id.origin", string="Purchase Ref#")
 
 # class MOProductionCompletedLines(models.Model):
 #     _name = "mo.production.completed.lines"
@@ -1044,3 +1125,27 @@ class CustomerPoReceivedLine(models.Model):
     customer_po_received_by = fields.Char(string="By")
     customer_po_received_no = fields.Char(string="No")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+
+
+
+class InsuranceTerm(models.Model):
+        _name = 'insurance.term'
+        '''
+            Create new object for Insurance Term
+        '''
+        name = fields.Char(string="Name")
+
+
+class ModeOfDelivery(models.Model):
+        _name = 'delivery.mode'
+        '''
+            Create new object for Mode of delivery
+        '''
+        name = fields.Char(string="Name")
+
+class ModeOfShipment(models.Model):
+        _name = 'shipment.mode'
+        '''
+            Create new object for Mode of delivery
+        '''
+        name = fields.Char(string="Name")

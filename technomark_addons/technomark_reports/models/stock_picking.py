@@ -18,6 +18,50 @@ class StockPicking(models.Model):
     challan_no = fields.Char(string="Challan No.")
     ics_lr_no = fields.Char(string="L.R. No.")
     picking_type_flag = fields.Boolean(string="Picking Type Flag", default=False)
+    
+
+    @api.model
+    def get_so_data(self, origin):
+        """ This function return data for SO or PO form on qweb report of Tax invoice"""
+        so_obj = self.env['sale.order']
+        if origin:
+            so_id = so_obj.search([('name', '=', origin)])
+            if so_id:
+                return so_id
+
+
+    @api.model
+    def get_orders(self, origin):
+        """ This function return data for SO or PO form on qweb report of Tax invoice"""
+        so_obj = self.env['sale.order']
+        po_obj = self.env['purchase.order']
+        if origin:
+            so_id = so_obj.search([('name', '=', origin)])
+            if so_id:
+                return so_id
+            # if so_id: Hide for now keep for future
+            #     return so_id.delivery_date
+            else:
+                po_id = po_obj.search([('name', '=', origin)])
+                # if po_id: Hide for now keep for future
+                #     return po_id.date_planned
+                if po_id:
+                    return po_id
+
+
+    @api.model
+    def get_delivert_term(self, origin):
+        """ This function return data for SO or PO form on qweb report of Tax invoice"""
+        so_obj = self.env['sale.order']
+        po_obj = self.env['purchase.order']
+        if origin:
+            so_id = so_obj.search([('name', '=', origin)])
+            if so_id:
+                return so_id.incoterm.name
+            else:
+                po_id = po_obj.search([('name', '=', origin)])
+                if po_id:
+                    return po_id.incoterm_id.name
 
     @api.multi
     def do_print_picking(self):

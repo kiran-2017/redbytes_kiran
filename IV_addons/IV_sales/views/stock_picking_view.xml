@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited sale view to add new fields for Delivery Information-->
+        <record id="view_picking_form_inherited" model="ir.ui.view">
+            <field name="name">stock.picking.form.inherited</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+
+              <!-- Add weight field on Dc for PO approx weight -->
+              <!-- <xpath expr="//field[@name='pack_operation_product_ids']/tree/field[@name='product_uom_id']" position="after">
+                  <field name="weight"/>
+                  <field name="actual_weight"/>
+              </xpath> -->
+
+              <!-- Screen for entering Other Info details like Vehicle reg. no, LR no ect...-->
+              <xpath expr="//page[@name='extra']" position="after">
+                <page string="Other Info" name="other_info" attrs="{'invisible': [('picking_type_flag','=',True)]}">
+                    <group>
+                      <!-- THis fields will use technomark_reports modules
+                      printing On DC-->
+                        <group col="4" colspan="4">
+                            <field name="transporter_name_id"/>
+                            <field name="lr_no"/>
+                            <field name="lr_date"/>
+                            <field name="vehical_registration_no"/>
+                            <field name="basis_of_freight"/>
+                            <field name="road_permit_no"/>
+                            <field name="delivery_type"/>
+                            <field name="dc_mode"/>
+                            <field name="eway_bill_no"/>
+                        </group>
+                    </group>
+                </page>
+              </xpath>
+          </field>
+      </record>
+</odoo>

@@ -5,29 +5,12 @@
   <template id="external_layout_header_inherited">
       <div class="header">
           <div class="row">
-              <div class="col-xs-3">
-                  <img t-if="company.logo" t-att-src="'data:image/png;base64,%s' % company.logo" style="max-height: 45px;"/>
-              </div>
-              <div class="text-right col-xs-4 page_bar" style="margin-top:20px;">
-                <strong><span>DELIVERY CHALLAN</span></strong>
-              </div>
-              <!-- <div  style=""> -->
-                <!-- <h4 class="text-center; col-xs-5" style="padding:0px !important;">DELIVERY CHALLAN</h4> -->
-              <!-- </div> -->
-              <div class="col-xs-5 text-right" style="margin-top:20px;" t-field="company.rml_header1"/>
-          </div>
-          <div class="row zero_min_height">
-              <div class="col-xs-12">
-                  <div style="border-bottom: 1px solid black;"></div>
+                <div class="text-center col-xs-12" style="margin-top:2px;">
+                <!-- <h1>DELIVERY CHALLAN</h1> -->
+                <span class="text-right"><h5>[ORIGINAL FOR RECIPIENT]</h5></span>
               </div>
           </div>
-          <div class="row">
-              <div class="col-xs-6" name="company_address">
-                  <span t-field="company.partner_id"
-                      t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'
-                      style="border-bottom: 1px solid black; display:inline-block;"/>
-              </div>
-          </div>
+
       </div>
   </template>
 
@@ -46,7 +29,7 @@
       <!-- Added new header here-->
       <t t-call="technomark_reports.external_layout_header_inherited" />
       <t t-raw="0" />
-      <t t-call="report.external_layout_footer" />
+      <!-- <t t-call="report.external_layout_footer" /> -->
   </template>
 
     <!--Inherited delivery slip template  -->
@@ -55,312 +38,280 @@
             <t t-call="technomark_reports.external_layout">
                 <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})" />
                 <div class="page">
-
-                  <div class="row">
-                      <div class="col-xs-6">
-                          <div t-if="o.move_lines and o.move_lines[0].partner_id and o.move_lines[0].partner_id.id != o.partner_id.id">
-                              <span><strong>Delivery Address:</strong></span>
-                              <div t-field="o.move_lines[0].partner_id"
-                                  t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'/>
-                          </div>
-                          <div t-if="o.picking_type_id.code != 'internal' and (not o.move_lines or not o.move_lines[0].partner_id) and o.picking_type_id.warehouse_id.partner_id">
-                              <span><strong>Warehouse Address:</strong></span>
-                              <div t-field="o.picking_type_id.warehouse_id.partner_id"
-                                  t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'/>
-                          </div>
-                      </div>
-                      <div class="col-xs-5 col-xs-offset-1">
-                          <div t-if="o.picking_type_id.code=='incoming' and o.partner_id">
-                              <span><strong>Vendor Address:</strong></span>
-                          </div>
-                          <div t-if="o.picking_type_id.code=='internal' and o.partner_id">
-                              <span><strong>Warehouse Address:</strong></span>
-                          </div>
-                          <div t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
-                              <span><strong>Customer Address:</strong></span>
-                          </div>
-                          <div t-if="o.partner_id" name="partner_header">
-                              <div t-field="o.partner_id"
-                                 t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True}'/>
-                              <!-- <p t-if="o.sudo().partner_id.vat">VAT: <span t-field="o.sudo().partner_id.vat"/></p> -->
-                          </div>
-                      </div>
+                  <div>
+                      <!--Add css here -->
+                      <style>
+                        .tr_formating{
+                            border: 2px solid #000000;
+                        }
+                        .td_formating{
+                            border: 1px solid #000000;
+                        }
+                      </style>
                   </div>
 
-                    <!-- <div class="row" name="customer_address">
-                        <div class="col-xs-4 pull-right">
-                            <div>
-                                <span><strong>Customer Address:</strong></span>
-                            </div>
-                            <div t-if="o.move_lines and o.move_lines[0].partner_id" name="partner_header">
-                                <div t-field="o.move_lines[0].partner_id"
-                                   t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True}'/>
-                            </div>
-                            <div t-if="not (o.move_lines and o.move_lines[0].partner_id) and o.partner_id" name="partner_header">
-                                <div t-field="o.partner_id"
-                                   t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True}'/>
-                            </div>
-                        </div>
-                    </div> -->
-                    <h2>
-                        <span>Challan No.:</span><br/>
-                        <span t-field="o.name"/>
-                    </h2>
-                    <table class="table table-condensed">
-                        <thead>
-                            <tr>
-                                <!-- <th t-if="o.origin"><strong>Order (Origin)</strong></th> -->
-                                <th name="td_sched_date_h">
-                                    <strong>Date</strong>
-                                </th>
-                                <th t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
-                                  <strong>Customer Reference</strong>
-                                </th>
-                                <th t-if="o.picking_type_id.code=='outgoing' and o.origin">
-                                  <strong>Mode</strong>
-                                </th>
-                                <th t-if="o.picking_type_id.code=='incoming' and o.partner_id">
-                                  <strong>Vendor Reference</strong>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <!--remove code for orion <td t-if="o.origin">
-                                    <span t-field="o.origin"/>
-                                </td> -->
-                                <td name="td_sched_date">
-                                   <t t-if="o.state == 'done'">
-                                     <span t-if="o.date_done" t-esc="o.date_converted(o.date_done)"/>
-                                        <!-- <span t-field="o.date_done"/> -->
-                                   </t>
-                                   <t t-if="o.state != 'done'">
-                                        <!-- <span t-field="o.min_date"/> -->
-                                        <span t-if="o.min_date" t-esc="o.date_converted(o.min_date)"/>
-                                   </t>
-                                </td>
-                                <td t-if="o.origin">
-                                    <span t-if="o.origin" t-esc="o.get_cust_ref(o.origin)"/>
-                                </td>
-                                <td t-if="o.picking_type_id.code=='outgoing' and o.origin">
-                                    <span t-field="o.dc_mode"/>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table class="table table-condensed mt48" t-if="not o.pack_operation_ids">
-                        <thead>
-                            <tr>
-                                <th><strong>Sr.No.</strong></th>
-                                <th><strong>Product</strong></th>
-                                <th><strong>Weight</strong></th>
-                                <th><strong>Ordered Quantity</strong></th>
-                                <th><strong>Delivered Quantity</strong></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-set="i" t-value="1" />
-                            <tr t-foreach="o.move_lines" t-as="move">
-                                <td>
-                                  <span t-esc="i">
-                                    <t t-set="i" t-value="i+1"/>
-                                  </span>
 
-                                </td>
-                                <td><span t-field="move.product_id"/></td>
-                                <td t-if="((move.product_id.is_weight_applicable) and (move.product_id.weight>0))">
-                                  <span t-field="move.product_id.weight"/>
-                                </td>
-                                <td>
-                                    <span t-field="move.ordered_qty"/>
-                                    <span t-field="move.product_uom"/>
-                                </td>
-                                <td>
-                                    <span t-if="pack_operation" t-field="pack_operation.qty_done"/>
-                                    <span t-if="pack_operation" t-field="move.product_uom"/>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <t t-set="backorder" t-value="False"/>
 
-                    <table class="table table-condensed mt48" t-if="o.pack_operation_ids">
-                        <t t-set="has_serial_number" t-value="o.pack_operation_ids.filtered('pack_lot_ids')" groups="stock.group_production_lot"/>
-                        <thead>
-                            <tr>
-                                <th><strong>Sr.No.</strong></th>
-                                <th><strong>Product</strong></th>
-                                <th><strong>Weight</strong></th>
-                                <!-- <th name="lot_serial" t-if="has_serial_number">
-                                    <span class="pull-left">Lot/Serial Number</span>
-                                </th> -->
-                                <th class="text-center"><strong>Ordered Quantity</strong></th>
-                                <th t-if="any([pack_operation.state == 'done' for pack_operation in o.pack_operation_ids])" class="text-right">
-                                        <strong>Delivered Quantity</strong>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-set="i" t-value="1" />
+                  <table class="table table-condensed mt48 page_bar" width="100%" style="border: 2px solid #000000; margin-top:2000px;">
+                      <tr>
+                        <td class="td_formating" colspan="2">
+                          <center><h1>DELIVERY CHALLAN</h1></center>
+                        </td>
+                      </tr>
 
-                            <tr t-foreach="o.pack_operation_ids" t-as="pack_operation">
-                                <td>
-                                  <!-- Logic for serial number printing on DC-->
-                                    <span t-esc="i"/>
-                                    <t t-set="i" t-value="i+1"/>
-                                </td>
-                                <t t-set="sale_order_line_data" t-value="o.get_sale_order_line_data(o.origin, pack_operation.product_id)"/>
-                                <td>
-                                    <span t-field="pack_operation.product_id"/>
-                                    <!-- Print vore, valve , valve operation, pn, case file no, seril no, etc-->
-                                    <t t-if="o.picking_type_id.code=='outgoing' and o.origin">
-                                        <span t-if="sale_order_line_data"><br/></span>
-                                        <span t-if="sale_order_line_data">For:</span><span t-if="sale_order_line_data" t-field="sale_order_line_data.valve"/><span t-if="sale_order_line_data">,</span>
-                                        <span t-if="sale_order_line_data" t-field="sale_order_line_data.valve_operation"/><span t-if="sale_order_line_data">,</span>
-                                        PN:<span t-if="sale_order_line_data" t-field="sale_order_line_data.pn"/><br/>
-                                        Case File: <span  t-if="sale_order_line_data" t-field="sale_order_line_data.case_file_number"/><br/>
-                                        Bore: <span t-if="sale_order_line_data" t-field="sale_order_line_data.bore"/>
-                                        <span t-if="sale_order_line_data"> mm</span>
-                                    </t>
-                                    <br/>
-                                    SR. NO(s) :
-                                    <t t-foreach="pack_operation.pack_lot_ids" t-as="packlot">
-                                        <span t-field="packlot.lot_id"/>
-                                        <t t-if="not packlot.lot_id">
-                                            <span t-field="packlot.lot_name"/>
+                      <tr>
+                        <td width="40%" class="td_formating">
+                          <div class="col-xs-3">
+                              <img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % o.company_id.logo" style="max-height: 50px;"/>
+                          </div>
+                          <div class="col-xs-10 text-center" t-field="o.company_id.rml_header1"/>
+                        </td>
+
+                        <td width="60%" style="padding:0px !important;" class="td_formating">
+                            <table class="table-condensed" width="100%">
+                                <tr>
+                                      <td class="td_formating" width="50%">
+                                        <strong>Challan No. :</strong>
+                                        <span t-if="o.name" t-field="o.name"/>
+                                      </td>
+
+                                      <td class="td_formating" width="50%" style="padding-bottom:30px !important;">
+                                        <strong>Challan Date :</strong>
+                                         <t t-if="o.state == 'done'">
+                                           <span t-if="o.date_done" t-esc="o.date_converted(o.date_done)"/>
+                                         </t>
+                                         <t t-if="o.state != 'done'">
+                                              <span t-if="o.min_date" t-esc="o.date_converted(o.min_date)"/>
+                                         </t>
+                                      </td>
+                                </tr>
+
+                                <tr>
+                                      <td class="td_formating" width="50%">
+                                        <strong>Order No. :</strong>
+                                        <span t-if="o.origin" t-esc="o.get_cust_ref(o.origin)"/>
+                                      </td>
+
+                                      <td class="td_formating" width="50%">
+                                        <t t-if="o.picking_type_id.code=='outgoing'">
+                                          <t t-set="so" t-value="o.get_so_data(o.origin)" />
+                                          <strong>Order Date :</strong>
+                                            <span t-if="so.date_order" t-esc="o.date_converted(so.date_order)"/>
                                         </t>
-                                    </t>
-                                    <!--<span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>-->
-                                    <!-- <t t-foreach="pack_operation.pack_lot_ids" t-as="pack_lot_id"> -->
-                                      <!-- <span t-if="pack_operation.pack_lot_ids" t-esc="o.get_lot_serial_number(pack_operation.pack_lot_ids)"/>-->  <!--<span t-if="pack_operation.pack_lot_ids.qty" t-field="pack_operation.pack_lot_ids.qty"/>-->
-                                    <!-- </t> -->
-                                    <t t-if="not pack_operation.product_id and pack_operation.package_id">
-                                        <span  t-field="pack_operation.package_id"/>
-                                    </t>
-                                </td>
-                                <!-- Add weight fields here-->
-                                <td>
-                                  <t t-if="((pack_operation.product_id.is_weight_applicable) and (pack_operation.product_id.weight>0))">
-                                      <span  t-if="(pack_operation.product_id.weight*pack_operation.qty_done)>0" t-esc="(pack_operation.product_id.weight*pack_operation.qty_done)"/>
-                                  </t>
-                                </td>
-                                <!-- <t t-if="has_serial_number">
-                                    <td t-if="pack_operation.pack_lot_ids">
-                                        <table class="table table-condensed" t-if="pack_operation.pack_lot_ids">
-                                            <tr t-foreach="pack_operation.pack_lot_ids" t-as="packlot">
-                                                <td>
-                                                    <span t-field="packlot.lot_id"/>
-                                                    <t t-if="not packlot.lot_id">
-                                                        <span t-field="packlot.lot_name"/>
-                                                    </t>
-                                                </td>
-                                                <td name="lot_qty">
-                                                    <span t-field="packlot.qty"/>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                    <td t-if="not pack_operation.pack_lot_ids"/>
-                                </t> -->
-                                <td class="text-center">
-                                    <span t-if="pack_operation.package_id">:</span>
-                                    <span t-field="pack_operation.package_id"/>
-                                    <span t-field="pack_operation.ordered_qty"/>
-                                    <span t-field="pack_operation.product_uom_id"/>
-                                </td>
-                                <td class="text-right" t-if="pack_operation.state == 'done'">
-                                    <t t-if="pack_operation.ordered_qty != pack_operation.qty_done">
-                                        <t t-set="backorder" t-value="True"/>
-                                    </t>
-                                    <span t-if="pack_operation" t-field="pack_operation.qty_done"/>
-                                    <span t-if="pack_operation" t-field="pack_operation.product_uom_id"/>
-                                </td>
-                            </tr>
-                            <tr t-if="sum(l.qty_done for l in o.pack_operation_ids)>0.0">
-                              <td>
-                                <span></span>
-                              </td>
-                              <td>
-                                <span></span>
-                              </td>
-                              <td>
-                                    <span></span>
-                              </td>
-                              <td>
-                                    <span></span>
-                              </td>
-                              <td class="text-right" t-if="o.state == 'done'">
-                                  <span class="page_bar" style="margin-right:40px;"><strong>Total</strong></span>
-                                  <span class="page_bar" style="margin-right:40px;">
-                                    <t t-if="(l.qty_done for l in o.pack_operation_ids)" t-esc="sum(l.qty_done for l in o.pack_operation_ids)"/>
-                                  </span>
-                              </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <!-- <table class="table table-condensed mt48" t-if="o.pack_operation_ids">
-                        <tr  t-if="sum(l.qty_done for l in o.pack_operation_ids)>0.0">
-                          <td>
-                            <span></span>
-                          </td>
-                          <td class="text-right">
-                                <span><strong>Total</strong></span>
-                          </td>
-                          <td>
-                              <t t-esc="sum(l.qty_done for l in o.pack_operation_ids)"/>
+                                      </td>
+                                </tr>
+
+                            </table>
                           </td>
                         </tr>
+
                         <tr>
-                          <td style="border:0px;">
-                              <div class="col-xs-12 text-right page_bar" style="margin-left:190px;">
-                                <strong>For TECHNOMARK INDIA</strong>
-                                <br/>
-                                <br/>
-                                <br/>
-                                <strong style="margin-right:50px;">Authorised Signatory</strong>
-                              </div>
+                          <td class="td_formating">
+                            <!-- -->
+                            <strong><span t-field="o.company_id"/></strong><br/>
+                            <span t-if="o.company_id.street" t-field="o.company_id.street"/>
+                            <span t-if="o.company_id.street2" t-field="o.company_id.street2"/><br/>
+                            <span t-if="o.company_id.city" t-field="o.company_id.city"/>-
+                            <span t-if="o.company_id.state_id" t-field="o.company_id.state_id"/><br/>
+                            <!-- <span t-if="o.company_id.zip" t-field="o.company_id.zip"/><br/> -->
+                            <span>Telephone:</span> <span t-if="o.company_id.phone" t-field="o.company_id.phone"/><br/>
+                            Email: <span t-if="o.company_id.email" t-field="o.company_id.email"/><br/>
+                            GSTIN : <span t-if="o.company_id.vat" t-field="o.company_id.vat"/><br/>
+                          </td>
+                          <td class="td_formating" style="padding:0px !important;">
+                            <!--Show delivery address here -->
+                            <strong><span>Consignee (Shipped To) : </span></strong><br/>
+                            <strong><span t-if="o.partner_id" t-field="o.partner_id"/></strong><br/>
+                            <span t-if="o.partner_id.street" t-field="o.partner_id.street"/><br/>
+                            <span t-if="o.partner_id.street2" t-field="o.partner_id.street2"/>
+                            <span t-if="o.partner_id.city" t-field="o.partner_id.city"/>-
+                            <span t-if="o.partner_id.state_id" t-field="o.partner_id.state_id"/><br/>
+                            Place of Supply/State code: <span t-if="o.partner_id.place_of_supply" t-field="o.partner_id.place_of_supply"/><br/>
+                            GSTIN : <span t-if="o.partner_id.partner_gstin" t-field="o.partner_id.partner_gstin"/><br/>
+                            <br/><br/><br/>
                           </td>
                         </tr>
-                    </table> -->
-                    <div class="col-xs-12 text-right page_bar" style="margin-left:100px;">
-                      <strong style="margin-right:70px;">For TECHNOMARK INDIA</strong>
-                      <br/>
-                      <br/>
-                      <br/>
-                      <strong style="margin-right:180px;">Authorised Signatory</strong>
-                    </div>
-                    <!-- tO ADD TERMS AND CONDITION HERE FROM DEFAULT SO SETTING-->
-                    <br/>
-                    <p t-if="o.note">
-                        <strong>Terms And Conditions</strong>
-                          <br/>
-                        <t t-esc="o.note"/>
-                    </p>
 
-                    <p t-if="o.backorder_id">
-                        This shipment is a backorder of <t t-esc="o.backorder_id.name"/>
-                    </p>
-                    <p>
-                        <t t-if="backorder">
-                            All items couldn't be shipped, the remaining ones will be shipped as soon as they become available.
-                        </t>
-                    </p>
 
-                    <!-- To add new fields on DC like transporter name, l r no, road permit no, etc..-->
-                    <div class="col-xs-12 text-left page_bar" style="margin-left:-10px; margin-top:200px;">
-                      <span><strong>Transporter Name</strong></span> : <span t-if="o.transporter_name_id" t-field="o.transporter_name_id.name"/><br/>
-                      <span><strong>L.R. No</strong></span> : <span t-if="o.lr_no" t-field="o.lr_no"/><br/>
-                      <span><strong>L.R. Date</strong></span> : <span t-if="o.lr_date" t-field="o.lr_date"/><br/>
-                      <span><strong>Vehicle Registration No.</strong></span> : <span t-if="o.vehical_registration_no" t-field="o.vehical_registration_no"/><br/>
-                      <span><strong>Basis Of Freight</strong></span> : <span t-if="o.basis_of_freight" t-field="o.basis_of_freight"/><br/>
-                      <span><strong>Party TIN</strong> : </span><span t-if="o.partner_id" t-field="o.partner_id.partner_vat_tin"/><br/>
-                      <span><strong>Road Permit No.</strong></span> : <span t-if="o.road_permit_no" t-field="o.road_permit_no"/><br/>
-                      <span><strong>Delivery Type</strong></span> : <span t-if="o.delivery_type" t-field="o.delivery_type"/><br/>
-                    </div>
+                        <tr>
+                          <td width="50%" colspan="2" style="padding:0px !important;" class="td_formating">
 
-                </div>
+                              <table class="table-condensed" t-if="not o.pack_operation_ids" width="100%">
+                                  <tr>
+                                      <th class="td_formating"><strong>Sr.No.</strong></th>
+                                      <th class="td_formating"><strong>Description</strong></th>
+                                      <th class="td_formating"><strong>Weight</strong></th>
+                                      <th class="td_formating"><strong>UOM</strong></th>
+                                      <th class="td_formating"><strong>HSN Code</strong></th>
+                                      <th t-if="any([pack_operation.state == 'done' for pack_operation in o.pack_operation_ids])" class="text-right td_formating">
+                                          <strong>Qty</strong>
+                                      </th>
+                                  </tr>
+                                  <tbody>
+                                    <t t-set="i" t-value="1"/>
+                                    <tr t-foreach="o.move_lines" t-as="move">
+                                        <td class="td_formating">
+                                          <span t-esc="i">
+                                            <t t-set="i" t-value="i+1"/>
+                                          </span>
+                                        </td>
+
+                                        <td class="td_formating"><span t-field="move.product_id"/></td>
+                                        <td t-if="((move.product_id.is_weight_applicable) and (move.product_id.weight>0))">
+                                          <span t-field="move.product_id.weight"/>
+                                        </td>
+                                        <td class="td_formating">
+                                            <span t-field="move.product_uom"/>
+                                        </td>
+                                        <td class="td_formating">
+                                            <span t-field="move.product_id.product_hsn_code"/>
+                                        </td>
+                                        <!--not to show now keep for future ref <td class="td_formating">
+                                            <span t-field="move.ordered_qty"/>
+                                        </td> -->
+                                        <td class="td_formating" t-if="any([pack_operation.state == 'done' for pack_operation in o.pack_operation_ids])">
+                                            <span t-if="pack_operation" t-field="pack_operation.qty_done"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <t t-set="backorder" t-value="False"/>
+
+                              <!-- Print DC lines-->
+                              <table class="table-condensed" t-if="o.pack_operation_ids" width="100%">
+                                  <t t-set="has_serial_number" t-value="o.pack_operation_ids.filtered('pack_lot_ids')" groups="stock.group_production_lot"/>
+                                    <tr>
+                                        <th class="td_formating"><strong>Sr.No.</strong></th>
+                                        <th class="td_formating"><strong>Description</strong></th>
+                                        <th class="td_formating"><strong>Weight</strong></th>
+                                        <th class="td_formating"><strong>UOM</strong></th>
+                                        <th class="td_formating"><strong>HSN Code</strong></th>
+                                        <th t-if="any([pack_operation.state == 'done' for pack_operation in o.pack_operation_ids])" class="text-right td_formating">
+                                                <strong>Qty</strong>
+                                        </th>
+                                    </tr>
+
+                                    <tbody>
+                                        <t t-set="i" t-value="1" />
+                                        <tr t-foreach="o.pack_operation_ids" t-as="pack_operation">
+                                          <td class="td_formating">
+                                            <!-- Logic for serial number printing on DC-->
+                                              <span t-esc="i"/>
+                                              <t t-set="i" t-value="i+1"/>
+                                          </td>
+                                          <t t-set="sale_order_line_data" t-value="o.get_sale_order_line_data(o.origin, pack_operation.product_id)"/>
+                                          <td class="td_formating">
+                                              <span t-field="pack_operation.product_id"/>
+                                              <!-- Print vore, valve , valve operation, pn, case file no, seril no, etc-->
+                                              <t t-if="o.picking_type_id.code=='outgoing' and o.origin">
+                                                  <span t-if="sale_order_line_data"><br/></span>
+                                                  <span t-if="sale_order_line_data">For:</span><span t-if="sale_order_line_data" t-field="sale_order_line_data.valve"/><span t-if="sale_order_line_data">,</span>
+                                                  <span t-if="sale_order_line_data" t-field="sale_order_line_data.valve_operation"/><span t-if="sale_order_line_data">,</span>
+                                                  PN:<span t-if="sale_order_line_data" t-field="sale_order_line_data.pn"/><br/>
+                                                  Case File: <span  t-if="sale_order_line_data" t-field="sale_order_line_data.case_file_number"/><br/>
+                                                  Bore: <span t-if="sale_order_line_data" t-field="sale_order_line_data.bore"/>
+                                                  <span t-if="sale_order_line_data"> mm</span>
+                                              </t>
+                                              <br/>
+                                              SR. NO(s) :
+                                              <t t-foreach="pack_operation.pack_lot_ids" t-as="packlot">
+                                                  <span t-field="packlot.lot_id"/>
+                                                  <t t-if="not packlot.lot_id">
+                                                      <span t-field="packlot.lot_name"/>
+                                                  </t>
+                                              </t>
+                                              <t t-if="not pack_operation.product_id and pack_operation.package_id">
+                                                  <span  t-field="pack_operation.package_id"/>
+                                              </t>
+                                          </td>
+                                          <!-- Add weight fields here-->
+                                          <td class="td_formating">
+                                              <t t-if="((pack_operation.product_id.is_weight_applicable) and (pack_operation.product_id.weight>0))">
+                                                  <span  t-if="(pack_operation.product_id.weight*pack_operation.qty_done)>0" t-esc="(pack_operation.product_id.weight*pack_operation.qty_done)"/>
+                                              </t>
+                                          </td>
+                                          <td class="td_formating">
+                                            <span t-if="pack_operation" t-field="pack_operation.product_uom_id"/>
+                                          </td>
+
+                                          <td class="td_formating">
+                                            <span t-field="pack_operation.product_id.product_hsn_code"/>
+                                          </td>
+
+                                          <!-- <td class="text-center">
+                                              <span t-if="pack_operation.package_id">:</span>
+                                              <span t-field="pack_operation.package_id"/>
+                                              <span t-field="pack_operation.ordered_qty"/>
+                                              <span t-field="pack_operation.product_uom_id"/>
+                                          </td>
+                                           -->
+
+                                          <td class="text-right td_formating" t-if="pack_operation.state == 'done'">
+                                            <t t-if="pack_operation.ordered_qty != pack_operation.qty_done">
+                                                <t t-set="backorder" t-value="True"/>
+                                            </t>
+                                            <span t-if="pack_operation" t-field="pack_operation.qty_done"/>
+                                         </td>
+
+                                        </tr>
+                                        <tr t-if="sum(l.qty_done for l in o.pack_operation_ids)>0.0">
+                                          <td class="td_formating"></td>
+                                          <td class="td_formating text-center" >
+                                            <strong>Total</strong>
+                                          </td>
+                                          <td class="text-right td_formating" t-if="o.state == 'done'" colspan="8">
+                                              <strong><t t-if="(l.qty_done for l in o.pack_operation_ids)" t-esc="'%.0f'%sum(l.qty_done for l in o.pack_operation_ids)"/></strong>
+                                          </td>
+                                        </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                            </tr>
+
+                            <tr>
+                              <td class="td_formating" colspan="6">
+                                <table width="100%" style="border: 0px !important;">
+                                  <t t-set="order_data" t-value="o.get_orders(o.origin)" />
+                                  <t t-set="so" t-value="o.get_so_data(o.origin)" />
+                                  <tr>
+                                    <td>
+                                      Terms of Delivery : <span t-esc="o.get_delivert_term(o.origin)"/> <br/>
+                                      Vehicle Registration No : <span t-esc="o.vehical_registration_no"/> <br/>
+                                      LR No : <span t-esc="o.lr_no"/> <br/>
+                                      Transporter : <span t-esc="o.transporter_name_id.name"/> <br/>
+                                      <t t-if="o.picking_type_id.code=='outgoing'">
+                                        E-Way Bill No :  <span t-esc="so.eway_bill_no"/> <br/>
+                                      </t>
+                                    </td>
+                                    <td>
+                                      <t t-if="o.picking_type_id.code=='outgoing'">
+                                        Insurance Terms : <span t-if="so" t-esc="so.insurance.name"/><br/>
+                                      </t>
+                                      Freight Terms : <span t-esc="o.basis_of_freight"/><br/>
+                                      Payment Terms : <span t-esc="order_data.payment_term_id.name"/><br/>
+                                      <t t-if="o.picking_type_id.code=='outgoing'">
+                                        Mode of delivery : <span t-if="so" t-esc="so.delivery_instructions.name"/><br/>
+                                        Mode of shipment : <span t-if="so" t-esc="so.mode_of_shipment.name"/><br/>
+                                      </t>
+                                  </td>
+                                  <td style="text-align:right;" width="30%">
+                                      <span>For</span> <strong><span t-if="o.company_id" t-esc="o.company_id.name"/></strong>
+                                      <br/>
+                                      <br/>
+                                      <br/><br/>
+                                      <span style="text-align:right;">  Authorised Signatory</span>
+                                  </td>
+
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+
+                    </table>
+
+              </div>
             </t>
-         </t>
+        </t>
     </template>
 
     <!-- Call template from here -->

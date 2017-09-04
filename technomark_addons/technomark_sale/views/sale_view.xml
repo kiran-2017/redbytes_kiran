@@ -16,10 +16,15 @@
                             <field name="delivery_instructions"/>
                             <field name="insurance"/>
                             <field name="warranty"/>
-                            <field name="special_remarks"/>
+                            <field name="mode_of_shipment"/>
+                            <field name="eway_bill_no"/>
                         </group>
                     </group>
                  </page>
+              </xpath>
+
+              <xpath expr="//field[@name='incoterm']" position="attributes">
+                  <attribute name="string">Terms of Delivery</attribute>
               </xpath>
 
               <!-- Add new fields to sale order line form view -->

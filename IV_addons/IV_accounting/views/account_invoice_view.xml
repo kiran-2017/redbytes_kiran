@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited Product Template view to add new fields for Delivery Information-->
+        <record id="invoice_form_inherited" model="ir.ui.view">
+            <field name="name">invoice.form.view.inherited</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+              <xpath expr="//field[@name='date_due']" position="after">
+                  <field name="buyer_order_no"/>
+                  <field name="tax_payable"/>
+                  <field name="destination"/>
+                  <field name="other_ref"/>
+              </xpath>
+            </field>
+        </record>
+
+        <record id="invoice_supplier_form_inherited" model="ir.ui.view">
+            <field name="name">invoice.supplier.form.inherited</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+              <xpath expr="//field[@name='payment_term_id']" position="after">
+                    <field name="buyer_order_no"/>
+                    <field name="destination"/>
+                    <field name="other_ref"/>
+              </xpath>
+
+              <!-- Add Approx Weight field in account invoice line -->
+              <!-- <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='quantity']" position="before">
+                  <field name="inv_actual_weight"/>
+              </xpath> -->
+            </field>
+        </record>
+</odoo>

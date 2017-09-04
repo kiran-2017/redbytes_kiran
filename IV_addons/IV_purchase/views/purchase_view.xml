@@ -9,6 +9,10 @@
               <!-- Add taxes/duties field on PO form-->
               <xpath expr="//field[@name='incoterm_id']" position="after">
                   <field name="taxes_duties"/>
+                  <field name="insurance_term"/>
+              </xpath>
+              <xpath expr="//field[@name='incoterm_id']" position="attributes">
+                  <attribute name="string">Terms of Delivery</attribute>
               </xpath>
 
               <!-- Add new fields on purchase order line tree view -->

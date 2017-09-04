@@ -5,20 +5,20 @@
   <template id="external_layout_header_po_inherited">
       <div class="header">
           <div class="row">
-              <div class="col-xs-3">
+              <!-- <div class="col-xs-3">
                   <img t-if="company.logo" t-att-src="'data:image/png;base64,%s' % company.logo" style="max-height: 45px;"/>
-              </div>
-              <div class="text-right col-xs-4 page_bar" style="margin-top:20px;">
-                <strong><span>PURCHASE ORDER</span></strong>
-              </div>
-              <div class="col-xs-5 text-right" style="margin-top:20px;" t-field="company.rml_header1"/>
+              </div> -->
+              <!-- <div class="text-center col-xs-12" style="margin-top:2px;">
+                <h1>PURCHASE ORDER</h1>
+              </div> -->
+              <!-- <div class="col-xs-5 text-right" style="margin-top:20px;" t-field="company.rml_header1"/> -->
           </div>
-          <div class="row zero_min_height">
+          <!-- <div class="row zero_min_height">
               <div class="col-xs-12">
                   <div style="border-bottom: 1px solid black;"></div>
               </div>
-          </div>
-          <div class="row">
+          </div> -->
+          <!-- <div class="row">
               <div class="col-xs-6" name="company_address">
                   <strong><span>BUYER:</span></strong>
                   <span t-field="company.partner_id"
@@ -27,9 +27,25 @@
                       VAT TIN: <span t-field="company.partner_id.company_id.vat"/><br/>
                       <span style="border-bottom: 1px solid black; display:inline-block;">CST TIN:</span> <span t-field="company.partner_id.company_id.cst"
                       style="border-bottom: 1px solid black; display:inline-block;"/><br/><br/><br/><br/>
-              </div>
+              </div> -->
 
-          </div>
+          <!-- </div> -->
+      </div>
+  </template>
+
+  <template id="external_layout_footer">
+      <div class="footer">
+        <div class="row">
+                <div class="col-xs-2 pull-left">
+                    <ul class="list-inline">
+                        <li>Page:</li>
+                        <li><span class="page"/></li>
+                        <li>/</li>
+                        <li><span class="topage"/></li>
+                    </ul>
+                </div>
+
+            </div>
       </div>
   </template>
 
@@ -48,7 +64,7 @@
       <!-- Added new header here-->
       <t t-call="technomark_purchase.external_layout_header_po_inherited" />
       <t t-raw="0" />
-      <t t-call="report.external_layout_footer" />
+      <t t-call="technomark_purchase.external_layout_footer" />
   </template>
 
 <template id="report_purchaseorder_document_inherited">
@@ -58,6 +74,14 @@
             <div>
               <!-- Add css here -->
               <style>
+
+                .tr_formating{
+                  border: 2px solid #000000;
+                }
+                .td_formating{
+                  border: 1px solid #000000;
+                }
+
                 #bottom-stuff {
                 padding: 0px 100px 200px 60px;
                 <!-- margin-left:10px; -->
@@ -65,208 +89,229 @@
               }
 
               #bottom{
-
                 position: absolute; bottom: 0px;
-}
+                }
+
+
               </style>
             </div>
-            <div class="oe_structure"/>
-            <div class="row">
-                <div class="col-xs-6">
-                  <br/>
-                  <br/>
-                  <br/>
-                    <strong>CONSIGNEE:</strong>
-                    <div t-if="o.dest_address_id">
-                        <div t-field="o.dest_address_id"
-                            t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'/>
+
+            <table class="table table-condensed mt48 page_bar" width="100%" style="border: 2px solid #000000; margin-top:2000px;">
+                <tr>
+                  <td class="td_formating" colspan="2" style="height:5% !important;">
+                    <center><h1>PURCHASE ORDER</h1></center>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td width="40%" class="td_formating">
+                    <div class="col-xs-3">
+                        <img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % o.company_id.logo" style="max-height: 50px;"/>
                     </div>
+                    <div class="col-xs-10 text-center" t-field="o.company_id.rml_header1"/>
+                  </td>
+                  <td width="60%" style="padding:0px !important;" class="td_formating">
+                      <table class="table-condensed" width="100%">
+                          <tr>
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                  <strong>PO No :</strong>
+                                  <span t-if="o.name" t-field="o.name"/>
+                                </td>
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                  <strong>Reference :</strong>
+                                  <span t-if="o.partner_ref" t-field="o.partner_ref"/>
+                                </td>
+                          </tr>
 
-                    <div t-if="not o.dest_address_id and o.picking_type_id and o.picking_type_id.warehouse_id">
-                        <span t-field="o.picking_type_id.warehouse_id.name"/>
-                        <div t-field="o.picking_type_id.warehouse_id.partner_id"
-                            t-options='{"widget": "contact", "fields": ["address", "phone", "fax"], "no_marker": True, "phone_icons": True}'/>
-                    </div>
-                </div>
-                <div class="col-xs-5 col-xs-offset-1">
-                    <div t-field="o.partner_id"
-                        t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'/>
-                        <p t-if="o.partner_id.vat">VAT: <span t-field="o.partner_id.vat"/></p>
-                </div>
-            </div>
+                          <tr>
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                  <strong>PO Date :</strong>
+                                  <span t-if="o.date_order" t-esc="o.date_converted(o.date_order)"/>
+                                </td>
 
-            <h2 t-if="o.state != 'draft'">Purchase Order Confirmation #<span t-field="o.name"/></h2>
-            <h2 t-if="o.state == 'draft'">Request for Quotation #<span t-field="o.name"/></h2>
+                          </tr>
+                      </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="40%" class="td_formating">
+                    <strong><span t-field="o.company_id"/></strong><br/>
+                    <span t-if="o.company_id.street" t-field="o.company_id.street"/>
+                    <span t-if="o.company_id.street2" t-field="o.company_id.street2"/><br/>
+                    <span t-if="o.company_id.city" t-field="o.company_id.city"/>-
+                    <span t-if="o.company_id.state_id" t-field="o.company_id.state_id"/><br/>
+                    Telephone:<span t-if="o.company_id.phone" t-field="o.company_id.phone"/><br/>
+                    Email: <span t-if="o.company_id.email" t-field="o.company_id.email"/><br/>
+                    GSTIN : <span t-if="o.company_id.vat" t-field="o.company_id.vat"/><br/>
+                  </td>
 
-            <div class="row mt32 mb32">
-                <div t-if="o.name" class="col-xs-3">
-                    <strong>Our Order Reference:</strong>
-                    <p t-field="o.name"/>
-                </div>
-                <div t-if="o.partner_ref" class="col-xs-3">
-                    <strong>Your Order Reference</strong>
-                    <p t-field="o.partner_ref"/>
-                </div>
-                <div t-if="o.date_order" class="col-xs-3">
-                    <strong>Order Date:</strong>
-                    <p t-if="o.date_order" t-esc="o.date_converted(o.date_order)"/>
-                    <!-- <p t-field="o.date_order"/> -->
-                </div>
-            </div>
+                  <td width="60%" style="padding:0px !important;" class="td_formating">
+                    <table class="table-condensed" width="100%">
+                      <tr>
+                          <td width="50%" class="td_formating" style="padding:0px !important;">
+                            <!-- <div class="col-xs-5 col-xs-offset-1"> -->
+                                <strong><span>Order on:</span></strong>
+                                <span t-field="o.partner_id"
+                                    t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'/>
+                                    <span t-if="o.partner_id.partner_gstin">GSTIN: <span t-field="o.partner_id.partner_gstin"/></span>
+                            <!-- </div> -->
+                        </td>
+                        <td width="50%" class="td_formating" style="padding:0px !important;">
+                          <!--Show delivery address here -->
+                          <strong><span>Consignee (Shipped To) : </span></strong><br/>
+                          <span t-field="o.company_id"/><br/>
+                          <span t-if="o.company_id.street" t-field="o.company_id.street"/>
+                          <span t-if="o.company_id.street2" t-field="o.company_id.street2"/><br/>
+                          <span t-if="o.company_id.city" t-field="o.company_id.city"/>-
+                          <span t-if="o.company_id.state_id" t-field="o.company_id.state_id"/><br/>
+                          Place of Supply/State code : <span t-if="o.company_id.partner_id.place_of_supply" t-field="o.company_id.partner_id.place_of_supply"/><br/>
+                          GSTIN : <span t-if="o.company_id.vat" t-field="o.company_id.vat"/><br/>
 
-            <table class="table table-condensed">
-                <thead>
-                    <tr>
-                        <th><strong>Sr.No</strong></th>
-                        <th><strong>Description</strong></th>
-                        <th><strong>Material</strong></th>
-                        <!-- <th><strong>Taxes</strong></th> -->
-                        <th class="text-center"><strong>Date Req.</strong></th>
-                        <th class="text-center"><strong>Approx Weight(kg)</strong></th>
-                        <th class="text-right"><strong>Qty</strong></th>
-                        <th class="text-right"><strong>Rate</strong></th>
-                        <th class="text-right"><strong>Per</strong></th>
-                        <th class="text-right"><strong>Amount</strong></th>
-                        <th><strong>Taxes</strong></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr t-foreach="o.order_line" t-as="line">
-                        <td>
-                            <span t-field="line.serial_no"/>
+                          <!-- <span t-if="o.partner_id" t-field="o.partner_id"/><br/>
+                          <span t-if="o.partner_id.street" t-field="o.partner_id.street"/><br/>
+                          <span t-if="o.partner_id.street2" t-field="o.partner_id.street2"/>
+                          <span t-if="o.partner_id.city" t-field="o.partner_id.city"/>-
+                          <span t-if="o.partner_id.state_id" t-field="o.partner_id.state_id"/><br/>
+                          Place of Supply/State code: <span t-if="o.partner_id.place_of_supply" t-field="o.partner_id.place_of_supply"/><br/>
+                          GSTIN : <span t-if="o.partner_id.partner_gstin" t-field="o.partner_id.partner_gstin"/><br/> -->
+                          <br/><br/><br/>
                         </td>
-                        <td>
-                            <span t-field="line.name"/>
-                        </td>
-                        <td>
-                            <span t-field="line.material"/>
-                        </td>
-                        <!-- <td>
-                            <span t-esc="', '.join(map(lambda x: x.name, line.taxes_id))"/>
-                        </td> -->
-                        <td class="text-center">
-                            <span t-if="line.date_planned" t-esc="line.date_converted(line.date_planned)"/>
-                            <!-- <span t-field="line.date_planned"/> -->
-                        </td>
-                        <td class="text-center">
-                            <span t-if="line.approx_weight>0" t-field="line.approx_weight"/>
-                        </td>
-                        <td class="text-right">
-                            <span t-field="line.product_qty"/>
-                            <span t-field="line.product_uom.name" groups="product.group_uom"/>
-                        </td>
-                        <td class="text-right">
-                            <span t-field="line.price_unit"/>
-                        </td>
-                        <td class="text-right">
-                            <span t-field="line.product_uom.name"/>
-                        </td>
-                        <td class="text-right">
-                            <span t-field="line.price_subtotal"
-                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                        </td>
-                        <td>
-                            <span t-esc="', '.join(map(lambda x: x.name, line.taxes_id))"/>
-                        </td>
-                    </tr>
-                </tbody>
+
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td width="50%" colspan="2" style="padding:0px !important;" class="td_formating">
+
+                      <table class="table-condensed" width="100%">
+                          <tr>
+                              <th class="td_formating" rowspan="2"><strong>Sr.No</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>Description</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>Material</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>Date Req.</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>Approx Weight(kg)</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>UOM</strong></th>
+                              <th class="td_formating" colspan="3">
+                                <center><strong>Taxable Value</strong></center>
+                              </th>
+                          </tr>
+                          <tr>
+                            <th class="td_formating"><strong>Per Unit</strong></th>
+                            <th class="td_formating"><strong>Qty</strong></th>
+                            <th class="td_formating"><strong>Total</strong></th>
+                            <!-- <th><strong>Taxes</strong></th> -->
+                          </tr>
+
+                          <tbody>
+                            <tr t-foreach="o.order_line" t-as="line">
+                                <td class="td_formating">
+                                    <span t-field="line.serial_no"/>
+                                </td>
+                                <td class="td_formating">
+                                    <span t-field="line.name"/>
+                                </td>
+                                <td class="td_formating">
+                                    <span t-field="line.material"/>
+                                </td>
+
+                                <td class="td_formating">
+                                  <span t-if="line.date_planned" t-esc="line.date_converted(line.date_planned)"/>
+                                <!-- <span t-field="line.date_planned"/> -->
+                                </td>
+                                <td class="td_formating">
+                                    <span t-if="line.approx_weight>0" t-field="line.approx_weight"/>
+                                </td>
+
+                                <td class="td_formating">
+                                    <!-- <span t-field="line.product_qty"/> -->
+                                    <span t-field="line.product_uom.name"/>
+                                </td>
+                                <td class="td_formating">
+                                    <span t-field="line.price_unit"/>
+                                </td>
+
+                                <td class="td_formating">
+                                    <span t-field="line.product_qty"/>
+                                    <!-- <span t-field="line.product_uom.name" groups="product.group_uom"/> -->
+                                </td>
+                                <td class="td_formating">
+                                    <span t-field="line.price_subtotal"
+                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+
+                           </tr>
+
+                           <tr>
+                             <td class="td_formating"></td>
+                             <td class="td_formating text-center" >
+                               <strong>Total</strong>
+                             </td>
+                             <td class="td_formating text-right" colspan="6">
+                                 <!-- To show only integer value on report for sum %.0f'%-->
+                                 <strong><t t-esc="'%.0f'%sum(l.product_qty for l in o.order_line)"/></strong>
+                             </td>
+                             <td class="td_formating text-right" colspan="8">
+                               <!-- <span t-field="o.amount_total" only show untaxed values keep for future
+                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                             </td> -->
+                             <strong><span t-field="o.amount_untaxed"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></strong>
+                           </td>
+                           </tr>
+
+                           <tr t-if="o.amount_untaxed">
+                               <td colspan="6">
+                                 Amount in words<br/>
+                                 <strong>Indian Rupees <span t-if="o.amount_untaxed" t-esc="o.amount_in_words(o.amount_untaxed)"/> only</strong>
+                               </td>
+                           </tr>
+                           <tr t-if="not o.amount_untaxed">
+                               <td colspan="6">
+                                 Amount in words<br/>
+                                 <strong>Indian Rupees</strong> <span t-if="not o.amount_untaxed" t-esc="o.amount_in_words(o.amount_untaxed)"/> <strong>Only</strong>
+                               </td>
+                           </tr>
+
+                           <tr>
+                               <td colspan="4" class="td_formating">
+                                 <span>GST : As Applicable</span><br/>
+                                 Terms of Delivery : <span t-esc="o.incoterm_id.name"/> <br/>
+                                 <br/>
+                               </td>
+                               <td colspan="5" class="td_formating">
+                                 <span>Insurance Terms : <span t-esc="o.insurance_term.name"/> </span><br/>
+                                 Freight Terms : <span t-esc="o.freight_term"/> <br/>
+                                 Payment Terms. :  <span t-esc="o.payment_term_id.name"/> <br/>
+                               </td>
+                           </tr>
+
+                           <tr>
+                               <td colspan="9" class="td_formating">
+                                 <strong>Special Remarks :</strong>
+                                 <p t-if="o.notes" t-field="o.notes"/>
+                                 <div class="oe_structure"/>
+                               </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="9" class="td_formating text-right">
+                                  <span>For</span> <strong><span t-if="o.company_id" t-esc="o.company_id.name"/></strong>
+                                  <br/>
+                                  <br/>
+                                  <br/>
+                                  <span style="text-align:right;">  Authorised Signatory</span>
+                                </td>
+                             </tr>
+                        </tbody>
+                    </table>
+                  </td>
+                </tr>
+
             </table>
 
-            <div class="row">
-                <div class="col-xs-12">
-                  <div class="col-xs-7">
-                    <span t-if="o.notes"  style="margin-left:-20px;">Note:</span>
-                    <p  style="margin-left:-20px;" t-field="o.notes"/>
-                    <div class="oe_structure"/>
-                    <br/><br/><br/>
-                    <div  style="margin-left:-20px;">
-                      <div class="oe_structure"/>
-                      <table class="table-condensed">
-                        <tr class="">
-                            <td class="text-left" t-if="o.incoterm_id">
-                              FREIGHT : <span t-if="o.incoterm_id" t-esc="o.incoterm_id.name"/><br/>
-                            </td>
-                            <!-- <td class="text-left" t-if="not o.incoterm_id">
-                              FREIGHT : <span t-if="not o.incoterm_id">DOOR DELIVERY</span><br/>
-                            </td> -->
-                        </tr>
-                        <tr class="">
-                            <td class="text-left">
-                                PAYMENT TERMS :  <span t-if="o.payment_term_id" t-esc="o.payment_term_id.name"/><br/>
-                            </td>
-                        </tr>
-                        <tr class="">
-                            <td class="text-left">
-                                TAXES/DUTIES :   <span t-field="o.taxes_duties"/><br/>
-                            </td>
-                        </tr>
-                      </table>
-                    </div>
-                  </div>
 
-                  <div class="col-xs-5">
-                    <!-- <br/><br/><br/> -->
-                    <table class="table table-condensed">
-                        <tr class="border-black">
-                            <td><strong>Total Without Taxes</strong></td>
-                            <td class="text-right">
-                                <span t-field="o.amount_untaxed"
-                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Taxes</td>
-                            <td class="text-right">
-                                <span t-field="o.amount_tax"
-                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                            </td>
-                        </tr>
-                        <tr class="border-black">
-                            <td><strong>Total</strong></td>
-                            <td class="text-right">
-                                <span t-field="o.amount_total"
-                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                            </td>
-                        </tr>
-                        <tr class="border-black"><!-- style="font-size:75%;"-->
-                            <td colspan="2">
-                              <strong>Rupees
-                              <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> only</strong>
-                            </td>
-                            <!-- <td class="text-left">
-                                <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> <strong>Only</strong>
-                            </td> -->
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            <!-- <div class="col-xs-8 page_bar" style="margin-left:15px; margin-top:10px; border:1px thin black;">
-              <strong>Rupees</strong>
-              <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> <strong>Only</strong>
-            </div> -->
-            <div>
-              <div style="margin-left:15px;"><!--margin-top:420px;-->
-                <span>
-                  <br/> <!-- To add one line space bofore company name-->
-                  <span><strong>For </strong></span> <strong><span t-if="o.company_id" t-esc="o.company_id.name"/></strong>
-                  <!-- <strong>For TECHNOMARK INDIA</strong> -->
-                  <br/>
-                  <br/>
-                  <br/>
-                  <strong>(PARTNER)</strong>
-                </span>
-              </div>
-            <!-- <div class="col-xs-8 page_bar" style="margin-left:15px; margin-top:100px; display:block !important;">
-              <span>
-                <strong>For TECHNOMARK INDIA</strong>
-                <br/>
-                <br/>
-                <br/>
-                <strong>(PARTNER)</strong>
-              </span>
-            </div> -->
-          </div>
-        </div>
       </div>
     </t>
 </template>

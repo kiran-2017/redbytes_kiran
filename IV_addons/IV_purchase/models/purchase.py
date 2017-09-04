@@ -21,9 +21,39 @@ class PurchaseOrder(models.Model):
     """
         Inherit class for priting new fields on PO
     """
+    _default_notes_val = """
+    <For any Product belonging to Category 'Casting', set the below text to appear in the Terms & Conditions>
+    1. TAX INVOICE (Original for Recipient and Duplicate for Transporter alongwith Delivery challan ( Original and Duplicate)
+    2. Casting must be properly grinded and must be free from blow holes, mismatches with that of casting drawings.
+    3. Thickness of casting must be homogeneous as per drawings and shall withstand hydrostatic pressure.
+    4. Test valve of each heat shall be sent along with the castings bearing unique heat no.
+    5. Heat no.,valve size, IVC Monogram and year of produce must be cast on all major castings.
+    6. Patterns delivered to your foundry are absolute property of Indian Valve Pvt. Ltd., Nashik and the foundry has no right to take out any castings from the pattern, unless, a written order signed by the Director of the company is received by you.
+    <For Products belonging to ANY other Category, set the below text to appear in the Terms & Conditions>
+    1. TAX INVOICE (Original for Recipient and Duplicate for Transporter alongwith Delivery challan ( Original and Duplicate)
+    """
+
     ## Add new fields to print on PO as taxes/duties
     taxes_duties = fields.Char(string="TAXES/DUTIES", default="As Applicable")
+    insurance_term = fields.Many2one('po.insurance.term',string="Insurance Terms")
+    notes = fields.Text('Terms and Conditions', default=_default_notes_val)
 
+    @api.model
+    def date_converted(self, date):
+        """ This function convert date %Y-%m-%d %H:%M:%S to  %m/%d/%Y remove time from date"""
+        import datetime
+        if date:
+            converted_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
+            return converted_date
+
+    @api.model
+    def amount_in_words(self, total):
+        """ This function convert amount in words format on PO qweb report"""
+        if not total:
+            return "Zero"
+        if total:
+            amount_in_words = num2words(total)
+            return amount_in_words.title()
 
 
 class PurchaseOrderLine(models.Model):
@@ -50,6 +80,13 @@ class PurchaseOrderLine(models.Model):
         if res and self.product_qty == 0:
             raise UserError(_('You cannot enter product quantity as Zero'))
         return res
+
+    @api.model
+    def date_converted(self, date):
+        """ This function convert date %Y-%m-%d %H:%M:%S to  %m/%d/%Y remove time from date"""
+        if date:
+            converted_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
+            return converted_date
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -106,3 +143,8 @@ class PurchaseOrderLine(models.Model):
     serial_no = fields.Integer(compute='_get_po_line_seq', string="Sr.No", default=1)
     material = fields.Char(string="Material")
     approx_weight = fields.Float(string="Approx Weight(kg)")
+
+class PoInsuranceTerm(models.Model):
+    _name = 'po.insurance.term'
+    ## Add new object for InsuranceTerm data entry
+    name = fields.Char(string="Name")

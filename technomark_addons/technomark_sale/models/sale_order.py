@@ -11,10 +11,11 @@ class SaleOrder(models.Model):
 
     ## Add new fields print on DC report
     delivery_date = fields.Date(string="Delivery Date")
-    delivery_instructions = fields.Text(string="Delivery Instructions")
-    insurance = fields.Text(string="Insurance")
+    delivery_instructions = fields.Many2one('delivery.mode', string="Mode of delivery")
+    insurance = fields.Many2one('insurance.term', string="Insurance Term")
     warranty = fields.Integer(string="Warranty(Months)", default=12)
-    special_remarks = fields.Text(string="Special Remarks")
+    mode_of_shipment = fields.Many2one('shipment.mode', string="Mode Of Shipment")
+    eway_bill_no = fields.Char(string="E-Way Bill No")
 
     @api.multi
     def print_quotation(self):
@@ -23,7 +24,6 @@ class SaleOrder(models.Model):
         report = self.env['report'].get_action(self, 'sale.report_saleorder')
         report.update({'print_report_name':'Quotation_Order'+ ' ' + self.name})
         return report
-
 
 
 
@@ -61,3 +61,26 @@ class SaleOrderLine(models.Model):
     pro_delivery_date = fields.Date(string="Delivery Date")
     ## Inherit this fields to remove decimal point from it
     # product_uom_qty = fields.Integer(string='Quantity', default=1)
+
+
+class InsuranceTerm(models.Model):
+        _name = 'insurance.term'
+        '''
+            Create new object for Insurance Term
+        '''
+        name = fields.Char(string="Name")
+
+
+class ModeOfDelivery(models.Model):
+        _name = 'delivery.mode'
+        '''
+            Create new object for Mode of delivery
+        '''
+        name = fields.Char(string="Name")
+
+class ModeOfShipment(models.Model):
+        _name = 'shipment.mode'
+        '''
+            Create new object for Mode of delivery
+        '''
+        name = fields.Char(string="Name")

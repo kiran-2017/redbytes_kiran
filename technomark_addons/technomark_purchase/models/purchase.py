@@ -21,10 +21,36 @@ class PurchaseOrder(models.Model):
     """
         Inherit class for priting new fields on PO
     """
+    _default_notes_val = """
+    <For any Product belonging to Category 'Casting', set the below text to appear in the Terms & Conditions>
+    1. TAX INVOICE (Original for Recipient and Duplicate for Transporter alongwith Delivery challan ( Original and Duplicate)
+    2. Casting must be properly grinded and must be free from blow holes, mismatches with that of casting drawings.
+    3. Thickness of casting must be homogeneous as per drawings and shall withstand hydrostatic pressure.
+    4. Test valve of each heat shall be sent along with the castings bearing unique heat no.
+    5. Heat no.,valve size, IVC Monogram and year of produce must be cast on all major castings.
+    6. Patterns delivered to your foundry are absolute property of Indian Valve Pvt. Ltd., Nashik and the foundry has no right to take out any castings from the pattern, unless, a written order signed by the Director of the company is received by you.
+    <For Products belonging to ANY other Category, set the below text to appear in the Terms & Conditions>
+    1. TAX INVOICE (Original for Recipient and Duplicate for Transporter alongwith Delivery challan ( Original and Duplicate)
+    """
     ## Add new fields to print on PO as taxes/duties
     taxes_duties = fields.Char(string="TAXES/DUTIES", default="As Applicable")
     ## Inherit this field to pass default value as "DOOR DELIVERY" on PO
     incoterm_id = fields.Many2one('stock.incoterms', 'Incoterm', states={'done': [('readonly', True)]}, help="International Commercial Terms are a series of predefined commercial terms used in international transactions.", default=lambda self: self.env['stock.incoterms'].search([('name', '=', 'DOOR DELIVERY')]))
+    insurance_term = fields.Many2one('po.insurance.term',string="Insurance Terms")
+    freight_term = fields.Selection([('To Pay', 'To Pay'), ('Paid', 'Paid')], 'Freight Terms', default='')
+    ## Inherit notes field to set default text on po
+    notes = fields.Text('Terms and Conditions', default=_default_notes_val)
+
+
+    @api.model
+    def amount_in_words(self, total):
+        """ This function convert amount in words format on PO qweb report"""
+        if not total:
+            return "Zero"
+        if total:
+            amount_in_words = num2words(total)
+            return amount_in_words.title()
+
 
     @api.multi
     def print_quotation(self):
@@ -198,3 +224,9 @@ class PurchaseOrderLine(models.Model):
     approx_weight = fields.Float(string="Approx Weight(kg)")
     ## Inherit product_qty to make it Integer to remove all deciaml points
     # product_qty = fields.Integer(string='Quantity', required=True)
+
+
+class PoInsuranceTerm(models.Model):
+    _name = 'po.insurance.term'
+    ## Add new object for InsuranceTerm data entry
+    name = fields.Char(string="Name")

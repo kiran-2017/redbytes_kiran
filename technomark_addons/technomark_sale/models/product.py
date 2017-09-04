@@ -9,20 +9,20 @@ class ProductTemplate(models.Model):
     _inherit = "product.template"
 
 
-    @api.one
-    @api.constrains('product_hsn_code')
-    def _check_product_hsn_code(self):
-        """
-            Apply constrains for HSN code to accept only
-            unique values
-        """
-        hsn_code_list = []
-        product_template_ids = self.search([('id','!=', self.id)])
-        for product_template_id in product_template_ids:
-            if product_template_id.product_hsn_code:
-                hsn_code_list.append(product_template_id.product_hsn_code)
-        if self.product_hsn_code in hsn_code_list:
-            raise ValidationError(_('A HSN Code can\'t have duplicate values.'))
+    # @api.one
+    # @api.constrains('product_hsn_code')
+    # def _check_product_hsn_code(self):
+    #     """
+    #         Apply constrains for HSN code to accept only
+    #         unique values
+    #     """
+    #     hsn_code_list = []
+    #     product_template_ids = self.search([('id','!=', self.id)])
+    #     for product_template_id in product_template_ids:
+    #         if product_template_id.product_hsn_code:
+    #             hsn_code_list.append(product_template_id.product_hsn_code)
+    #     if self.product_hsn_code in hsn_code_list:
+    #         raise ValidationError(_('A HSN Code can\'t have duplicate values.'))
 
 
     ## Add HSN code field on product template form

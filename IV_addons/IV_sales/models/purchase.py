@@ -36,11 +36,11 @@ class PurchaseOrder(models.Model):
         res = super(PurchaseOrder, self).button_confirm()
         ## Logic to Raw material Lines
 
-        po_sent_id = po_sent_obj.search([('purchase_id','=',self.id)])
-        print po_sent_id,'----po_sent_id'
-        if po_sent_id:
-            picking_ids = self._get_incoming_shipment()
-            print picking_ids,'---------picking_ids'
+        po_sent_ids = po_sent_obj.search([('purchase_id','=',self.id)])
+        picking_ids = self._get_incoming_shipment()
+        print picking_ids,'---------picking_ids'
+        print po_sent_ids,'----po_sent_id'
+        for po_sent_id in po_sent_ids:
             for pick_id in picking_ids:
                 print po_sent_id.sale_order_id,'------po_sent_id.sale_order_id'
                 picking_vals = {

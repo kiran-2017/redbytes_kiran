@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="1">
+
+    <record id="sequence_revise_so" model="ir.sequence">
+        <field name="name">Revise Sequence</field>
+        <field name="code">sale.order.revision</field>
+        <field name="prefix">#</field>
+        <field name="suffix"></field>
+        <field name="padding">0</field>
+        <field eval="1" name="number_increment"/>
+        <field eval="1" name="number_next_actual"/>
+    </record>
+
+  </data>
+</openerp>

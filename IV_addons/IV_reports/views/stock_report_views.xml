@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Add new Menu-->
+        <report
+            string="Delivery Challan"
+            id="action_report_delivery_inherited"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="IV_reports.report_deliveryslip_inherited"
+            file="IV_reports.report_deliveryslip_inherited"
+        />
+
+        <report
+            string="Incoming Shipment"
+            id="incoming_shipment_for_sale"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="IV_reports.report_incoming_shipment"
+            file="IV_reports.report_incoming_shipment"
+        />
+
+        <!-- Inherit Delivery SLip menu to hide default DS Menu-->
+        <report
+            string="Delivery Slip"
+            id="stock.action_report_delivery"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="stock.report_deliveryslip"
+            file="stock.report_deliveryslip"
+            menu="False"
+        />
+
+      </data>
+</odoo>
+<!--
+Need to set report format on server
+
+FOR DC- ('Delivery Challan'+ '  ' + str(object.name).replace('_','/')+'.pdf')
+Tax Invoice ('Tax Invoice'+ '  ' + str(object.number or "").replace('_','/')+'.pdf')
+Quotation_order  ('Ouotation_Order'+ '  ' + str(object.name).replace('_','/')+'.pdf')
+Request for Quotation ('Request For Ouotation'+ '  ' + str(object.name).replace('_','/')+'.pdf')
+purchase order ('Purchase Order'+ '  ' + (object.name)+'.pdf')
+-->

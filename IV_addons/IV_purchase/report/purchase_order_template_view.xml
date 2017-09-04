@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Inherit external Layout Header -->
+  <template id="external_layout_header_po_inherited">
+      <div class="header">
+          <div class="row">
+              <!-- <div class="col-xs-3">
+                  <img t-if="company.logo" t-att-src="'data:image/png;base64,%s' % company.logo" style="max-height: 45px;"/>
+              </div> -->
+              <!-- <div class="text-center col-xs-12" style="margin-top:2px;">
+                <h1>PURCHASE ORDER</h1>
+              </div> -->
+              <!-- <div class="col-xs-5 text-right" style="margin-top:20px;" t-field="company.rml_header1"/> -->
+          </div>
+          <!-- <div class="row zero_min_height">
+              <div class="col-xs-12">
+                  <div style="border-bottom: 1px solid black;"></div>
+              </div>
+          </div> -->
+          <!-- <div class="row">
+              <div class="col-xs-6" name="company_address">
+                  <strong><span>BUYER:</span></strong>
+                  <span t-field="company.partner_id"
+                      t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'
+                      />
+                      VAT TIN: <span t-field="company.partner_id.company_id.vat"/><br/>
+                      <span style="border-bottom: 1px solid black; display:inline-block;">CST TIN:</span> <span t-field="company.partner_id.company_id.cst"
+                      style="border-bottom: 1px solid black; display:inline-block;"/><br/><br/><br/><br/>
+              </div> -->
+
+          <!-- </div> -->
+      </div>
+  </template>
+
+  <template id="external_layout_footer">
+      <div class="footer">
+        <div class="row">
+                <div class="col-xs-2 pull-left">
+                    <ul class="list-inline">
+                        <li>Page:</li>
+                        <li><span class="page"/></li>
+                        <li>/</li>
+                        <li><span class="topage"/></li>
+                    </ul>
+                </div>
+
+            </div>
+      </div>
+  </template>
+
+<!-- Inherit external Layout -->
+  <template id="external_layout">
+      <!-- Multicompany -->
+      <t t-if="not o and doc">
+          <t t-set="o" t-value="doc"/>
+      </t>
+      <t t-if="o and 'company_id' in o">
+          <t t-set="company" t-value="o.company_id"></t>
+      </t>
+      <t t-if="not o or not 'company_id' in o">
+          <t t-set="company" t-value="res_company"></t>
+      </t>
+      <!-- Added new header here-->
+      <t t-call="IV_purchase.external_layout_header_po_inherited" />
+      <t t-raw="0" />
+      <t t-call="IV_purchase.external_layout_footer" />
+  </template>
+
+<template id="report_purchaseorder_document_inherited">
+    <t t-call="IV_purchase.external_layout">
+        <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
+        <div class="page">
+            <div>
+              <!-- Add css here -->
+              <style>
+
+                .tr_formating{
+                  border: 2px solid #000000;
+                }
+                .td_formating{
+                  border: 1px solid #000000;
+                }
+
+                #bottom-stuff {
+                padding: 0px 100px 200px 60px;
+                <!-- margin-left:10px; -->
+                position: relative;
+              }
+
+              #bottom{
+                position: absolute; bottom: 0px;
+                }
+
+
+              </style>
+            </div>
+
+            <table class="table table-condensed mt48 page_bar" width="100%" style="border: 2px solid #000000; margin-top:2000px;">
+                <tr>
+                  <td class="td_formating" colspan="2" style="height:5% !important;">
+                    <center><h1>PURCHASE ORDER</h1></center>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="40%" class="td_formating">
+                    <div class="col-xs-3">
+                        <img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % o.company_id.logo" style="max-height: 50px;"/>
+                    </div>
+                    <div class="col-xs-10 text-center" t-field="o.company_id.rml_header1"/>
+                  </td>
+                  <td width="60%" style="padding:0px !important;" class="td_formating">
+                      <table class="table-condensed" width="100%">
+                          <tr>
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                  <strong>PO No :</strong>
+                                  <span t-if="o.name" t-field="o.name"/>
+                                </td>
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                  <strong>Reference :</strong>
+                                  <span t-if="o.partner_ref" t-field="o.partner_ref"/>
+                                </td>
+                          </tr>
+
+                          <tr>
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                  <strong>PO Date :</strong>
+                                  <span t-if="o.date_order" t-esc="o.date_converted(o.date_order)"/>
+                                </td>
+
+                          </tr>
+                      </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="40%" class="td_formating">
+                    <strong><span t-field="o.company_id"/></strong><br/>
+                    <span t-if="o.company_id.street" t-field="o.company_id.street"/>
+                    <span t-if="o.company_id.street2" t-field="o.company_id.street2"/><br/>
+                    <span t-if="o.company_id.city" t-field="o.company_id.city"/>-
+                    <span t-if="o.company_id.state_id" t-field="o.company_id.state_id"/><br/>
+                    Telephone <span t-if="o.company_id.phone" t-field="o.company_id.phone"/><br/>
+                    Email: <span t-if="o.company_id.email" t-field="o.company_id.email"/><br/>
+                    GSTIN : <span t-if="o.company_id.vat" t-field="o.company_id.vat"/><br/>
+                  </td>
+
+                  <td width="60%" style="padding:0px !important;" class="td_formating">
+                    <table class="table-condensed" width="100%">
+                      <tr>
+                          <td width="50%" class="td_formating" style="padding:0px !important;">
+                            <!-- <div class="col-xs-5 col-xs-offset-1"> -->
+                                <strong><span>Order on:</span></strong>
+                                <span t-field="o.partner_id"
+                                    t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'/>
+                                    <span t-if="o.partner_id.partner_gstin">GSTIN: <span t-field="o.partner_id.partner_gstin"/></span>
+                            <!-- </div> -->
+                        </td>
+                        <td width="50%" class="td_formating" style="padding:0px !important;">
+                          <!--Show delivery address here -->
+                          <strong><span>Consignee (Shipped To) : </span></strong><br/>
+                          <span t-field="o.company_id"/><br/>
+                          <span t-if="o.company_id.street" t-field="o.company_id.street"/>
+                          <span t-if="o.company_id.street2" t-field="o.company_id.street2"/><br/>
+                          <span t-if="o.company_id.city" t-field="o.company_id.city"/>-
+                          <span t-if="o.company_id.state_id" t-field="o.company_id.state_id"/><br/>
+                          Place of Supply/State code: <span t-if="o.company_id.partner_id.place_of_supply" t-field="o.company_id.partner_id.place_of_supply"/><br/>
+                          GSTIN : <span t-if="o.company_id.vat" t-field="o.company_id.vat"/><br/>
+
+                          <!-- <span t-if="o.partner_id" t-field="o.partner_id"/><br/>
+                          <span t-if="o.partner_id.street" t-field="o.partner_id.street"/><br/>
+                          <span t-if="o.partner_id.street2" t-field="o.partner_id.street2"/>
+                          <span t-if="o.partner_id.city" t-field="o.partner_id.city"/>-
+                          <span t-if="o.partner_id.state_id" t-field="o.partner_id.state_id"/><br/>
+                          Place of Supply/State code: <span t-if="o.partner_id.place_of_supply" t-field="o.partner_id.place_of_supply"/><br/>
+                          GSTIN : <span t-if="o.partner_id.partner_gstin" t-field="o.partner_id.partner_gstin"/><br/> -->
+                          <br/><br/><br/>
+                        </td>
+
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td width="50%" colspan="2" style="padding:0px !important;" class="td_formating">
+
+                      <table class="table-condensed" width="100%">
+                          <tr>
+                              <th class="td_formating" rowspan="2"><strong>Sr.No</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>Description</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>Material</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>Date Req.</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>Approx Weight(kg)</strong></th>
+                              <th class="td_formating" rowspan="2"><strong>UOM</strong></th>
+                              <th class="td_formating" colspan="3">
+                                <center><strong>Taxable Value</strong></center>
+                              </th>
+                          </tr>
+                          <tr>
+                            <th class="td_formating"><strong>Per Unit</strong></th>
+                            <th class="td_formating"><strong>Qty</strong></th>
+                            <th class="td_formating"><strong>Total</strong></th>
+                            <!-- <th><strong>Taxes</strong></th> -->
+                          </tr>
+
+                          <tbody>
+                            <tr t-foreach="o.order_line" t-as="line">
+                                <td class="td_formating">
+                                    <span t-field="line.serial_no"/>
+                                </td>
+                                <td class="td_formating">
+                                    <span t-field="line.name"/>
+                                </td>
+                                <td class="td_formating">
+                                    <span t-field="line.material"/>
+                                </td>
+
+                                <td class="td_formating">
+                                  <span t-if="line.date_planned" t-esc="line.date_converted(line.date_planned)"/>
+                                <!-- <span t-field="line.date_planned"/> -->
+                                </td>
+                                <td class="td_formating">
+                                    <span t-if="line.approx_weight>0" t-field="line.approx_weight"/>
+                                </td>
+
+                                <td class="td_formating">
+                                    <!-- <span t-field="line.product_qty"/> -->
+                                    <span t-field="line.product_uom.name"/>
+                                </td>
+                                <td class="td_formating">
+                                    <span t-field="line.price_unit"/>
+                                </td>
+
+                                <td class="td_formating">
+                                    <span t-field="line.product_qty"/>
+                                    <!-- <span t-field="line.product_uom.name" groups="product.group_uom"/> -->
+                                </td>
+                                <td class="td_formating">
+                                    <span t-field="line.price_subtotal"
+                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+
+                           </tr>
+
+                           <tr>
+                             <td class="td_formating"></td>
+                             <td class="td_formating text-center" >
+                               <strong>Total</strong>
+                             </td>
+                             <td class="td_formating text-right" colspan="6">
+                                 <!-- To show only integer value on report for sum %.0f'%-->
+                                 <strong><t t-esc="'%.0f'%sum(l.product_qty for l in o.order_line)"/></strong>
+                             </td>
+                             <td class="td_formating text-right" colspan="8">
+                               <!-- <span t-field="o.amount_total" only show untaxed values keep for future
+                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                             </td> -->
+                             <strong><span t-field="o.amount_untaxed"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></strong>
+                           </td>
+                           </tr>
+
+                           <tr t-if="o.amount_untaxed">
+                               <td colspan="6">
+                                 Amount in words<br/>
+                                 <strong>Indian Rupees <span t-if="o.amount_untaxed" t-esc="o.amount_in_words(o.amount_untaxed)"/> only</strong>
+                               </td>
+                           </tr>
+                           <tr t-if="not o.amount_untaxed">
+                               <td colspan="6">
+                                 Amount in words<br/>
+                                 <strong>Indian Rupees</strong> <span t-if="not o.amount_untaxed" t-esc="o.amount_in_words(o.amount_untaxed)"/> <strong>Only</strong>
+                               </td>
+                           </tr>
+
+                           <tr>
+                               <td colspan="4" class="td_formating">
+                                 <span>GST : As Applicable</span><br/>
+                                 Terms of Delivery : <span t-esc="o.incoterm_id.name"/> <br/>
+                                 <br/>
+                               </td>
+                               <td colspan="5" class="td_formating">
+                                 <span>Insurance Terms : <span t-esc="o.insurance_term.name"/></span><br/>
+                                 Freight Terms : <span t-esc="o.incoterm_id.name"/> <br/>
+                                 Payment Terms. :  <span t-esc="o.payment_term_id.name"/> <br/>
+                               </td>
+                           </tr>
+
+                           <tr>
+                               <td colspan="9" class="td_formating">
+                                 <strong>Special Remarks :</strong>
+                                 <p t-if="o.notes" t-field="o.notes"/>
+                                 <div class="oe_structure"/>
+                               </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="9" class="td_formating text-right">
+                                  <span>For</span> <strong><span t-if="o.company_id" t-esc="o.company_id.name"/></strong>
+                                  <br/>
+                                  <br/>
+                                  <br/>
+                                  <span style="text-align:right;">  Authorised Signatory</span>
+                                </td>
+                             </tr>
+                        </tbody>
+                    </table>
+                  </td>
+                </tr>
+
+            </table>
+
+
+      </div>
+    </t>
+</template>
+
+<template id="report_purchaseorder_inherited">
+    <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="IV_purchase.report_purchaseorder_document_inherited" t-lang="o.partner_id.lang"/>
+        </t>
+    </t>
+</template>
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+        <!-- Add new Menu for PO-->
+        <report
+            string="Purchase Order"
+            id="action_report_purchase_order_inherited"
+            model="purchase.order"
+            report_type="qweb-pdf"
+            name="IV_purchase.report_purchaseorder_inherited"
+            file="IV_purchase.report_purchaseorder_inherited"
+        />
+
+        <!-- Hide old PO menu -->
+        <report
+            string="Purchase Order"
+            id="purchase.action_report_purchase_order"
+            model="purchase.order"
+            report_type="qweb-pdf"
+            name="IV_purchase.report_purchaseorder"
+            file="IV_purchase.report_purchaseorder"
+            menu="False"
+        />
+</odoo>

@@ -19,8 +19,39 @@ class ResPartner(models.Model):
         if vals and 'partner_vat_tin' in vals:
             for child in self.child_ids:
                 child.partner_vat_tin = vals['partner_vat_tin']
+        ## Hide not required to assign GSTIN on child contacts
+        ## Keep for future
+        # if vals and 'partner_gstin' in vals:
+        #     for child in self.child_ids:
+        #         child.partner_gstin = vals['partner_gstin']
+
         if vals and 'partner_gstin' in vals:
-            for child in self.child_ids:
-                child.partner_gstin = vals['partner_gstin']
+            """
+                Assign state code from GSTIN entered
+                1st 2 digit should be assign to state code
+            """
+            partner_gstin = str(vals.get('partner_gstin'))
+            gstin_list = [i for i in str(partner_gstin)]
+            if gstin_list:
+                vals['place_of_supply'] = gstin_list[0] + gstin_list[1]
+
         res = super(ResPartner, self).write(vals)
+        return res
+
+    @api.model
+    def create(self, vals):
+        """
+            Assign state code from GSTIN entered
+            1st 2 digit should be assign to state code
+        """
+        if vals and 'partner_gstin' in vals:
+            """
+                Assign state code from GSTIN entered
+                1st 2 digit should be assign to state code
+            """
+            partner_gstin = str(vals.get('partner_gstin'))
+            gstin_list = [i for i in str(partner_gstin)]
+            if gstin_list:
+                vals['place_of_supply'] = gstin_list[0] + gstin_list[1]
+        res = super(ResPartner, self).create(vals)
         return res

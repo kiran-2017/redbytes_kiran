@@ -14,11 +14,12 @@ You could use this simplified accounting in case you work with an (external) acc
     """,
     'category': 'Sale',
     'website': 'https://www.odoo.com/page/billing',
-    'depends' : ['product', 'sale', 'stock', 'project', 'sale_stock','document'],
+    'depends' : ['product', 'sale', 'stock', 'project', 'sale_stock','document','IV_reports'],
     'data': [
         'views/sale_view.xml',
         'views/product_view.xml',
         'views/account_invoice_view.xml',
+        'views/stock_picking_view.xml',
     ],
     'demo': [
     ],
