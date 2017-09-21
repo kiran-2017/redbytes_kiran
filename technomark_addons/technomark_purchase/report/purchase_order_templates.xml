@@ -92,6 +92,17 @@
                 position: absolute; bottom: 0px;
                 }
 
+              .table_borders{
+                border-bottom-style: none;
+                border-left-style: none;
+                border-right-style: none;
+                border-top-style: none;
+              }
+
+              .table_bottom_border{
+                border-bottom-style: none;
+              }
+
 
               </style>
             </div>
@@ -113,18 +124,18 @@
                   <td width="60%" style="padding:0px !important;" class="td_formating">
                       <table class="table-condensed" width="100%">
                           <tr>
-                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;border-top-style: none;border-left-style: none;">
                                   <strong>PO No :</strong>
                                   <span t-if="o.name" t-field="o.name"/>
                                 </td>
-                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;border-top-style: none;border-right-style: none;border-top-style: none;">
                                   <strong>Reference :</strong>
                                   <span t-if="o.partner_ref" t-field="o.partner_ref"/>
                                 </td>
                           </tr>
 
                           <tr>
-                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;">
+                                <td class="td_formating" width="50%" style="padding-bottom:20px !important;border-bottom-style: none;border-left-style: none;">
                                   <strong>PO Date :</strong>
                                   <span t-if="o.date_order" t-esc="o.date_converted(o.date_order)"/>
                                 </td>
@@ -135,6 +146,7 @@
                 </tr>
                 <tr>
                   <td width="40%" class="td_formating">
+                    <strong><span>Billed To:</span></strong><br/>
                     <strong><span t-field="o.company_id"/></strong><br/>
                     <span t-if="o.company_id.street" t-field="o.company_id.street"/>
                     <span t-if="o.company_id.street2" t-field="o.company_id.street2"/><br/>
@@ -148,22 +160,33 @@
                   <td width="60%" style="padding:0px !important;" class="td_formating">
                     <table class="table-condensed" width="100%">
                       <tr>
-                          <td width="50%" class="td_formating" style="padding:0px !important;">
+                          <td width="50%" class="td_formating" style="padding:0px !important;border-bottom-style: none;border-right-style: none;border-top-style: none;border-left-style: none;">
                             <!-- <div class="col-xs-5 col-xs-offset-1"> -->
-                                <strong><span>Order on:</span></strong>
+                                <strong><span>Supplier:</span></strong>
                                 <span t-field="o.partner_id"
                                     t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'/>
                                     <span t-if="o.partner_id.partner_gstin">GSTIN: <span t-field="o.partner_id.partner_gstin"/></span>
                             <!-- </div> -->
                         </td>
-                        <td width="50%" class="td_formating" style="padding:0px !important;">
+                        <td width="50%" class="td_formating" style="padding:0px !important;border-bottom-style: none;border-right-style: none;border-top-style: none;">
                           <!--Show delivery address here -->
                           <strong><span>Consignee (Shipped To) : </span></strong><br/>
-                          <span t-field="o.company_id"/><br/>
+                          <!-- <span t-field="o.company_id"/><br/>
                           <span t-if="o.company_id.street" t-field="o.company_id.street"/>
                           <span t-if="o.company_id.street2" t-field="o.company_id.street2"/><br/>
                           <span t-if="o.company_id.city" t-field="o.company_id.city"/>-
-                          <span t-if="o.company_id.state_id" t-field="o.company_id.state_id"/><br/>
+                          <span t-if="o.company_id.state_id" t-field="o.company_id.state_id"/><br/> -->
+
+                          <div t-if="o.dest_address_id">
+                              <div t-field="o.dest_address_id"
+                                  t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                          </div>
+
+                          <div t-if="not o.dest_address_id and o.picking_type_id and o.picking_type_id.warehouse_id">
+                              <span t-field="o.picking_type_id.warehouse_id.name"/>
+                              <div t-field="o.picking_type_id.warehouse_id.partner_id"
+                                  t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                          </div>
                           Place of Supply/State code : <span t-if="o.company_id.partner_id.place_of_supply" t-field="o.company_id.partner_id.place_of_supply"/><br/>
                           GSTIN : <span t-if="o.company_id.vat" t-field="o.company_id.vat"/><br/>
 
@@ -187,13 +210,13 @@
 
                       <table class="table-condensed" width="100%">
                           <tr>
-                              <th class="td_formating" rowspan="2"><strong>Sr.No</strong></th>
-                              <th class="td_formating" rowspan="2"><strong>Description</strong></th>
-                              <th class="td_formating" rowspan="2"><strong>Material</strong></th>
-                              <th class="td_formating" rowspan="2"><strong>Date Req.</strong></th>
-                              <th class="td_formating" rowspan="2"><strong>Approx Weight(kg)</strong></th>
-                              <th class="td_formating" rowspan="2"><strong>UOM</strong></th>
-                              <th class="td_formating" colspan="3">
+                              <th class="td_formating" rowspan="2" style="border-top-style: none;border-left-style: none;"><strong>Sr.No</strong></th>
+                              <th class="td_formating" rowspan="2" style="border-top-style: none;border-left-style: none;"><strong>Description</strong></th>
+                              <th class="td_formating" rowspan="2" style="border-top-style: none;border-left-style: none;"><strong>Material</strong></th>
+                              <th class="td_formating" rowspan="2" style="border-top-style: none;border-left-style: none;"><strong>Date Req.</strong></th>
+                              <th class="td_formating" rowspan="2" style="border-top-style: none;border-left-style: none;"><strong>Weight in Kg</strong></th>
+                              <th class="td_formating" rowspan="2" style="border-top-style: none;border-left-style: none;"><strong>UOM</strong></th>
+                              <th class="td_formating" colspan="3" style="border-top-style: none;border-left-style: none;">
                                 <center><strong>Taxable Value</strong></center>
                               </th>
                           </tr>
@@ -206,7 +229,7 @@
 
                           <tbody>
                             <tr t-foreach="o.order_line" t-as="line">
-                                <td class="td_formating">
+                                <td class="td_formating" style="border-left-style: none;">
                                     <span t-field="line.serial_no"/>
                                 </td>
                                 <td class="td_formating">
@@ -226,7 +249,8 @@
 
                                 <td class="td_formating">
                                     <!-- <span t-field="line.product_qty"/> -->
-                                    <span t-field="line.product_uom.name"/>
+                                    <span t-if="line.product_id.is_weight_applicable" t-esc="o.get_uom(line)"/>
+                                    <span t-if="not line.product_id.is_weight_applicable" t-field="line.product_uom.name"/>
                                 </td>
                                 <td class="td_formating">
                                     <span t-field="line.price_unit"/>
@@ -244,7 +268,7 @@
                            </tr>
 
                            <tr>
-                             <td class="td_formating"></td>
+                             <td class="td_formating" style="border-left-style:none;"></td>
                              <td class="td_formating text-center" >
                                <strong>Total</strong>
                              </td>
@@ -275,7 +299,7 @@
                            </tr>
 
                            <tr>
-                               <td colspan="4" class="td_formating">
+                               <td colspan="4" class="td_formating" style="border-left-style: none;">
                                  <span>GST : As Applicable</span><br/>
                                  Terms of Delivery : <span t-esc="o.incoterm_id.name"/> <br/>
                                  <br/>
@@ -288,7 +312,7 @@
                            </tr>
 
                            <tr>
-                               <td colspan="9" class="td_formating">
+                               <td colspan="9" class="td_formating" style="border-left-style: none;">
                                  <strong>Special Remarks :</strong>
                                  <p t-if="o.notes" t-field="o.notes"/>
                                  <div class="oe_structure"/>
@@ -296,7 +320,7 @@
                             </tr>
 
                             <tr>
-                                <td colspan="9" class="td_formating text-right">
+                                <td colspan="9" class="td_formating text-right" style="border-left-style: none;border-bottom-style: none;">
                                   <span>For</span> <strong><span t-if="o.company_id" t-esc="o.company_id.name"/></strong>
                                   <br/>
                                   <br/>

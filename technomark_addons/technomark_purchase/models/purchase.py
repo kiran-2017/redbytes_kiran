@@ -22,15 +22,13 @@ class PurchaseOrder(models.Model):
         Inherit class for priting new fields on PO
     """
     _default_notes_val = """
-    <For any Product belonging to Category 'Casting', set the below text to appear in the Terms & Conditions>
     1. TAX INVOICE (Original for Recipient and Duplicate for Transporter alongwith Delivery challan ( Original and Duplicate)
+    Applicable for Castings only
     2. Casting must be properly grinded and must be free from blow holes, mismatches with that of casting drawings.
     3. Thickness of casting must be homogeneous as per drawings and shall withstand hydrostatic pressure.
     4. Test valve of each heat shall be sent along with the castings bearing unique heat no.
     5. Heat no.,valve size, IVC Monogram and year of produce must be cast on all major castings.
     6. Patterns delivered to your foundry are absolute property of Indian Valve Pvt. Ltd., Nashik and the foundry has no right to take out any castings from the pattern, unless, a written order signed by the Director of the company is received by you.
-    <For Products belonging to ANY other Category, set the below text to appear in the Terms & Conditions>
-    1. TAX INVOICE (Original for Recipient and Duplicate for Transporter alongwith Delivery challan ( Original and Duplicate)
     """
     ## Add new fields to print on PO as taxes/duties
     taxes_duties = fields.Char(string="TAXES/DUTIES", default="As Applicable")
@@ -41,6 +39,18 @@ class PurchaseOrder(models.Model):
     ## Inherit notes field to set default text on po
     notes = fields.Text('Terms and Conditions', default=_default_notes_val)
 
+    @api.model
+    def get_uom(self,line):
+        """ This function assign UOM as Kg when is_weight_applicable is selected to True on PO report only"""
+        uom_obj = self.env['product.uom']
+        uom_categ_obj = self.env['product.uom.categ']
+        ## Get UOM id for kg
+        product_uom_kg_categ_ids = uom_categ_obj.search([('name','=','Weight')])
+        if product_uom_kg_categ_ids:
+            uom_kg_ids = uom_obj.search([('name','=','kg'),('active','=',True),('category_id','in',[rec_id.id for rec_id in product_uom_kg_categ_ids])])
+            if line and line.product_id.is_weight_applicable:
+                for uom_id in uom_kg_ids:
+                    return uom_id.name
 
     @api.model
     def amount_in_words(self, total):

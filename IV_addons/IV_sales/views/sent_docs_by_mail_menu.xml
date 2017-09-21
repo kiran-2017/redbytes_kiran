@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Sent mail Inherit Action menu GAD-->
+    <record id="send_by_mail_gad" model="ir.actions.server">
+        <field name="name">Sent GAD By Email</field>
+        <field name="model_id" ref="model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">action = env['sale.order'].send_by_mail_gad()</field>
+    </record>
+
+    <record model="ir.values" id="gad_sent">
+        <field name="name">Sent GAD By Email</field>
+        <field name="model" eval="'sale.order'" />
+        <field name="key" >action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,%d'%send_by_mail_gad" />
+        <field name="object" eval="True" />
+    </record>
+
+    <!-- Sent mail Inherit Action menu QAP-->
+    <record id="send_by_mail_qap" model="ir.actions.server">
+        <field name="name">Sent QAP By Email</field>
+        <field name="model_id" ref="model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">action = env['sale.order'].send_by_mail_qap()</field>
+    </record>
+
+    <record model="ir.values" id="qap_sent">
+        <field name="name">Sent QAP By Email</field>
+        <field name="model" eval="'sale.order'" />
+        <field name="key" >action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,%d'%send_by_mail_qap" />
+        <field name="object" eval="True" />
+    </record>
+
+
+    <!-- Sent mail Inherit Action menu for TPI -->
+    <record id="send_by_mail_tpi" model="ir.actions.server">
+        <field name="name">Sent TPI By Email</field>
+        <field name="model_id" ref="model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">action = env['sale.order'].send_by_mail_tpi()</field>
+    </record>
+
+    <record model="ir.values" id="qap_tpi">
+        <field name="name">Sent TPI By Email</field>
+        <field name="model" eval="'sale.order'" />
+        <field name="key" >action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,%d'%send_by_mail_tpi" />
+        <field name="object" eval="True" />
+    </record>
+
+
+</odoo>

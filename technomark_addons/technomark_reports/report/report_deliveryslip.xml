@@ -1,17 +1,75 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
 
-  <!-- Inherit external Layout Header -->
+  <!-- Inherit external Layout Header for Original Copy -->
   <template id="external_layout_header_inherited">
       <div class="header">
           <div class="row">
                 <div class="text-center col-xs-12" style="margin-top:2px;">
                 <!-- <h1>DELIVERY CHALLAN</h1> -->
-                <span class="text-right"><h5>[ORIGINAL FOR RECIPIENT]</h5></span>
+                <span class="text-right"><h5>(ORIGINAL FOR RECIPIENT)</h5></span>
               </div>
           </div>
 
       </div>
+  </template>
+
+  <!-- Header for Duplicate copy -->
+  <template id="external_layout_header_duplicate">
+      <div class="header">
+          <div class="row">
+              <div class="text-center col-xs-12" style="margin-top:2px;">
+                <!-- <h4>(DUPLICATE FOR TRANSPORTER)</h4> -->
+                <span class="text-right"><h5>(DUPLICATE FOR TRANSPORTER)</h5></span>
+              </div>
+          </div>
+      </div>
+  </template>
+
+  <!-- Header for Trpilcate copy -->
+  <template id="external_layout_header_triplicate">
+      <div class="header">
+          <div class="row">
+              <div class="text-center col-xs-12" style="margin-top:2px;">
+                <!-- <h4>(TRIPLICATE FOR SUPPLIER)</h4> -->
+                <span class="text-right"><h5>(TRIPLICATE FOR SUPPLIER)</h5></span>
+              </div>
+          </div>
+      </div>
+  </template>
+
+  <!-- Header for Extra Copy -->
+  <template id="external_layout_header_extra_copy">
+      <div class="header">
+          <div class="row">
+              <div class="text-center col-xs-12" style="margin-top:2px;">
+                <!-- <h4>(TRIPLICATE FOR SUPPLIER)</h4> -->
+                <span class="text-right"><h5>(EXTRA COPY)</h5></span>
+              </div>
+          </div>
+      </div>
+  </template>
+
+
+
+  <!-- External Layout for Duplicate Report -->
+  <template id="external_layout_duplicate">
+    <t t-call="technomark_reports.external_layout_header_duplicate" />
+    <!-- Call Report Template for triplicate -->
+    <t t-call="technomark_reports.report_delivery_order_view_triplicate" />
+
+  </template>
+
+  <!-- External Layout for Triplicate Report -->
+  <template id="external_layout_triplicate">
+    <t t-call="technomark_reports.external_layout_header_triplicate" />
+    <!-- Call extra copy trmplate -->
+    <t t-call="technomark_reports.report_delivery_order_view_extra_copy" />
+  </template>
+
+  <!-- External Layout for Extra Copy Report -->
+  <template id="external_layout_extra_copy">
+    <t t-call="technomark_reports.external_layout_header_extra_copy" />
   </template>
 
 <!-- Inherit external Layout -->
@@ -70,12 +128,12 @@
                         <td width="60%" style="padding:0px !important;" class="td_formating">
                             <table class="table-condensed" width="100%">
                                 <tr>
-                                      <td class="td_formating" width="50%">
+                                      <td class="td_formating" width="50%" style="border-top-style: none;border-left-style: none;">
                                         <strong>Challan No. :</strong>
                                         <span t-if="o.name" t-field="o.name"/>
                                       </td>
 
-                                      <td class="td_formating" width="50%" style="padding-bottom:30px !important;">
+                                      <td class="td_formating" width="50%" style="padding-bottom:30px !important;border-top-style: none;border-right-style:none;">
                                         <strong>Challan Date :</strong>
                                          <t t-if="o.state == 'done'">
                                            <span t-if="o.date_done" t-esc="o.date_converted(o.date_done)"/>
@@ -87,12 +145,12 @@
                                 </tr>
 
                                 <tr>
-                                      <td class="td_formating" width="50%">
+                                      <td class="td_formating" width="50%" style="border-bottom-style: none;border-left-style: none;">
                                         <strong>Order No. :</strong>
                                         <span t-if="o.origin" t-esc="o.get_cust_ref(o.origin)"/>
                                       </td>
 
-                                      <td class="td_formating" width="50%">
+                                      <td class="td_formating" width="50%" style="border-bottom-style: none;border-right-style: none;">
                                         <t t-if="o.picking_type_id.code=='outgoing'">
                                           <t t-set="so" t-value="o.get_so_data(o.origin)" />
                                           <strong>Order Date :</strong>
@@ -106,7 +164,7 @@
                         </tr>
 
                         <tr>
-                          <td class="td_formating">
+                          <td class="td_formating" style="border-bottom-style: none;">
                             <!-- -->
                             <strong><span t-field="o.company_id"/></strong><br/>
                             <span t-if="o.company_id.street" t-field="o.company_id.street"/>
@@ -118,7 +176,7 @@
                             Email: <span t-if="o.company_id.email" t-field="o.company_id.email"/><br/>
                             GSTIN : <span t-if="o.company_id.vat" t-field="o.company_id.vat"/><br/>
                           </td>
-                          <td class="td_formating" style="padding:0px !important;">
+                          <td class="td_formating" style="padding:0px !important;border-bottom-style: none;">
                             <!--Show delivery address here -->
                             <strong><span>Consignee (Shipped To) : </span></strong><br/>
                             <strong><span t-if="o.partner_id" t-field="o.partner_id"/></strong><br/>
@@ -138,19 +196,19 @@
 
                               <table class="table-condensed" t-if="not o.pack_operation_ids" width="100%">
                                   <tr>
-                                      <th class="td_formating"><strong>Sr.No.</strong></th>
-                                      <th class="td_formating"><strong>Description</strong></th>
-                                      <th class="td_formating"><strong>Weight</strong></th>
-                                      <th class="td_formating"><strong>UOM</strong></th>
-                                      <th class="td_formating"><strong>HSN Code</strong></th>
-                                      <th t-if="any([pack_operation.state == 'done' for pack_operation in o.pack_operation_ids])" class="text-right td_formating">
+                                      <th class="td_formating" style="border-top-style: none;border-left-style: none;"><strong>Sr.No.</strong></th>
+                                      <th class="td_formating" style="border-top-style: none;border-left-style: none;"><strong>Description</strong></th>
+                                      <th class="td_formating" style="border-top-style: none;border-left-style: none;"><strong>Weight</strong></th>
+                                      <th class="td_formating" style="border-top-style: none;border-left-style: none;"><strong>UOM</strong></th>
+                                      <th class="td_formating" style="border-top-style: none;border-left-style: none;"><strong>HSN Code</strong></th>
+                                      <th t-if="any([pack_operation.state == 'done' for pack_operation in o.pack_operation_ids])" class="text-right td_formating" style="border-top-style: none;border-left-style: none;">
                                           <strong>Qty</strong>
                                       </th>
                                   </tr>
                                   <tbody>
                                     <t t-set="i" t-value="1"/>
                                     <tr t-foreach="o.move_lines" t-as="move">
-                                        <td class="td_formating">
+                                        <td class="td_formating" style="border-left-style: none;">
                                           <span t-esc="i">
                                             <t t-set="i" t-value="i+1"/>
                                           </span>
@@ -181,7 +239,7 @@
                               <table class="table-condensed" t-if="o.pack_operation_ids" width="100%">
                                   <t t-set="has_serial_number" t-value="o.pack_operation_ids.filtered('pack_lot_ids')" groups="stock.group_production_lot"/>
                                     <tr>
-                                        <th class="td_formating"><strong>Sr.No.</strong></th>
+                                        <th class="td_formating" style="border-left-style: none;"><strong>Sr.No.</strong></th>
                                         <th class="td_formating"><strong>Description</strong></th>
                                         <th class="td_formating"><strong>Weight</strong></th>
                                         <th class="td_formating"><strong>UOM</strong></th>
@@ -194,7 +252,7 @@
                                     <tbody>
                                         <t t-set="i" t-value="1" />
                                         <tr t-foreach="o.pack_operation_ids" t-as="pack_operation">
-                                          <td class="td_formating">
+                                          <td class="td_formating" style="border-left-style: none;">
                                             <!-- Logic for serial number printing on DC-->
                                               <span t-esc="i"/>
                                               <t t-set="i" t-value="i+1"/>
@@ -255,7 +313,7 @@
 
                                         </tr>
                                         <tr t-if="sum(l.qty_done for l in o.pack_operation_ids)>0.0">
-                                          <td class="td_formating"></td>
+                                          <td class="td_formating" style="border-top-style: none;border-left-style: none;"></td>
                                           <td class="td_formating text-center" >
                                             <strong>Total</strong>
                                           </td>
@@ -274,7 +332,7 @@
                                   <t t-set="order_data" t-value="o.get_orders(o.origin)" />
                                   <t t-set="so" t-value="o.get_so_data(o.origin)" />
                                   <tr>
-                                    <td>
+                                    <td style="border-top-style: none;">
                                       Terms of Delivery : <span t-esc="o.get_delivert_term(o.origin)"/> <br/>
                                       Vehicle Registration No : <span t-esc="o.vehical_registration_no"/> <br/>
                                       LR No : <span t-esc="o.lr_no"/> <br/>
@@ -283,7 +341,7 @@
                                         E-Way Bill No :  <span t-esc="so.eway_bill_no"/> <br/>
                                       </t>
                                     </td>
-                                    <td>
+                                    <td style="border-top-style: none;">
                                       <t t-if="o.picking_type_id.code=='outgoing'">
                                         Insurance Terms : <span t-if="so" t-esc="so.insurance.name"/><br/>
                                       </t>
@@ -314,10 +372,36 @@
         </t>
     </template>
 
+    <!-- Report Template for Duplicate print-->
+    <template id="report_delivery_order_view_duplicate">
+        <t t-call="report.html_container">
+            <t t-call="technomark_reports.external_layout_duplicate"/>
+                <t t-call="technomark_reports.report_delivery_document_inherited"/>
+          </t>
+    </template>
+
+    <!-- Report Template for Triplicate print-->
+    <template id="report_delivery_order_view_triplicate">
+        <t t-call="report.html_container">
+            <t t-call="technomark_reports.external_layout_triplicate"/>
+                <t t-call="technomark_reports.report_delivery_document_inherited"/>
+          </t>
+    </template>
+
+    <!-- Report Template for Extra Copy print-->
+    <template id="report_delivery_order_view_extra_copy">
+        <t t-call="report.html_container">
+            <t t-call="technomark_reports.external_layout_extra_copy"/>
+                <t t-call="technomark_reports.report_delivery_document_inherited"/>
+          </t>
+    </template>
+
     <!-- Call template from here -->
     <template id="report_deliveryslip_inherited">
         <t t-foreach="docs" t-as="o">
             <t t-call="technomark_reports.report_delivery_document_inherited" t-lang="o.partner_id.lang"/>
+            <!-- Call duplicate report template -->
+            <t t-call="technomark_reports.report_delivery_order_view_duplicate" t-lang="o.partner_id.lang"/>
         </t>
     </template>
 

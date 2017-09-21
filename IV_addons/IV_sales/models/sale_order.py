@@ -22,9 +22,8 @@ class SaleOrder(models.Model):
         ## Logic to change date color if delivery date is getting expire and out of date
 
         for rec in self:
-            print datetime.now(), rec.delivery_date, type(rec.delivery_date),'-datetime now-----rec.delivery_date---datetime.now'
             current_date = str(datetime.now())[0:10]#datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
-            print rec.delivery_date < current_date,'---rec.delivery_date < = datetime.now()'
+            # print rec.delivery_date < current_date,'---rec.delivery_date < = datetime.now()'
             if rec.delivery_date < current_date:
                 rec.check_for_delivery_date = True
             else:
@@ -42,9 +41,9 @@ class SaleOrder(models.Model):
         ('draft', 'Quotation'),
         ('sent', 'Quotation Sent'),
         ('sale', 'Sales Order'),
-        ('Advance Received', 'Advance Received'),
-        ('GAD Approved', 'GAD Approved'),
-        ('QAP Approved', 'QAP Approved'),
+        # ('Advance Received', 'Advance Received'),
+        # ('GAD Approved', 'GAD Approved'),
+        # ('QAP Approved', 'QAP Approved'),
         ('done', 'Locked'),
         ('cancel', 'Cancelled'),
         ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
@@ -72,11 +71,13 @@ class SaleOrder(models.Model):
     delivery = fields.Selection([('BLANK', '[BLANK]'), ('Door Delivery', 'Door Delivery'), ('Godown Delivery', 'Godown Delivery')], 'Delivery', default='BLANK')
     freight = fields.Selection([('BLANK', '[BLANK]'), ('To Pay', 'To Pay'), ('Paid', 'Paid')], 'Freight', default='BLANK')
     insurance = fields.Selection([('BLANK', '[BLANK]'), ('NA', 'NA'), ('Our Account', 'Our Account'), ('Client Account', 'Client Account')], 'Insurance', default='BLANK')
-    transporter = fields.Char(string="Transporter", copy=False)
+    transporter = fields.Many2one('transporter.info', string="Transporter", copy=False)
     performance_guarantee = fields.Selection([('BLANK', '[BLANK]'), ('Performance BG', 'Performance BG'), ('Corporate Bond', 'Corporate Bond')], 'Performance Guarantee', default='BLANK')
     delivery_instructions = fields.Many2one('delivery.mode', string="Mode of delivery")
     mode_of_shipment = fields.Many2one('shipment.mode', string="Mode Of Shipment")
     # shipping_policy = fields.Char(string="Shipping Policy", default="Deliver each product when available")
+    ## Add field
+    delivery_text_instruction = fields.Text(string="Delivery Instruction")
 
     document_lines = fields.One2many('document.lines', 'sale_order_id', string="Documents", copy=False)
 
@@ -158,7 +159,7 @@ class SaleOrder(models.Model):
             if self.name in split_name:
                 # print int(split_name[-1]), type(int(split_name[-1])),'-----------split_name'
                 inc_seq = int(split_name[-1]) + 1
-                print inc_seq,'-----------inc_seq'
+                # print inc_seq,'-----------inc_seq'
                 self.new_revision_so_no = self.name + '#' + str(inc_seq)
         else:
             self.new_revision_so_no = self.name + '#' + str(inc_seq)
@@ -195,25 +196,174 @@ class SaleOrder(models.Model):
                 ## Create lines and append here
                 self.mo_issued_lines = [[0, 0, mo_issued_vals]]
 
-        """ Logic to create revised PO records to PO sent lines """
+        ## PO sent creation flow has chaned
+        ## Now Po sent will create on confimation of PO or send PO
+        ## This logic keep for future
+        # """ Logic to create revised PO records to PO sent lines """
         ## Create Po sent lines for revised so if any and
         ## previous po is in confirm state
-        po_sent_ids = self._get_po_sent_lies()
-        for po_sent_id in po_sent_ids:
-            if po_sent_id:
-                purchase_id = po_set_lines_obj.search([('purchase_id','=',po_sent_id.id)])
-                if not purchase_id:
-                    po_sent_vals = {
-                            'po_sent_date': self._get_current_date(),
-                            'po_sent_by': self._get_current_user(),
-                            'po_sent_no': po_sent_id.name,
-                            'purchase_id': po_sent_id.id,
-                            'sale_order_id':self.id,
-                        }
-                    ## Create lines and append here
-                    self.po_sent_lines = [[0, 0, po_sent_vals]]
+        # po_sent_ids = self._get_po_sent_lies()
+        # for po_sent_id in po_sent_ids:
+        #     if po_sent_id:
+        #         purchase_id = po_set_lines_obj.search([('purchase_id','=',po_sent_id.id)])
+        #         if not purchase_id:
+        #             po_sent_vals = {
+        #                     'po_sent_date': self._get_current_date(),
+        #                     'po_sent_by': self._get_current_user(),
+        #                     'po_sent_no': po_sent_id.name,
+        #                     'purchase_id': po_sent_id.id,
+        #                     'sale_order_id':self.id,
+        #                 }
+        #             ## Create lines and append here
+        #             self.po_sent_lines = [[0, 0, po_sent_vals]]
 
         return True
+
+    @api.model
+    def send_by_mail_gad(self):
+        ir_model_data = self.env['ir.model.data']
+        if self._context and 'active_id' in self._context:
+            active_id = self._context.get('active_id')
+            if active_id:
+                sale_order_ids = self.browse(active_id)
+                for rec in sale_order_ids:
+                    rec.ensure_one()
+                    try:
+                        ## Logic to send revised So email with new SO ref#
+                        if rec.new_revision_so_no:
+                            template_id = ir_model_data.get_object_reference('IV_sales', 'email_template_for_gad')[1]
+                            template = self.env['mail.template'].browse(template_id)
+                        else:
+                            template_id = ir_model_data.get_object_reference('IV_sales', 'email_template_for_gad')[1]
+                            print template_id,'------elsee---template'
+                    except ValueError:
+                        template_id = False
+                    try:
+                        compose_form_id = ir_model_data.get_object_reference('mail', 'email_compose_message_wizard_form')[1]
+                    except ValueError:
+                        compose_form_id = False
+                    ctx = dict()
+
+                    ctx.update({
+                        'default_model': 'sale.order',
+                        'default_res_id': rec.ids[0],
+                        'default_use_template': bool(template_id),
+                        'default_template_id': template_id,
+                        'attachment_ids': [],
+                        'default_composition_mode': 'comment',
+                        'mark_so_as_sent': True,
+                        'custom_layout': "sale.mail_template_data_notification_email_sale_order"
+                    })
+
+                    print ctx,'--------ctx after'
+
+                    return {
+                        'type': 'ir.actions.act_window',
+                        'view_type': 'form',
+                        'view_mode': 'form',
+                        'res_model': 'mail.compose.message',
+                        'views': [(compose_form_id, 'form')],
+                        'view_id': compose_form_id,
+                        'target': 'new',
+                        'context': ctx,
+                    }
+
+    @api.model
+    def send_by_mail_qap(self):
+        ir_model_data = self.env['ir.model.data']
+        if self._context and 'active_id' in self._context:
+            active_id = self._context.get('active_id')
+            if active_id:
+                sale_order_ids = self.browse(active_id)
+                for rec in sale_order_ids:
+                    rec.ensure_one()
+                    try:
+                        ## Logic to send revised So email with new SO ref#
+                        if rec.new_revision_so_no:
+                            template_id = ir_model_data.get_object_reference('IV_sales', 'email_template_for_qap')[1]
+                        else:
+                            template_id = ir_model_data.get_object_reference('IV_sales', 'email_template_for_qap')[1]
+                    except ValueError:
+                        template_id = False
+                    try:
+                        compose_form_id = ir_model_data.get_object_reference('mail', 'email_compose_message_wizard_form')[1]
+                    except ValueError:
+                        compose_form_id = False
+                    ctx = dict()
+
+                    ctx.update({
+                        'default_model': 'sale.order',
+                        'default_res_id': rec.ids[0],
+                        'default_use_template': bool(template_id),
+                        'default_template_id': template_id,
+                        'attachment_ids': [],
+                        'default_composition_mode': 'comment',
+                        'mark_so_as_sent': True,
+                        'custom_layout': "sale.mail_template_data_notification_email_sale_order"
+                    })
+
+                    return {
+                        'type': 'ir.actions.act_window',
+                        'view_type': 'form',
+                        'view_mode': 'form',
+                        'res_model': 'mail.compose.message',
+                        'views': [(compose_form_id, 'form')],
+                        'view_id': compose_form_id,
+                        'target': 'new',
+                        'context': ctx,
+                    }
+    @api.model
+    def send_by_mail_tpi(self):
+        print '-----send_by_mail_tpi-------------send mail gad'
+        ir_model_data = self.env['ir.model.data']
+        print self._context,'---_context'
+        if self._context and 'active_id' in self._context:
+            active_id = self._context.get('active_id')
+            print active_id,'------active_id'
+            if active_id:
+                sale_order_ids = self.browse(active_id)
+                for rec in sale_order_ids:
+                    print rec.new_revision_so_no,'---rec.new_revision_so_no'
+                    rec.ensure_one()
+                    try:
+                        ## Logic to send revised So email with new SO ref#
+                        if rec.new_revision_so_no:
+                            template_id = ir_model_data.get_object_reference('IV_sales', 'email_template_for_tpi')[1]
+                        else:
+                            template_id = ir_model_data.get_object_reference('IV_sales', 'email_template_for_tpi')[1]
+                    except ValueError:
+                        template_id = False
+                    try:
+                        compose_form_id = ir_model_data.get_object_reference('mail', 'email_compose_message_wizard_form')[1]
+                    except ValueError:
+                        compose_form_id = False
+                    ctx = dict()
+
+                    ctx.update({
+                        'default_model': 'sale.order',
+                        'default_res_id': rec.ids[0],
+                        'default_use_template': bool(template_id),
+                        'default_template_id': template_id,
+                        'attachment_ids': [],
+                        'default_composition_mode': 'comment',
+                        'mark_so_as_sent': True,
+                        'custom_layout': "sale.mail_template_data_notification_email_sale_order"
+                    })
+
+                    print ctx,'--------ctx after'
+
+                    return {
+                        'type': 'ir.actions.act_window',
+                        'view_type': 'form',
+                        'view_mode': 'form',
+                        'res_model': 'mail.compose.message',
+                        'views': [(compose_form_id, 'form')],
+                        'view_id': compose_form_id,
+                        'target': 'new',
+                        'context': ctx,
+                    }
+
+
 
     @api.multi
     def sent_revise_so(self):
@@ -225,7 +375,11 @@ class SaleOrder(models.Model):
         self.ensure_one()
         ir_model_data = self.env['ir.model.data']
         try:
-            template_id = ir_model_data.get_object_reference('sale', 'email_template_edi_sale')[1]
+            ## Logic to send revised So email with new SO ref#
+            if self.new_revision_so_no:
+                template_id = ir_model_data.get_object_reference('IV_sales', 'email_template_edi_sale_revised')[1]
+            else:
+                template_id = ir_model_data.get_object_reference('sale', 'email_template_edi_sale')[1]
         except ValueError:
             template_id = False
         try:
@@ -233,20 +387,24 @@ class SaleOrder(models.Model):
         except ValueError:
             compose_form_id = False
         ctx = dict()
+
         ctx.update({
             'default_model': 'sale.order',
             'default_res_id': self.ids[0],
             'default_use_template': bool(template_id),
             'default_template_id': template_id,
+            'attachment_ids': [],
             'default_composition_mode': 'comment',
             'mark_so_as_sent': True,
             'custom_layout': "sale.mail_template_data_notification_email_sale_order"
         })
+
+        print ctx,'--------ctx after'
         ## Update Quotation Sent values for order status
         quotation_sent_vals = {
             'quotation_sent_date': self._get_current_date(),
             'quotation_sent_by': self._get_current_user(),
-            'quotation_sent_no': self.new_revision_so_no,
+            'quotation_sent_no': self.new_revision_so_no if self.new_revision_so_no else self.name,
             'sale_order_id': self.id
         }
         ## Create new line every time for quotation sent Revision
@@ -288,9 +446,6 @@ class SaleOrder(models.Model):
         """
             Inherit function to assign RFQ Received Data
         """
-        print vals, res,'-----------res create'
-        # res.rfq_received_date = self._get_current_date(),
-        # res.rfq_received_by = self._get_current_user(),
         return res
 
 
@@ -381,26 +536,30 @@ class SaleOrder(models.Model):
         picking_ids = picking_obj.search([('origin','=',self.name)])
         return picking_ids
 
-    @api.multi
-    def _get_po_sent_lies(self):
-        """
-            Get PO Sent for SO
-        """
-        procurement_obj = self.env['procurement.order']
-        po_obj = self.env['purchase.order']
-        po_group_obj = self.env['procurement.group']
 
-        purchase_list = []
-        po_group_id = po_group_obj.search([('name','=', self.name)])
-        print po_group_id,'--------po_group_ids'
-        if po_group_id:
-            procurement_ids = procurement_obj.search([('group_id','=',po_group_id.id)])
-            for procurement_id in procurement_ids:
-                if procurement_id.purchase_line_id.order_id not in purchase_list:
-                    print procurement_id.purchase_line_id.order_id,'-------procurement_id.purchase_line_id.order_id'
-                    purchase_list.append(procurement_id.purchase_line_id.order_id)
-            print purchase_list,'---------purchase_list'
-        return purchase_list
+    ## PO sent creation flow has chaned
+    ## Now Po sent will create on confimation of PO or send PO
+    ## This logic keep for future
+    # @api.multi
+    # def _get_po_sent_lies(self):
+    #     """
+    #         Get PO Sent for SO
+    #     """
+    #     procurement_obj = self.env['procurement.order']
+    #     po_obj = self.env['purchase.order']
+    #     po_group_obj = self.env['procurement.group']
+    #
+    #     purchase_list = []
+    #     po_group_id = po_group_obj.search([('name','=', self.name)])
+    #     print po_group_id,'--------po_group_ids'
+    #     if po_group_id:
+    #         procurement_ids = procurement_obj.search([('group_id','=',po_group_id.id)])
+    #         for procurement_id in procurement_ids:
+    #             if procurement_id.purchase_line_id.order_id not in purchase_list:
+    #                 print procurement_id.purchase_line_id.order_id,'-------procurement_id.purchase_line_id.order_id'
+    #                 purchase_list.append(procurement_id.purchase_line_id.order_id)
+    #         print purchase_list,'---------purchase_list'
+    #     return purchase_list
 
 
     @api.multi
@@ -474,33 +633,31 @@ class SaleOrder(models.Model):
                 }
             ## Create lines and append here
             self.dispatch_lines = [[0, 0, picking_vals]]
+
+
+        ## PO sent creation flow has chaned
+        ## Now Po sent will create on confimation of PO or send PO
+        ## This logic keep for future
         ## Logic o get So related PO
-        po_sent_ids = self._get_po_sent_lies()
-        for po_sent_id in po_sent_ids:
-            if po_sent_id:
-                po_sent_vals = {
-                        'po_sent_date': self._get_current_date(),
-                        'po_sent_by': self._get_current_user(),
-                        'po_sent_no': po_sent_id.name,
-                        'purchase_id': po_sent_id.id,
-                        'sale_order_id':self.id,
-                    }
-                ## Create lines and append here
-                self.po_sent_lines = [[0, 0, po_sent_vals]]
+        # po_sent_ids = self._get_po_sent_lies()
+        # for po_sent_id in po_sent_ids:
+        #     if po_sent_id:
+        #         po_sent_vals = {
+        #                 'po_sent_date': self._get_current_date(),
+        #                 'po_sent_by': self._get_current_user(),
+        #                 'po_sent_no': po_sent_id.name,
+        #                 'purchase_id': po_sent_id.id,
+        #                 'sale_order_id':self.id,
+        #             }
+        #         ## Create lines and append here
+        #         self.po_sent_lines = [[0, 0, po_sent_vals]]
         return res
 
-    # @api.multi
-    # def customer_po_received(self):
-    #     self.write({
-    #     'state': 'Customer PO Received',
-    #     'customer_po_received_date': self._get_current_date(),
-    #     'customer_po_received_by': self._get_current_user(),
-    #     })
 
     @api.multi
     def create_advance_received(self):
         self.write({
-        'state': 'Advance Received',
+        # 'state': 'Advance Received',
         'advance_received': 'Y',
         'advance_received_date': self._get_current_date(),
         'advance_received_by': self._get_current_user(),
@@ -527,7 +684,7 @@ class SaleOrder(models.Model):
 
 
         self.write({
-        'state': 'GAD Approved',
+        # 'state': 'GAD Approved',
         'ga_drawing_approved': 'Y',
         'ga_drawing_approved_date': self._get_current_date(),
         'ga_drawing_approved_by': self._get_current_user(),
@@ -553,7 +710,7 @@ class SaleOrder(models.Model):
                 raise UserError(_('Please upload QAP Approved Documents.'))
 
         self.write({
-        'state': 'QAP Approved',
+        # 'state': 'QAP Approved',
         'qap_approved': 'Y',
         'qap_approved_date': self._get_current_date(),
         'qap_approved_by': self._get_current_user(),
@@ -620,7 +777,68 @@ class SaleOrder(models.Model):
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
-    """ Inherit class for adding new fields on order line"""
+    """ Inherit class for adding new fields on order line for onchange"""
+
+    @api.multi
+    @api.onchange('product_id')
+    def product_id_change(self):
+        ''' Inherit method to pass finished size for selected product if size is there'''
+
+        if not self.product_id:
+            return {'domain': {'product_uom': []}}
+
+        vals = {}
+        domain = {'product_uom': [('category_id', '=', self.product_id.uom_id.category_id.id)]}
+        if not self.product_uom or (self.product_id.uom_id.id != self.product_uom.id):
+            vals['product_uom'] = self.product_id.uom_id
+            vals['product_uom_qty'] = 1.0
+
+        product = self.product_id.with_context(
+            lang=self.order_id.partner_id.lang,
+            partner=self.order_id.partner_id.id,
+            quantity=vals.get('product_uom_qty') or self.product_uom_qty,
+            date=self.order_id.date_order,
+            pricelist=self.order_id.pricelist_id.id,
+            uom=self.product_uom.id
+        )
+
+        name = product.name_get()[0][1]
+        if product.description_sale:
+            name += '\n' + product.description_sale
+        vals['name'] = name
+
+        ## assign size on lines
+        if self.product_id and self.product_id.pro_size:
+            vals['size'] = self.product_id.pro_size
+        ## assign PN
+        if self.product_id and self.product_id.pro_pn:
+            vals['pn'] = self.product_id.pro_pn
+        ## assign Operation
+        if self.product_id and self.product_id.pro_operation:
+            vals['operation'] = self.product_id.pro_operation
+        ## assign MOC
+        if self.product_id and self.product_id.pro_material:
+            vals['moc'] = self.product_id.pro_material
+
+        self._compute_tax_id()
+
+        if self.order_id.pricelist_id and self.order_id.partner_id:
+            vals['price_unit'] = self.env['account.tax']._fix_tax_included_price(self._get_display_price(product), product.taxes_id, self.tax_id)
+        self.update(vals)
+
+        title = False
+        message = False
+        warning = {}
+        if product.sale_line_warn != 'no-message':
+            title = _("Warning for %s") % product.name
+            message = product.sale_line_warn_msg
+            warning['title'] = title
+            warning['message'] = message
+            if product.sale_line_warn == 'block':
+                self.product_id = False
+            return {'warning': warning}
+        return {'domain': domain}
+
 
     size = fields.Float(string="Size")
     moc = fields.Char(string="MOC")
@@ -781,6 +999,7 @@ class DocumentLines(models.Model):
                 'res_model': 'sale.order',
                 'res_id': so_id.id,
                 'res_name': so_id.name,
+                'so_doc_type':False,
             }
 
         if vals and 'document_type' in vals and vals.get('document_attachment') != False:
@@ -791,6 +1010,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 ## Rename file name with new format
@@ -804,16 +1024,19 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
             ## Approved GA Drawing
             if vals.get('document_type') == 'Approved GA Drawing':
+                print vals.get('document_attachment'),'-----------document_attachment'
                 doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -824,6 +1047,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -834,6 +1058,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -844,6 +1069,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -854,6 +1080,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -864,6 +1091,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -874,6 +1102,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -884,6 +1113,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -894,16 +1124,19 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
             ## GA Drawing
             if vals.get('document_type') == 'GA Drawing':
+
                 doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -914,6 +1147,7 @@ class DocumentLines(models.Model):
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas_fname' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                     'datas': vals.get('document_attachment'),
+                    'so_doc_type': vals.get('document_type'),
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
@@ -944,6 +1178,7 @@ class DocumentLines(models.Model):
                 'res_model': 'sale.order',
                 'res_id': so_id.id,
                 'res_name': so_id.name,
+                'so_doc_type':False,
             }
 
         if vals and 'document_date' in vals:
@@ -957,6 +1192,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -969,6 +1205,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -976,10 +1213,12 @@ class DocumentLines(models.Model):
             self.document_filename = attachment_id.name
         ## Approved GA Drawing
         if self.document_type == 'Approved GA Drawing':
+            print vals.get('document_attachment'),'---document_attachment-'
             ir_attachment_vals.update({
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -991,6 +1230,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1002,6 +1242,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1013,6 +1254,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1024,6 +1266,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1036,6 +1279,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1048,6 +1292,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1059,6 +1304,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1070,6 +1316,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1082,6 +1329,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1093,6 +1341,7 @@ class DocumentLines(models.Model):
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas': vals.get('document_attachment'),
+                'so_doc_type': self.document_type,
             })
             attachment_id = attachment_obj.create(ir_attachment_vals)
             ## Rename file name with new format
@@ -1147,5 +1396,12 @@ class ModeOfShipment(models.Model):
         _name = 'shipment.mode'
         '''
             Create new object for Mode of delivery
+        '''
+        name = fields.Char(string="Name")
+
+class TransporterInfo(models.Model):
+        _name = 'transporter.info'
+        '''
+            Create new object for Transporter
         '''
         name = fields.Char(string="Name")

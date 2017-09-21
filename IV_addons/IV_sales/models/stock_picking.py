@@ -60,7 +60,10 @@ class Picking(models.Model):
                         'sale_order_id':po_sent_id.sale_order_id.id,
                     }
                 ## Create lines and append here
-                raw_material_obj.create(picking_vals)
+                ## Search raw material lines for current backorder
+                raw_material_ids = raw_material_obj.search([('incoming_pick_id','=',backorder_picking.id),('sale_order_id','=',po_sent_id.sale_order_id.id)])
+                if not raw_material_ids:
+                    raw_material_obj.create(picking_vals)
 
     @api.multi
     def _create_backorder(self, backorder_moves=[]):

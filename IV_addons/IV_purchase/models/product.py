@@ -9,7 +9,7 @@ class ProductTemplate(models.Model):
         at sale order line and calculate subtotal as weight * quantity * unit price
     """
     # This field allow to use product weight in Sale order Line
-    is_weight_applicable = fields.Boolean(string="Allow To Use Weight")
+    # is_weight_applicable = fields.Boolean(string="Allow To Use Weight")
 
     # @api.one
     # @api.depends('property_cost_method', 'categ_id.property_cost_method')

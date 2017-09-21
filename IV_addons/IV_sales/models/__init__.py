@@ -4,3 +4,5 @@ import product
 import stock_picking
 import account
 import purchase
+import ir_attachment
+import mail_template

@@ -27,7 +27,7 @@
                   <field name="material"/>
               </xpath>
               <xpath expr="//field[@name='order_line']/tree/field[@name='date_planned']" position="after">
-                  <field name="approx_weight"/>
+                  <field name="approx_weight" string="Unit Wt(Kg)"/>
               </xpath>
               <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="attributes">
                   <attribute name="string">Rate</attribute>
@@ -48,7 +48,7 @@
               </xpath>
 
               <xpath expr="//field[@name='order_line']/form/sheet/group/group/field[@name='date_planned']" position="after">
-                  <field name="approx_weight"/>
+                  <field name="approx_weight" string="Unit Wt(Kg)"/>
               </xpath>
 
               <xpath expr="//field[@name='order_line']/form/sheet/group/group/field[@name='price_unit']" position="attributes">

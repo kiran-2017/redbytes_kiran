@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <!-- Inherited sale view to add new fields for Delivery Information-->
+        <record id="view_attachment_form_inherited" model="ir.ui.view">
+            <field name="name">view.attachment.form.inherited</field>
+            <field name="model">ir.attachment</field>
+            <field name="inherit_id" ref="base.view_attachment_form"/>
+            <field name="arch" type="xml">
+              <xpath expr="//field[@name='mimetype']" position="after">
+                <field name="so_doc_type" invisible="1"/>
+              </xpath>
+            </field>
+        </record>
+</odoo>

@@ -22,21 +22,34 @@ class PurchaseOrder(models.Model):
         Inherit class for priting new fields on PO
     """
     _default_notes_val = """
-    <For any Product belonging to Category 'Casting', set the below text to appear in the Terms & Conditions>
     1. TAX INVOICE (Original for Recipient and Duplicate for Transporter alongwith Delivery challan ( Original and Duplicate)
-    2. Casting must be properly grinded and must be free from blow holes, mismatches with that of casting drawings.
-    3. Thickness of casting must be homogeneous as per drawings and shall withstand hydrostatic pressure.
-    4. Test valve of each heat shall be sent along with the castings bearing unique heat no.
-    5. Heat no.,valve size, IVC Monogram and year of produce must be cast on all major castings.
-    6. Patterns delivered to your foundry are absolute property of Indian Valve Pvt. Ltd., Nashik and the foundry has no right to take out any castings from the pattern, unless, a written order signed by the Director of the company is received by you.
-    <For Products belonging to ANY other Category, set the below text to appear in the Terms & Conditions>
-    1. TAX INVOICE (Original for Recipient and Duplicate for Transporter alongwith Delivery challan ( Original and Duplicate)
+    Applicable for Castings only
+    1. Casting must be properly grinded and must be free from blow holes, mismatches with that of casting drawings.
+    2. Thickness of casting must be homogeneous as per drawings and shall withstand hydrostatic pressure.
+    3. Test valve of each heat shall be sent along with the castings bearing unique heat no.
+    4. Heat no.,valve size, IVC Monogram and year of produce must be cast on all major castings.
+    5. Patterns delivered to your foundry are absolute property of Indian Valve Pvt. Ltd., Nashik and the foundry has no right to take out any castings from the pattern, unless, a written order signed by the Director of the company is received by you.
     """
 
     ## Add new fields to print on PO as taxes/duties
     taxes_duties = fields.Char(string="TAXES/DUTIES", default="As Applicable")
     insurance_term = fields.Many2one('po.insurance.term',string="Insurance Terms")
     notes = fields.Text('Terms and Conditions', default=_default_notes_val)
+
+
+    @api.model
+    def get_uom(self,line):
+        """ This function assign UOM as Kg when is_weight_applicable is selected to True on PO report only"""
+        uom_obj = self.env['product.uom']
+        uom_categ_obj = self.env['product.uom.categ']
+        ## Get UOM id for kg
+        product_uom_kg_categ_ids = uom_categ_obj.search([('name','=','Weight')])
+        if product_uom_kg_categ_ids:
+            uom_kg_ids = uom_obj.search([('name','=','kg'),('active','=',True),('category_id','in',[rec_id.id for rec_id in product_uom_kg_categ_ids])])
+            if line and line.product_id.is_weight_applicable:
+                for uom_id in uom_kg_ids:
+                    return uom_id.name
+
 
     @api.model
     def date_converted(self, date):
@@ -68,12 +81,22 @@ class PurchaseOrderLine(models.Model):
         if vals and 'product_qty' in vals and vals['product_qty'] == 0:
             raise UserError(_('You cannot enter product quantity as Zero'))
         res = super(PurchaseOrderLine, self).create(vals)
+        ## Logic to change subtotal while creating PO
+        if res and res.product_id.is_weight_applicable:
+            res.approx_weight = res.product_id.weight * res.product_qty
+            res.price_subtotal = res.approx_weight * res.price_unit
         return res
 
     @api.multi
     def write(self, vals):
         """ Logic for change approx_weight in PO line and apply new sub total"""
         """ Inherit write method to validate POL qty field it should be > 0"""
+        if vals and 'product_qty' in vals and self.product_id.is_weight_applicable:
+            vals.update({'approx_weight': self.product_id.weight * vals['product_qty']})
+            vals.update({'price_subtotal': self.approx_weight * self.price_unit})
+        if vals and 'approx_weight' in vals and self.product_id.is_weight_applicable:
+            # hide for now keep for future ref vals.update({'price_subtotal': vals['approx_weight'] * self.product_qty * self.price_unit})
+            vals.update({'price_subtotal': vals['approx_weight'] * self.price_unit})
         if vals and 'product_qty' in vals and vals['product_qty'] == 0:
             raise UserError(_('You cannot enter product quantity as Zero'))
         res = super(PurchaseOrderLine, self).write(vals)
@@ -126,6 +149,39 @@ class PurchaseOrderLine(models.Model):
             self.approx_weight = self.product_id.weight * self.product_qty or 0.0
         return result
 
+    @api.onchange('approx_weight')
+    def _onchange_approx_weight(self):
+        """ This function calculate total amount for PO after change of appprox weight"""
+        if self.product_id.is_weight_applicable:
+            self._compute_amount()
+
+    @api.onchange('product_qty')
+    def _onchange_product_qty(self):
+        """ This function calculate total amount for PO after change of Quantity """
+        if self.product_qty:
+            self.approx_weight = self.product_id.weight * self.product_qty
+
+    @api.depends('product_qty', 'price_unit', 'taxes_id')
+    def _compute_amount(self):
+        """" Inherit function to callculate sub total on aprrox weight is applicable"""
+        for line in self:
+            taxes = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
+            if line.product_id.is_weight_applicable:
+                product_weight = line.product_id.weight * line.product_qty
+                line.update({
+                    ## Logic to calculate total tax on Approx Weight * rate * qty
+                    'price_tax': (taxes['total_included'] * line.product_id.weight) - (taxes['total_excluded'] * line.product_id.weight),
+                    'price_total': taxes['total_included'],
+                    # 'price_subtotal': taxes['total_excluded'] * line.approx_weight, keep for future ref
+                    'price_subtotal': line.price_unit * product_weight, ## subtotal is unit proce * total approx weight(unit weight * product qty)
+                })
+            else:
+                ## Else default flow
+                line.update({
+                    'price_tax': taxes['total_included'] - taxes['total_excluded'],
+                    'price_total': taxes['total_included'],
+                    'price_subtotal': taxes['total_excluded'],
+                })
 
     @api.multi
     def _get_po_line_seq(self):

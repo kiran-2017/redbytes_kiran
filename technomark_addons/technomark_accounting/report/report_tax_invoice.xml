@@ -16,8 +16,8 @@
       <div class="header">
           <div class="row">
               <div class="text-center col-xs-12" style="margin-top:2px;">
-                <h4>(DUPLICATE FOR TRANSPORTER)</h4>
-                <h1>TAX INVOICE</h1>
+                <!-- <h4>(DUPLICATE FOR TRANSPORTER)</h4> -->
+                <span class="text-right"><h5>(DUPLICATE FOR TRANSPORTER)</h5></span>
               </div>
           </div>
       </div>
@@ -27,8 +27,8 @@
       <div class="header">
           <div class="row">
               <div class="text-center col-xs-12" style="margin-top:2px;">
-                <h4>(TRIPLICATE FOR SUPPLIER)</h4>
-                <h1>TAX INVOICE</h1>
+                <!-- <h4>(TRIPLICATE FOR SUPPLIER)</h4> -->
+                <span class="text-right"><h5>(TRIPLICATE FOR SUPPLIER)</h5></span>
               </div>
           </div>
       </div>
@@ -44,8 +44,8 @@
                     <ul class="list-inline">
                         <li>Page:</li>
                         <li><span class="page"/></li>
-                        <li>/</li>
-                        <li><span class="topage"/></li>
+                        <!-- <li>/</li>
+                        <li><span class="topage"/></li> -->
                     </ul>
                 </div>
 
@@ -55,13 +55,13 @@
 
   <template id="external_layout_duplicate">
     <t t-call="technomark_accounting.external_layout_header_duplicate" />
-    <t t-raw="0" />
     <t t-call="technomark_accounting.external_layout_footer" />
+    <!-- Call Report Template for triplicate -->
+    <t t-call="technomark_accounting.report_tax_invoice_view_triplicate" />
   </template>
 
   <template id="external_layout_triplicate">
     <t t-call="technomark_accounting.external_layout_header_triplicate" />
-    <t t-raw="1" />
     <t t-call="technomark_accounting.external_layout_footer" />
   </template>
 
@@ -126,13 +126,13 @@
                         <td width="60%" style="padding:0px !important;" class="td_formating">
                             <table class="table-condensed" width="100%">
                               <tr>
-                                  <td class="td_formating" width="50%">
+                                  <td class="td_formating" width="50%" style="border-top-style: none;border-left-style: none;">
                                     Invoice No. :
                                     <strong><span t-if="o.number" t-field="o.number"/></strong>
                                     <strong><span t-if="not o.number"><br/></span></strong>
                                   </td>
 
-                                  <td class="td_formating" width="50%">
+                                  <td class="td_formating" width="50%" style="border-top-style: none;border-right-style: none;">
                                     Invoice Date :
                                     <strong><span t-if="o.date_invoice" t-field="o.date_invoice"/></strong>
                                     <strong><span t-if="not o.date_invoice"><br/></span></strong>
@@ -153,14 +153,14 @@
                               </tr> -->
 
                               <tr>
-                                  <td class="td_formating" width="50%">
+                                  <td class="td_formating" width="50%" style="border-left-style: none;">
                                     DC  No. :
                                     <t t-set="order_info" t-value="o.get_delivery_date(o.origin)" />
                                     <strong><span t-if="order_info" t-field="order_info.name"/></strong>
                                     <strong><span t-if="not order_info"><br/></span></strong>
                                   </td>
 
-                                  <td class="td_formating" width="50%">
+                                  <td class="td_formating" width="50%" style="border-right-style: none;">
                                     DC Date :
                                     <t t-set="order_info" t-value="o.get_delivery_date(o.origin)" />
                                     <t t-if="order_info.state == 'done'">
@@ -187,13 +187,13 @@
                                   </td>
                               </tr> -->
                               <tr>
-                                  <td class="td_formating" width="50%">
+                                  <td class="td_formating" width="50%" style="border-bottom-style: none;border-left-style: none;">
                                     Order No. : <!--<br/>-->
                                     <strong><span t-if="o.name" t-field="o.name"/></strong>
                                     <strong><span t-if="not o.name"><br/></span></strong>
                                   </td>
 
-                                  <td class="td_formating" width="50%">
+                                  <td class="td_formating" width="50%" style="border-bottom-style: none;border-right-style: none;">
                                     <t t-set="order_data" t-value="o.get_orders(o.origin)" />
                                     Order Date :
                                     <strong><span t-if="order_data.date_order" t-esc="o.date_converted(order_data.date_order)"/></strong>
@@ -223,7 +223,7 @@
                       <td width="60%" style="padding:0px !important;" class="td_formating">
                         <table class="table-condensed" width="100%">
                           <tr>
-                              <td width="40%" class="td_formating" t-if="o.partner_shipping_id" style="padding:0px !important;">
+                              <td width="40%" class="td_formating" t-if="o.partner_shipping_id" style="padding:0px !important;border-bottom-style: none;border-left-style: none;border-top-style: none;">
                                 <span> <b> Billed To : </b> </span><br/>
                                 <strong><span t-if="o.partner_shipping_id" t-field="o.partner_shipping_id"/></strong><br/>
                                 <span t-if="o.partner_shipping_id.street" t-field="o.partner_shipping_id.street"/><br/>
@@ -234,7 +234,7 @@
                                 GSTIN : <span t-if="o.partner_shipping_id.partner_gstin" t-field="o.partner_shipping_id.partner_gstin"/><br/>
                                 <br/><br/><br/>
                               </td>
-                              <td width="40%" class="td_formating" t-if="not o.partner_shipping_id" style="padding:0px !important;">
+                              <td width="40%" class="td_formating" t-if="not o.partner_shipping_id" style="padding:0px !important;border-bottom-style: none;border-left-style: none;border-top-style: none;">
                                 <!--Show delivery address here -->
                                 <strong><span> Billed To :</span> </strong><br/>
                                 <span t-if="o.partner_id" t-field="o.partner_id"/><br/>
@@ -247,7 +247,7 @@
                                 <br/><br/><br/>
                               </td>
 
-                              <td width="39.7%" class="td_formating" style="padding:0px !important;">
+                              <td width="39.7%" class="td_formating" style="padding:0px !important;border-top-style: none;border-bottom-style: none;border-right-style:none;">
                                 <!--Show delivery address here -->
                                 <strong><span>Consignee (Shipped To) : </span></strong><br/>
                                 <span t-if="o.partner_id" t-field="o.partner_id"/><br/>
@@ -317,7 +317,7 @@
                         <!-- Print Invoice line info -->
                           <table class="table-condensed" t-if="o.invoice_line_ids" width="100%">
                                 <tr>
-                                    <th class="td_formating" rowspan="2"><strong>Sr.No.</strong></th>
+                                    <th class="td_formating" rowspan="2" style="border-left-style: none;"><strong>Sr.No.</strong></th>
                                     <th class="td_formating" rowspan="2"><strong>Description</strong></th>
 
                                     <th class="td_formating" rowspan="2"><strong>UOM</strong></th>
@@ -337,7 +337,7 @@
                             <tbody>
                                 <t t-set="i" t-value="1"/>
                                 <tr t-foreach="o.invoice_line_ids" t-as="invoice">
-                                    <td class="td_formating text-center">
+                                    <td class="td_formating text-center" style="border-left-style: none;">
                                       <span t-esc="i"/>
                                         <t t-set="i" t-value="i+1"/>
                                     </td>
@@ -395,7 +395,7 @@
 
                                 <tr t-if="o.amount_untaxed">
                                     <!-- <td class="td_formating text-right" colspan="2"><span t-if="o.amount_tax" t-field="o.amount_untaxed"/></td> -->
-                                    <td colspan="2" class="td_formating text-right">Subtotal</td>
+                                    <td colspan="2" class="td_formating text-right" style="border-left-style: none;">Subtotal</td>
                                     <td class="text-right td_formating" colspan="7">
                                         <strong><span t-field="o.amount_untaxed"
                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></strong>
@@ -403,7 +403,7 @@
                                 </tr>
 
                                 <tr  t-if="o.amount_tax">
-                                      <td class="td_formating text-right" colspan="2">
+                                      <td class="td_formating text-right" colspan="2" style="border-left-style: none;">
                                           <t t-foreach="o.tax_line_ids" t-as="tax_line">
                                               <span t-field="tax_line.name"/><br/>
                                             <!-- <span t-foreach="invoice_line.invoice_line_tax_ids" t-as="invoice_tax" t-if="invoice_tax.name"><br/></span> -->
@@ -435,7 +435,7 @@
                                 </tr>
 
                                 <tr t-if=" not o.amount_tax">
-                                      <td class="td_formating text-right" colspan="2">
+                                      <td class="td_formating text-right" colspan="2" style="border-left-style: none;">
                                             <span>TAX</span>
                                       </td>
 
@@ -446,7 +446,7 @@
                                 </tr>
 
                                 <tr t-if="o.amount_total">
-                                    <td style="text-align:right;" colspan="2" class="td_formating">Total</td>
+                                    <td style="text-align:right;border-left-style: none;" colspan="2" class="td_formating">Total</td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -462,7 +462,7 @@
                                     </td>
                                 </tr>
                                 <tr t-if="not o.amount_total">
-                                    <td style="text-align:right;" colspan="2" class="td_formating">Total</td>
+                                    <td style="text-align:right;border-left-style: none;" colspan="2" class="td_formating">Total</td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -478,13 +478,13 @@
                                 </tr>
 
                                 <tr t-if="o.amount_total">
-                                    <td colspan="6">
+                                    <td colspan="6" style="border-left-style: none;">
                                       Amount In Words <br/>
                                       <strong>Indian Rupees <span t-if="o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> only</strong>
                                     </td>
                                 </tr>
                                 <tr t-if="not o.amount_total">
-                                    <td colspan="6">
+                                    <td colspan="6" style="border-left-style: none;">
                                       Amount In Words <br/>
                                       <strong>Indian Rupees</strong> <span t-if="not o.amount_total" t-esc="o.amount_in_words(o.amount_total)"/> <strong>Only</strong>
                                     </td>
@@ -616,18 +616,15 @@
 
   <template id="report_tax_invoice_view_duplicate">
       <t t-call="report.html_container">
-          <t t-call="technomark_accounting.external_layout_duplicate">
+          <t t-call="technomark_accounting.external_layout_duplicate"/>
               <t t-call="technomark_accounting.report_tax_invoice_view"/>
-
-          </t>
         </t>
   </template>
 
   <template id="report_tax_invoice_view_triplicate">
       <t t-call="report.html_container">
-          <t t-call="technomark_accounting.external_layout_triplicate">
+          <t t-call="technomark_accounting.external_layout_triplicate"/>
               <t t-call="technomark_accounting.report_tax_invoice_view"/>
-          </t>
         </t>
   </template>
 
@@ -638,8 +635,8 @@
       <t t-foreach="docs" t-as="o">
           <t t-call="technomark_accounting.report_tax_invoice_view"/>
           <!-- call template for duplicate-->
-          <!-- <t t-call="technomark_accounting.report_tax_invoice_view_triplicate"/> -->
-          <!-- <t t-call="technomark_accounting.report_tax_invoice_view_duplicate"/> -->
+          <t t-call="technomark_accounting.report_tax_invoice_view_duplicate"/>
+
       </t>
   </template>
 
