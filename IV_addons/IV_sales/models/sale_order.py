@@ -35,6 +35,20 @@ class SaleOrder(models.Model):
                 rec.check_for_delivery_date = False
 
 
+    @api.multi
+    @api.onchange('order_completed')
+    def onchange_order_completed(self):
+        """ Write logic to mannualy edit for order completed """
+        if self.order_completed == 'Y':
+            self.order_completed_date = self._get_current_date()
+            self.order_completed_by = self._get_current_user()
+        else:
+            self.order_completed_date = False
+            self.order_completed_by = ""
+
+
+
+
     ## Add data fields here
     ## Inherit states to add more states to SO form
     state = fields.Selection([
@@ -58,32 +72,35 @@ class SaleOrder(models.Model):
     ## Add VALVE LIST values here
     inspection = fields.Selection([('YES', 'YES'), ('NO', 'NO')], 'Inspection', default='NO', copy=False)
     agency_name = fields.Char(string="Agency Name", copy=False)
-    painting = fields.Char(string="Painting", copy=False)
-    flange_drilling = fields.Char(string="Flange Drilling", copy=False)
-    packing = fields.Char(string="Packing")
-    material_standard = fields.Selection([('IS', 'IS'), ('DIN', 'DIN')], 'Material Standard', default='', copy=False)
+    painting = fields.Many2one('painting', string="Painting", copy=False)
+    flange_drilling = fields.Many2one('flange.drilling', string="Flange Drilling", copy=False)
+    packing = fields.Many2one('packing', string="Packing")
+    # material_standard = fields.Selection([('IS', 'IS'), ('DIN', 'DIN')], 'Material Standard', default='', copy=False)
+    material_standard = fields.Many2one('material.standard', 'Material Standard', copy=False)
+
     special_mfg_instruction = fields.Char(string="Special Mfg Instruction", copy=False)
     ## Add COMMERCIAL group fields here
-    advance_bg_required = fields.Selection([('BLANK', '[BLANK]'), ('YES', 'YES'), ('NO', 'NO')], 'Advance BG Required', default='BLANK')
-    advance_bg_details = fields.Text(string="Advance BG details", copy=False)
-    warranty = fields.Integer(string="Warranty(Months)", default="12", copy=False)
+    advance_bg_required = fields.Selection([('YES', 'YES'), ('NO', 'NO')], 'ADVANCE BG REQUIRED', default='NO')
+    advance_bg_details = fields.Text(string="ADVANCE BG DETAILS", copy=False)
+    warranty = fields.Integer(string="WARRANTY(MONTHS)", default="12", copy=False)
     ## Add Delivery group fields
-    delivery = fields.Selection([('BLANK', '[BLANK]'), ('Door Delivery', 'Door Delivery'), ('Godown Delivery', 'Godown Delivery')], 'Delivery', default='BLANK')
-    freight = fields.Selection([('BLANK', '[BLANK]'), ('To Pay', 'To Pay'), ('Paid', 'Paid')], 'Freight', default='BLANK')
-    insurance = fields.Selection([('BLANK', '[BLANK]'), ('NA', 'NA'), ('Our Account', 'Our Account'), ('Client Account', 'Client Account')], 'Insurance', default='BLANK')
-    transporter = fields.Many2one('transporter.info', string="Transporter", copy=False)
-    performance_guarantee = fields.Selection([('BLANK', '[BLANK]'), ('Performance BG', 'Performance BG'), ('Corporate Bond', 'Corporate Bond')], 'Performance Guarantee', default='BLANK')
-    delivery_instructions = fields.Many2one('delivery.mode', string="Mode of delivery")
-    mode_of_shipment = fields.Many2one('shipment.mode', string="Mode Of Shipment")
+    # delivery = fields.Selection([('Door Delivery', 'Door Delivery'), ('Godown Delivery', 'Godown Delivery')], 'Delivery')
+    delivery = fields.Many2one('delivery.type', 'DELIVERY')
+    freight = fields.Selection([('To Pay', 'To Pay'), ('Paid', 'Paid')], 'FREIGHT')
+    insurance = fields.Selection([('NA', 'NA'), ('Our Account', 'Our Account'), ('Client Account', 'Client Account')], 'INSURANCE')
+    transporter = fields.Many2one('transporter.info', string="TRANSPORTER", copy=False)
+    performance_guarantee = fields.Selection([('Performance BG', 'Performance BG'), ('Corporate Bond', 'Corporate Bond')], 'PERFORMANCE GUARANTEE')
+    delivery_instructions = fields.Many2one('delivery.mode', string="MODE OF DELIVERY")
+    mode_of_shipment = fields.Many2one('shipment.mode', string="MODE OF SHIPMENT")
     # shipping_policy = fields.Char(string="Shipping Policy", default="Deliver each product when available")
     ## Add field
-    delivery_text_instruction = fields.Text(string="Delivery Instruction")
+    delivery_text_instruction = fields.Text(string="DELIVERY INSTRUCTION")
 
     document_lines = fields.One2many('document.lines', 'sale_order_id', string="Documents", copy=False)
 
     ## ORDER STATUS fields
-    rfq_received_date = fields.Date(string="Date", copy=False)
-    rfq_received_by = fields.Char(string="By", copy=False)
+    rfq_received_lines = fields.One2many('rfq.received', 'sale_order_id', string="RFQ Received")
+
 
     # quotation_sent = fields.Selection([('Y','Y'),('N','N')], string="Quotation Sent", default='N')
     quotation_sent_line_ids = fields.One2many('quotation.sent.line', 'sale_order_id', string="Quotation Sent", copy=False)
@@ -91,10 +108,8 @@ class SaleOrder(models.Model):
 
 
 
+    order_accepted_lines = fields.One2many('order.accepted', 'sale_order_id', string="Order Accepted")
 
-    order_accepted = fields.Selection([('Y','Y'),('N','N')], string="Order Accepted", default='N', copy=False)
-    order_accepted_date = fields.Date(string="Date", copy=False)
-    order_accepted_by = fields.Char(string="By", copy=False)
 
     advance_received = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="Advance Received", default='N', copy=False)
     advance_received_date = fields.Date(string="Date", copy=False)
@@ -111,22 +126,19 @@ class SaleOrder(models.Model):
     ga_drawing_sent_date = fields.Date(string="Date")
     ga_drawing_sent_by = fields.Char(string="By")
 
-    ga_drawing_approved = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="GA Drawing Approved", default='N')
-    ga_drawing_approved_date = fields.Date(string="Date", copy=False)
-    ga_drawing_approved_by = fields.Char(string="By", copy=False)
+    gad_approved_lines = fields.One2many('gad.approved.lines', 'sale_order_id', "GAD Approved")
 
     ## Use in Phase 3
     qap_sent = fields.Selection([('Y','Y'),('N','N')], string="QAP Sent", default="N")
     qap_sent_date = fields.Date(string="Date", copy=False)
     qap_sent_by = fields.Char(string="By", copy=False)
 
-    qap_approved = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="QAP Approved", default="N")
-    qap_approved_date = fields.Date(string="Date", copy=False)
-    qap_approved_by = fields.Char(string="By", copy=False)
+    qap_approved_lines = fields.One2many('qap.approved.lines', 'sale_order_id', 'QAP Approved')
+
 
     order_completed = fields.Selection([('Y','Y'),('N','N')], string="Order Completed", default="N")
-    order_completed_date = fields.Date(string="Date", copy=False)
-    order_completed_by = fields.Char(string="By", copy=False)
+    order_completed_date = fields.Date(string="Date", copy=False,)
+    order_completed_by = fields.Char(string="By", copy=False)#, default=lambda self: self.env.user.name
 
     order_cancelled = fields.Selection([('Y','Y'),('N','N')], string="Order Cancelled", default="N")
     order_cancelled_date = fields.Date(string="Date", copy=False)
@@ -235,7 +247,6 @@ class SaleOrder(models.Model):
                             template = self.env['mail.template'].browse(template_id)
                         else:
                             template_id = ir_model_data.get_object_reference('IV_sales', 'email_template_for_gad')[1]
-                            print template_id,'------elsee---template'
                     except ValueError:
                         template_id = False
                     try:
@@ -254,8 +265,6 @@ class SaleOrder(models.Model):
                         'mark_so_as_sent': True,
                         'custom_layout': "sale.mail_template_data_notification_email_sale_order"
                     })
-
-                    print ctx,'--------ctx after'
 
                     return {
                         'type': 'ir.actions.act_window',
@@ -314,16 +323,12 @@ class SaleOrder(models.Model):
                     }
     @api.model
     def send_by_mail_tpi(self):
-        print '-----send_by_mail_tpi-------------send mail gad'
         ir_model_data = self.env['ir.model.data']
-        print self._context,'---_context'
         if self._context and 'active_id' in self._context:
             active_id = self._context.get('active_id')
-            print active_id,'------active_id'
             if active_id:
                 sale_order_ids = self.browse(active_id)
                 for rec in sale_order_ids:
-                    print rec.new_revision_so_no,'---rec.new_revision_so_no'
                     rec.ensure_one()
                     try:
                         ## Logic to send revised So email with new SO ref#
@@ -350,7 +355,6 @@ class SaleOrder(models.Model):
                         'custom_layout': "sale.mail_template_data_notification_email_sale_order"
                     })
 
-                    print ctx,'--------ctx after'
 
                     return {
                         'type': 'ir.actions.act_window',
@@ -399,7 +403,6 @@ class SaleOrder(models.Model):
             'custom_layout': "sale.mail_template_data_notification_email_sale_order"
         })
 
-        print ctx,'--------ctx after'
         ## Update Quotation Sent values for order status
         quotation_sent_vals = {
             'quotation_sent_date': self._get_current_date(),
@@ -438,14 +441,33 @@ class SaleOrder(models.Model):
 
     @api.model
     def create(self, vals):
-        vals.update({
-            'rfq_received_date' : self._get_current_date(),
-            'rfq_received_by' : self._get_current_user()
-        })
-        res = super(SaleOrder, self).create(vals)
+        # vals.update({
+        #     'rfq_received_date' : self._get_current_date(),
+        #     'rfq_received_by' : self._get_current_user()
+        #
+        # })
         """
             Inherit function to assign RFQ Received Data
         """
+
+        res = super(SaleOrder, self).create(vals)
+        if res:
+            # order_accepted_vals = {
+            #     'order_state': 'RFQ Received',
+            #     'customer_po_received_date': self._get_current_date(),
+            #     'customer_po_received_by': self._get_current_user(),
+            #     'customer_po_received_no': res.name,
+            # }
+            # res.customer_po_received_line_ids=[[0, 0, order_accepted_vals]]
+
+            ## Create RFQ lines
+            rfq_received_vals = {
+                'rfq_received_date' : self._get_current_date(),
+                'rfq_received_by' : self._get_current_user(),
+                'sale_order_id': res.id,
+            }
+            res.rfq_received_lines=[[0, 0, rfq_received_vals]]
+
         return res
 
 
@@ -586,11 +608,20 @@ class SaleOrder(models.Model):
                 raise UserError(_('Please upload Customer PO Received(RO) Documents.'))
 
 
+        # Create lines for order Acceptance after SO confirm
+        order_accepted_vals = {
+            'order_accepted': 'Y',
+            'order_accepted_date': self._get_current_date(),
+            'order_accepted_by': self._get_current_user(),
+        }
+        self.order_accepted_lines=[[0, 0, order_accepted_vals]]
+
         ## Create PO receives lines for SO
         ## Customer PO received is same SO
         # po_ids = self._get_po()
         # for po_id in po_ids:
         po_received_vals = {
+                'order_state': 'PO Received',
                 'customer_po_received_date': self._get_current_date(),
                 'customer_po_received_by': self._get_current_user(),
                 'customer_po_received_no': self.name,
@@ -599,12 +630,12 @@ class SaleOrder(models.Model):
         ## Create lines and append here
         self.customer_po_received_line_ids=[[0, 0, po_received_vals]]
 
-        ## Write values for order Acceptance of SO
-        self.write({
-            'order_accepted': 'Y',
-            'order_accepted_date': self._get_current_date(),
-            'order_accepted_by': self._get_current_user(),
-        })
+        # ## Write values for order Acceptance of SO
+        # self.write({
+        #     'order_state': 'Y',
+        #     'order_accepted_date': self._get_current_date(),
+        #     'order_accepted_by': self._get_current_user(),
+        # })
 
         ## Logic to get MO for related SO
         mo_ids = self._get_mo()
@@ -653,68 +684,68 @@ class SaleOrder(models.Model):
         #         self.po_sent_lines = [[0, 0, po_sent_vals]]
         return res
 
+    ## No need for now
+    # @api.multi
+    # def create_advance_received(self):
+    #     self.write({
+    #     # 'state': 'Advance Received',
+    #     'advance_received': 'Y',
+    #     'advance_received_date': self._get_current_date(),
+    #     'advance_received_by': self._get_current_user(),
+    #     })
 
-    @api.multi
-    def create_advance_received(self):
-        self.write({
-        # 'state': 'Advance Received',
-        'advance_received': 'Y',
-        'advance_received_date': self._get_current_date(),
-        'advance_received_by': self._get_current_user(),
-        })
+    # @api.multi
+    # def gad_approved(self):
+    #     not required for now lines will create when attachment get loaded
+    #     ## Before genarating GAD Approved entries check
+    #     ## GAD Document is uploaded in Documents Tab or not
+    #     gad_doc_list = []
+    #     if not self.document_lines:
+    #         raise UserError(_('Please upload Approved GA Drawing Documents.'))
+    #     else:
+    #         for line in self.document_lines:
+    #             if line.document_type == 'Approved GA Drawing':
+    #                 gad_doc_list.append(line)
+    #         if gad_doc_list:
+    #             for line in gad_doc_list:
+    #                 if not line.document_attachment:
+    #                     raise UserError(_('Please upload Approved GA Drawing Documents.'))
+    #         else:
+    #             raise UserError(_('Please upload Approved GA Drawing Documents.'))
+    #
+    #
+    #     self.write({
+    #     # 'state': 'GAD Approved',
+    #     'ga_drawing_approved': 'Y',
+    #     'ga_drawing_approved_date': self._get_current_date(),
+    #     'ga_drawing_approved_by': self._get_current_user(),
+    #     })
 
-    @api.multi
-    def gad_approved(self):
-
-        ## Before genarating GAD Approved entries check
-        ## GAD Document is uploaded in Documents Tab or not
-        gad_doc_list = []
-        if not self.document_lines:
-            raise UserError(_('Please upload Approved GA Drawing Documents.'))
-        else:
-            for line in self.document_lines:
-                if line.document_type == 'Approved GA Drawing':
-                    gad_doc_list.append(line)
-            if gad_doc_list:
-                for line in gad_doc_list:
-                    if not line.document_attachment:
-                        raise UserError(_('Please upload Approved GA Drawing Documents.'))
-            else:
-                raise UserError(_('Please upload Approved GA Drawing Documents.'))
-
-
-        self.write({
-        # 'state': 'GAD Approved',
-        'ga_drawing_approved': 'Y',
-        'ga_drawing_approved_date': self._get_current_date(),
-        'ga_drawing_approved_by': self._get_current_user(),
-        })
-
-    @api.multi
-    def create_qap_approved(self):
-
-        ## Logic to check/provide restriction on QAP Approved Button
-        ## upload document first before proceed
-        qap_doc_list = []
-        if not self.document_lines:
-            raise UserError(_('Please upload QAP Approved Documents.'))
-        else:
-            for line in self.document_lines:
-                if line.document_type == 'Approved QA Plan':
-                    qap_doc_list.append(line)
-            if qap_doc_list:
-                for line in qap_doc_list:
-                    if not line.document_attachment:
-                        raise UserError(_('Please upload QAP Approved Documents.'))
-            else:
-                raise UserError(_('Please upload QAP Approved Documents.'))
-
-        self.write({
-        # 'state': 'QAP Approved',
-        'qap_approved': 'Y',
-        'qap_approved_date': self._get_current_date(),
-        'qap_approved_by': self._get_current_user(),
-        })
+    # @api.multi
+    # def create_qap_approved(self):
+    #
+    #     ## Logic to check/provide restriction on QAP Approved Button
+    #     ## upload document first before proceed
+    #     qap_doc_list = []
+    #     if not self.document_lines:
+    #         raise UserError(_('Please upload QAP Approved Documents.'))
+    #     else:
+    #         for line in self.document_lines:
+    #             if line.document_type == 'Approved QA Plan':
+    #                 qap_doc_list.append(line)
+    #         if qap_doc_list:
+    #             for line in qap_doc_list:
+    #                 if not line.document_attachment:
+    #                     raise UserError(_('Please upload QAP Approved Documents.'))
+    #         else:
+    #             raise UserError(_('Please upload QAP Approved Documents.'))
+    #
+    #     self.write({
+    #     # 'state': 'QAP Approved',
+    #     'qap_approved': 'Y',
+    #     'qap_approved_date': self._get_current_date(),
+    #     'qap_approved_by': self._get_current_user(),
+    #     })
 
     @api.multi
     def _get_payment_lies(self):
@@ -749,6 +780,7 @@ class SaleOrder(models.Model):
             payment_line_ids = payment_line_obj.search([('payment_received_no', '=', payment_id.name)])
             if not payment_line_ids:
                 self.payment_received_lines = [[0, 0, payment_vals]]
+                self.is_adv = 'Y'
 
 
     @api.multi
@@ -893,6 +925,7 @@ class MOIssuedLines(models.Model):
     mo_issued_no = fields.Char(string="No")
     # mo_production_completed = fields.Selection([('Y','Y'),('N','N'),('Part','Part')], string="MO Production Completed")
     mo_production_completed = fields.Selection(related="mrp_id.state", string="State")
+    mo_date = fields.Datetime(related="mrp_id.date_planned_start", string="MO Date")
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
     mrp_id = fields.Many2one('mrp.production', string="MRP Id")
 
@@ -977,6 +1010,34 @@ class DocumentLines(models.Model):
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
 
     @api.multi
+    def _create_qap_record(self, so_id):
+        ## Write logic to create QAP entry
+        qap_vals = {
+            'qap_approved_date': so_id._get_current_date(),
+            'qap_approved_by': so_id._get_current_user(),
+            'qap_approved': 'Y',
+            'sale_order_id': so_id.id,
+        }
+        qap_rec_id = self.search([('document_type','=','Approved QA Plan'),('sale_order_id','=',so_id.id)])
+        if qap_rec_id:
+            so_id.qap_approved_lines=[[0, 0, qap_vals]]
+
+    @api.multi
+    def _create_gad_record(self, so_id):
+        ## Write logic to create QAP entry
+        gad_vals = {
+            'ga_drawing_approved_date': so_id._get_current_date(),
+            'ga_drawing_approved_by': so_id._get_current_user(),
+            'ga_drawing_approved': 'Y',
+            'sale_order_id': so_id.id,
+        }
+        gad_rec_id = self.search([('document_type','=','Approved GA Drawing'),('sale_order_id','=',so_id.id)])
+        if gad_rec_id:
+            so_id.gad_approved_lines=[[0, 0, gad_vals]]
+            so_id.is_gad = 'Y'
+
+
+    @api.multi
     def _create_attachment_for_documents(self, vals):
         """
             Create attachment from uploaded files
@@ -986,6 +1047,7 @@ class DocumentLines(models.Model):
         """
         ## Add object here
         attachment_obj = self.env['ir.attachment']
+
 
         if vals and 'sale_order_id' in vals:
             ## get current So ID
@@ -1030,7 +1092,6 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## Approved GA Drawing
             if vals.get('document_type') == 'Approved GA Drawing':
-                print vals.get('document_attachment'),'-----------document_attachment'
                 doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -1040,6 +1101,11 @@ class DocumentLines(models.Model):
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
+                ## Call function to create GAD Record line
+                self._create_gad_record(so_id)
+
+
+
             ##Approved QA Plan
             if vals.get('document_type') == 'Approved QA Plan':
                 doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
@@ -1051,6 +1117,11 @@ class DocumentLines(models.Model):
                 })
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
+                ## Call function to create QAP Record line
+                self._create_qap_record(so_id)
+
+
+
             ##Quotation
             if vals.get('document_type') == 'Quotation':
                 doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
@@ -1156,6 +1227,7 @@ class DocumentLines(models.Model):
 
     @api.model
     def create(self, vals):
+        # kkkkkkk
         res = super(DocumentLines, self).create(vals)
         ## Call function to create attachments for uploaded documents
         res._create_attachment_for_documents(vals)
@@ -1213,7 +1285,6 @@ class DocumentLines(models.Model):
             self.document_filename = attachment_id.name
         ## Approved GA Drawing
         if self.document_type == 'Approved GA Drawing':
-            print vals.get('document_attachment'),'---document_attachment-'
             ir_attachment_vals.update({
                 'name' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
                 'datas_fname' : self.document_type + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -1373,6 +1444,8 @@ class CustomerPoReceivedLine(models.Model):
     customer_po_received_date = fields.Date(string="Date")
     customer_po_received_by = fields.Char(string="By")
     customer_po_received_no = fields.Char(string="No")
+    # order_state = fields.Selection([('Y','Y'),('N','N')], string="Order State", default='N', copy=False)
+    order_state = fields.Char(string="Order State", copy=False)
     sale_order_id = fields.Many2one('sale.order', string="Sale Order")
 
 
@@ -1405,3 +1478,66 @@ class TransporterInfo(models.Model):
             Create new object for Transporter
         '''
         name = fields.Char(string="Name")
+
+class FlangeDrilling(models.Model):
+        _name = 'flange.drilling'
+        '''
+            Create new object for Flange Drilling
+        '''
+        name = fields.Char(string="Name")
+
+class Painting(models.Model):
+        _name = 'painting'
+        '''
+            Create new object for Painting
+        '''
+        name = fields.Char(string="Name")
+
+class Packing(models.Model):
+        _name = 'packing'
+        '''
+            Create new object for Packing
+        '''
+        name = fields.Char(string="Name")
+
+class MaterialStandard(models.Model):
+        _name = 'material.standard'
+        '''
+            Create new object for Material Standard
+        '''
+        name = fields.Char(string="Name")
+
+class RfqReceived(models.Model):
+    _name = "rfq.received"
+
+    rfq_received_date = fields.Date(string="Date", copy=False)
+    rfq_received_by = fields.Char(string="By", copy=False)
+    sale_order_id = fields.Many2one('sale.order')
+
+class OrderAccepted(models.Model):
+    _name= 'order.accepted'
+
+    order_accepted = fields.Selection([('Y','Y'),('N','N')], string="Order Accepted", default='N', copy=False)
+    order_accepted_date = fields.Date(string="Date", copy=False)
+    order_accepted_by = fields.Char(string="By", copy=False)
+    sale_order_id = fields.Many2one('sale.order')
+
+class GadApprovedLines(models.Model):
+    _name = 'gad.approved.lines'
+    ga_drawing_approved = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="GAD Approved", default='N')
+    ga_drawing_approved_date = fields.Date(string="Date", copy=False)
+    ga_drawing_approved_by = fields.Char(string="By", copy=False)
+    sale_order_id = fields.Many2one('sale.order')
+
+class QapApprovedLines(models.Model):
+    _name = 'qap.approved.lines'
+
+    qap_approved = fields.Selection([('Y','Y'),('N','N'),('NA','NA')], string="QAP Approved", default="N")
+    qap_approved_date = fields.Date(string="Date", copy=False)
+    qap_approved_by = fields.Char(string="By", copy=False)
+    sale_order_id = fields.Many2one('sale.order')
+
+class DeliveryType(models.Model):
+    _name = 'delivery.type'
+
+    name = fields.Char(string="Name")

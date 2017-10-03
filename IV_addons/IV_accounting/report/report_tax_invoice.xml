@@ -607,18 +607,18 @@
 
   <template id="report_tax_invoice_view_duplicate">
       <t t-call="report.html_container">
-          <t t-call="IV_accounting.external_layout_duplicate">
+          <t t-call="IV_accounting.external_layout_duplicate"/>
               <t t-call="IV_accounting.report_tax_invoice_view"/>
 
-          </t>
+          <!-- </t> -->
         </t>
   </template>
 
   <template id="report_tax_invoice_view_triplicate">
       <t t-call="report.html_container">
-          <t t-call="IV_accounting.external_layout_triplicate">
+          <t t-call="IV_accounting.external_layout_triplicate"/>
               <t t-call="IV_accounting.report_tax_invoice_view"/>
-          </t>
+          <!-- </t> -->
         </t>
   </template>
 

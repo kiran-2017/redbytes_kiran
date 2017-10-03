@@ -16,6 +16,7 @@ You could use this simplified accounting in case you work with an (external) acc
     'website': 'https://www.odoo.com/page/billing',
     'depends' : ['base','product', 'purchase', 'stock', 'technomark_reports'],
     'data': [
+            'security/ir.model.access.csv',
             'views/purchase_views.xml',
             'views/product_views.xml',
             'views/stock_picking_views.xml',
