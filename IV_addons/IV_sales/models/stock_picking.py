@@ -5,6 +5,9 @@ from collections import namedtuple
 import json
 import time
 
+from odoo import report as odoo_report
+import base64
+
 from odoo import api, fields, models, _
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools.float_utils import float_compare
@@ -25,6 +28,40 @@ class Picking(models.Model):
     delivery_type = fields.Selection([('door_delivery', 'DOOR DELIVERY'), ('godown_delivery', 'GODOWN DELIVERY')], 'Delivery Type', default='door_delivery')
     dc_mode = fields.Selection([('returnable', 'Returnable'), ('non_returnable', 'Non-Returnable')], 'Delivery Mode')
     eway_bill_no = fields.Char(string="E-Way Bill No")
+
+
+    @api.multi
+    def _create_dc_document_line(self, pick_id):
+        """
+            This function will create auto link document under Document Tab of SO
+        """
+        sale_obj = self.env['sale.order']
+
+        print pick_id,'-----pick_id'
+        if pick_id:
+            ## Get SO id from current pick_id
+            sale_order_id = sale_obj.search([('name','=',pick_id.origin)])
+
+            ## get report template for DC
+            template = self.env.ref('IV_reports.report_deliveryslip_inherited', False)
+            ## Report Template Name
+            report_service = "IV_reports.report_deliveryslip_inherited"
+            ## Get report data to print
+            result, format = odoo_report.render_report(self._cr, self._uid, [pick_id.id], report_service, {'model': 'stock.picking'}, self._context)
+            result = base64.b64encode(result)
+
+            if sale_order_id and result:
+                dc_vals = {
+                    'document_type': 'Delivery Challan',
+                    'document_date': sale_order_id._get_current_date(),#pick_id.min_date,
+                    'document_no': pick_id.name,
+                    'sale_order_id': sale_order_id.id,
+                    'document_filename': pick_id.id,
+                    'document_attachment': result,
+                }
+                ## Create document lines for Delivery Challan
+                sale_order_id.document_lines = [[0, 0, dc_vals]]
+        return True
 
 
     @api.multi
@@ -87,6 +124,8 @@ class Picking(models.Model):
             })
             if backorder_picking:
                 self._create_dispatched_lines(backorder_picking, picking)
+                self._create_dc_document_line(picking)
+
             picking.message_post(body=_("Back order <em>%s</em> <b>created</b>.") % (backorder_picking.name))
             not_done_bo_moves.write({'picking_id': backorder_picking.id})
             if not picking.date_done:

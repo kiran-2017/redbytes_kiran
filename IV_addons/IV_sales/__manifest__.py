@@ -14,7 +14,7 @@ You could use this simplified accounting in case you work with an (external) acc
     """,
     'category': 'Sale',
     'website': 'https://www.odoo.com/page/billing',
-    'depends' : ['product', 'sale', 'stock', 'project', 'sale_stock','document','IV_reports','mail','mrp','purchase'],
+    'depends' : ['product', 'sale', 'stock', 'project', 'sale_stock','document','IV_reports','mail','mrp','purchase','IV_accounting'],
     'data': [
         'security/ir.model.access.csv',
         'views/sale_view.xml',

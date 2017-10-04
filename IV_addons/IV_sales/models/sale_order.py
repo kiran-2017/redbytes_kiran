@@ -1168,6 +1168,8 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## Delivery Challan
             if vals.get('document_type') == 'Delivery Challan':
+                print vals,'------------vals'
+                print vals.get('document_date'),'--------document_date'
                 doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -1175,6 +1177,7 @@ class DocumentLines(models.Model):
                     'datas': vals.get('document_attachment'),
                     'so_doc_type': vals.get('document_type'),
                 })
+                print ir_attachment_vals,'------ir_attachment_vals'
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
             ## Invoice

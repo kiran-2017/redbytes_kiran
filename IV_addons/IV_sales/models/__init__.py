@@ -6,3 +6,5 @@ import account
 import purchase
 import ir_attachment
 import mail_template
+import stock_immediate_transfer
+import account_invoice
