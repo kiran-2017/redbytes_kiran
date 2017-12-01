@@ -16,6 +16,7 @@ You could use this simplified accounting in case you work with an (external) acc
     'website': 'https://www.odoo.com/page/billing',
     'depends' : ['mrp', 'product', 'hr'],
     'data': [
+            'security/ir.model.access.csv',
             'views/product_views.xml',
             'views/mrp_bom_form_views.xml',
             # 'views/mrp_workorder_views.xml',no need for now

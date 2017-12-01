@@ -149,12 +149,15 @@
 
                                   <td class="td_formating" width="50%" style="border-right-style:none;">
                                     DC Date :
+
                                     <t t-set="order_info" t-value="o.get_delivery_date(o.origin)" />
-                                    <t t-if="order_info.state == 'done'">
-                                      <strong><span t-if="order_info.date_done" t-esc="o.date_converted(order_info.date_done)"/></strong>
-                                    </t>
-                                    <t t-if="order_info.state != 'done'">
-                                         <strong><span t-if="order_info.min_date" t-esc="o.date_converted(order_info.min_date)"/></strong>
+                                    <t t-if="order_info">
+                                      <t t-if="order_info.state == 'done'">
+                                        <strong><span t-if="order_info.date_done" t-esc="o.date_converted(order_info.date_done)"/></strong>
+                                      </t>
+                                      <t t-if="order_info.state != 'done'">
+                                           <strong><span t-if="order_info.min_date" t-esc="o.date_converted(order_info.min_date)"/></strong>
+                                      </t>
                                     </t>
                                   </td>
                               </tr>
@@ -535,14 +538,14 @@
                               <td>
                                 Tax Payable on Reverse charge : No <br/>
                                 Terms of Delivery : <span t-esc="o.get_order_data(o.origin)"/> <br/>
-                                Vehicle Registration No : <span t-esc="order_info.vehical_registration_no"/> <br/>
-                                LR No : <span t-esc="order_info.lr_no"/><br/>
-                                Transporter : <span t-esc="order_info.transporter_name_id.name"/><br/>
-                                E-Way Bill No : <span t-esc="order_info.eway_bill_no"/><br/>
+                                Vehicle Registration No : <span t-if="order_info" t-esc="order_info.vehical_registration_no"/> <br/>
+                                LR No : <span t-if="order_info" t-esc="order_info.lr_no"/><br/>
+                                Transporter : <span t-if="order_info" t-esc="order_info.transporter_name_id.name"/><br/>
+                                E-Way Bill No : <span t-if="order_info" t-esc="order_info.eway_bill_no"/><br/>
                               </td>
                               <td>
                                 Insurance Terms : <span t-if="o.type=='out_invoice'" t-esc="order_data.insurance"/><br/>
-                                Freight Terms : <span t-esc="order_info.basis_of_freight"/><br/>
+                                Freight Terms : <span t-if="order_info" t-esc="order_info.basis_of_freight"/><br/>
                                 Payment Terms : <span t-esc="o.payment_term_id.name"/><br/>
                                 <t t-if="o.type=='out_invoice'">
                                   Mode of delivery : <span t-esc="order_data.delivery_instructions.name"/><br/>

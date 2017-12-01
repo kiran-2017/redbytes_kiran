@@ -6,6 +6,8 @@ from odoo.exceptions import UserError, ValidationError
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
+
+    _order = 'confirmation_date desc'
     """ Inherit class for adding new fields on sale order form to print on DC report"""
 
 
@@ -29,7 +31,8 @@ class SaleOrder(models.Model):
 
 
 class SaleOrderLine(models.Model):
-    _inherit = "sale.order.line"
+    _name = "sale.order.line"
+    _inherit = ['sale.order.line', 'mail.thread', 'ir.needaction_mixin']
     """ Inherit class for adding new fields on order line to print on DC report"""
 
     @api.model
@@ -52,7 +55,7 @@ class SaleOrderLine(models.Model):
 
 
     ## Add new fields
-    bore = fields.Integer(string="Bore (mm)")
+    bore = fields.Integer(string="Bore (mm)", track_visibility='always')
     valve = fields.Text(string="Valve")
     valve_operation = fields.Char(string="MO/EO")
     pn = fields.Char(string="PN")

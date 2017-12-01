@@ -23,13 +23,14 @@ class Product(models.Model):
         # TDE: this could be cleaned a bit I think
 
         def _name_get(d):
-            """ Inherit name_get function to remove default code from product name """
+            """ Inherit name_get function to remove name and show only default code from product name """
             name = d.get('name', '')
-            ## Hide default code no need to pass code in product name 
-            # code = self._context.get('display_default_code', True) and d.get('default_code', False) or False
+            ## Hide default code no need to pass code in product name
+            code = self._context.get('display_default_code', True) and d.get('default_code', False) or False
             # if code:
             #     name = '[%s] %s' % (code,name)
-            name = '%s' % (name)
+            if code:
+                name = '%s' % (code)
             return (d['id'], name)
 
         partner_id = self._context.get('partner_id')

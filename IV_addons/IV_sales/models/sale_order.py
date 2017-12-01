@@ -6,10 +6,58 @@ from odoo.exceptions import UserError, ValidationError
 import time
 import datetime
 from datetime import datetime, timedelta
+from lxml import etree
+from odoo.osv.orm import setup_modifiers
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
     """ Inherit class for adding new fields on sale order"""
+
+
+    @api.model
+    def check_downpayment_lines(self):
+        sale_order_line_obj = self.env['sale.order.line']
+        print self.env.context.get('params'),'---------self.env.context'
+        if self.env.context and 'id' in self.env.context.get('params'):
+            active_id = self.env.context.get('params')['id']
+            if active_id:
+                downpayment_line_id = sale_order_line_obj.search([('down_payment_active', '=', True), ('order_id', '=', active_id)])
+                print downpayment_line_id,'------downpayment_line_id'
+                if downpayment_line_id:
+                    return True
+        return False
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        result = super(SaleOrder, self).fields_view_get(view_id, view_type, toolbar=toolbar, submenu=submenu)
+
+        if view_type == "form":
+            print self.check_downpayment_lines(),'------------return'
+            # if self.check_downpayment_lines():
+            doc = etree.XML(result['arch'])
+            print doc.xpath("//field[@name='order_line']"),'----------treeeeee'
+            for node in doc.xpath("//field[@name='order_line']"):
+                user_filter =  "[('product_id.type', '!='," + str('service') + " )]"
+                print user_filter,'---------user_filter'
+                node.set('domain',user_filter)
+                setup_modifiers(node, result['fields']['order_line'])
+                # node.set('invisible', '1')
+                result['arch'] = etree.tostring(doc)
+            # jhfjdjjjjjlkkkkkk
+        # asset_id = self.env.context.get('active_id')
+        # active_model = self.env.context.get('active_model')
+        # if active_model == 'account.asset.asset' and asset_id:
+        #     asset = self.env['account.asset.asset'].browse(asset_id)
+        #     doc = etree.XML(result['arch'])
+        #     if asset.method_time == 'number' and doc.xpath("//field[@name='method_end']"):
+        #         node = doc.xpath("//field[@name='method_end']")[0]
+        #         node.set('invisible', '1')
+        #         setup_modifiers(node, result['fields']['method_end'])
+        #     elif asset.method_time == 'end' and doc.xpath("//field[@name='method_number']"):
+        #         node = doc.xpath("//field[@name='method_number']")[0]
+        #         node.set('invisible', '1')
+        #         setup_modifiers(node, result['fields']['method_number'])
+        #     result['arch'] = etree.tostring(doc)
+        return result
 
 
     @api.multi
@@ -92,7 +140,7 @@ class SaleOrder(models.Model):
     performance_guarantee = fields.Selection([('Performance BG', 'Performance BG'), ('Corporate Bond', 'Corporate Bond')], 'PERFORMANCE GUARANTEE')
     delivery_instructions = fields.Many2one('delivery.mode', string="MODE OF DELIVERY")
     mode_of_shipment = fields.Many2one('shipment.mode', string="MODE OF SHIPMENT")
-    # shipping_policy = fields.Char(string="Shipping Policy", default="Deliver each product when available")
+    shipping_policy = fields.Many2one('iv.shippin.policy', string="Shipping Policy", copy=False)
     ## Add field
     delivery_text_instruction = fields.Text(string="DELIVERY INSTRUCTION")
 
@@ -118,20 +166,15 @@ class SaleOrder(models.Model):
     advance_received_per = fields.Float(string="Amount %", copy=False)
 
     ## Use in Phase 3
-    ga_drawing_ready = fields.Selection([('Y','Y'),('N','N')], string="GA Drawing Ready", default="N")
-    ga_drawing_ready_date = fields.Date(string="Date", copy=False)
-    ga_drawing_ready_by = fields.Char(string="By", copy=False)
-    ## Use in Phase 3
-    ga_drawing_sent = fields.Selection([('Y','Y'),('N','N')], string="GA Drawing Sent", default="N")
-    ga_drawing_sent_date = fields.Date(string="Date")
-    ga_drawing_sent_by = fields.Char(string="By")
-
+    ga_drawing_ready_lines = fields.One2many('ga.drawing.ready.lines', 'sale_order_id', 'GA Drawing Ready')
+    ga_drawing_sent_lines = fields.One2many('ga.drawing.sent.lines', 'sale_order_id', 'GA Drawing Sent')
     gad_approved_lines = fields.One2many('gad.approved.lines', 'sale_order_id', "GAD Approved")
+    qap_sent_lines = fields.One2many('qap.sent.lines', 'sale_order_id', 'QAP Sent')
 
-    ## Use in Phase 3
-    qap_sent = fields.Selection([('Y','Y'),('N','N')], string="QAP Sent", default="N")
-    qap_sent_date = fields.Date(string="Date", copy=False)
-    qap_sent_by = fields.Char(string="By", copy=False)
+    ##Phase 2
+    tpi_call_issued_lines = fields.One2many('tpi.call.issued.lines', 'sale_order_id', 'TPI Call Issued', copy=False)
+    tpi_completed_lines = fields.One2many('tpi.completed.lines', 'sale_order_id', 'TPI Completed')
+
 
     qap_approved_lines = fields.One2many('qap.approved.lines', 'sale_order_id', 'QAP Approved')
 
@@ -811,6 +854,18 @@ class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
     """ Inherit class for adding new fields on order line for onchange"""
 
+
+
+
+
+    # @api.model
+    # def search(self, args, offset=0, limit=None, order=None, count=False):
+    #     """ Inherit search method for sale order line to hide down payment lines from SOL"""
+    #     ## Append domain to search line by down_payment_active active
+    #     args += [('down_payment_active', '=', False)]
+    #     return super(SaleOrderLine, self).search(args=args, offset=offset, limit=limit, order=order, count=count)
+
+
     @api.multi
     @api.onchange('product_id')
     def product_id_change(self):
@@ -877,6 +932,7 @@ class SaleOrderLine(models.Model):
     operation = fields.Char(string="Operation")
     pn = fields.Char(string="PN")
     line_delivery_date = fields.Date(string="Delivery Date")
+    down_payment_active = fields.Boolean('Active', default=False)
 
 class ClientDocLines(models.Model):
     _name = "client.doc.lines"
@@ -1168,8 +1224,6 @@ class DocumentLines(models.Model):
                 self.document_filename = attachment_id.name
             ## Delivery Challan
             if vals.get('document_type') == 'Delivery Challan':
-                print vals,'------------vals'
-                print vals.get('document_date'),'--------document_date'
                 doc_dt = datetime.strptime(vals.get('document_date'), '%Y-%m-%d').strftime("%b %d %Y")
                 ir_attachment_vals.update({
                     'name' : vals.get('document_type') + '-' + so_id.name + '-' + so_id.partner_id.name + '-' + doc_dt,
@@ -1177,7 +1231,6 @@ class DocumentLines(models.Model):
                     'datas': vals.get('document_attachment'),
                     'so_doc_type': vals.get('document_type'),
                 })
-                print ir_attachment_vals,'------ir_attachment_vals'
                 attachment_id = attachment_obj.create(ir_attachment_vals)
                 self.document_filename = attachment_id.name
             ## Invoice
@@ -1542,5 +1595,49 @@ class QapApprovedLines(models.Model):
 
 class DeliveryType(models.Model):
     _name = 'delivery.type'
+
+    name = fields.Char(string="Name")
+
+class GaDrawingReadyLines(models.Model):
+    _name = 'ga.drawing.ready.lines'
+    ga_drawing_ready = fields.Selection([('Y','Y'),('N','N')], string="GA Drawing Ready", default="N")
+    ga_drawing_ready_date = fields.Date(string="Date", copy=False)
+    ga_drawing_ready_by = fields.Char(string="By", copy=False)
+    sale_order_id = fields.Many2one('sale.order')
+
+
+class GaDrawingSentLines(models.Model):
+    _name = 'ga.drawing.sent.lines'
+    ga_drawing_sent = fields.Selection([('Y','Y'),('N','N')], string="GA Drawing Sent")
+    ga_drawing_sent_date = fields.Date(string="Date")
+    ga_drawing_sent_by = fields.Char(string="By")
+    sale_order_id = fields.Many2one('sale.order')
+
+class QapSentLines(models.Model):
+    _name = 'qap.sent.lines'
+    qap_sent = fields.Selection([('Y','Y'),('N','N')], string="QAP Sent")
+    qap_sent_date = fields.Date(string="Date", copy=False)
+    qap_sent_by = fields.Char(string="By", copy=False)
+    sale_order_id = fields.Many2one('sale.order')
+
+class TpiCallIssued(models.Model):
+    _name = 'tpi.call.issued.lines'
+
+    tpi_call_issued = fields.Selection([('Y','Y'),('N','N')], string="TPI Call Issued", copy=False)
+    tpi_call_issued_date = fields.Date(string="Date", copy=False)
+    tpi_call_issued_by = fields.Char(string="By", copy=False)
+    sale_order_id = fields.Many2one('sale.order')
+
+
+class TpiCompletedLines(models.Model):
+    _name = 'tpi.completed.lines'
+
+    tpi_completed = fields.Selection([('Y','Y'),('N','N')], string="TPI Completed", copy=False)
+    tpi_completed_date = fields.Date(string="Date", copy=False)
+    tpi_completed_by = fields.Char(string="By", copy=False)
+    sale_order_id = fields.Many2one('sale.order')
+
+class IvShippingPolicy(models.Model):
+    _name = "iv.shippin.policy"
 
     name = fields.Char(string="Name")

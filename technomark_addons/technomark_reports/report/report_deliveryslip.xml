@@ -338,7 +338,7 @@
                                       LR No : <span t-esc="o.lr_no"/> <br/>
                                       Transporter : <span t-esc="o.transporter_name_id.name"/> <br/>
                                       <t t-if="o.picking_type_id.code=='outgoing'">
-                                        E-Way Bill No :  <span t-esc="so.eway_bill_no"/> <br/>
+                                        E-Way Bill No :  <span t-esc="o.eway_bill_no"/> <br/>
                                       </t>
                                     </td>
                                     <td style="border-top-style: none;">

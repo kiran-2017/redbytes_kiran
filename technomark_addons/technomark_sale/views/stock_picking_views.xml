@@ -28,6 +28,7 @@
                             <field name="road_permit_no"/>
                             <field name="delivery_type"/>
                             <field name="dc_mode"/>
+                            <field name="eway_bill_no"/>
                         </group>
                     </group>
                 </page>

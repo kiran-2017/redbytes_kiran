@@ -12,6 +12,7 @@
                     <field name="tax_payable"/>
                     <field name="destination"/>
                     <field name="other_ref"/>
+                    <field name="eway_bill_no"/>
               </xpath>
             </field>
         </record>

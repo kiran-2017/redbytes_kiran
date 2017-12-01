@@ -18,7 +18,7 @@ class StockPicking(models.Model):
     challan_no = fields.Char(string="Challan No.")
     ics_lr_no = fields.Char(string="L.R. No.")
     picking_type_flag = fields.Boolean(string="Picking Type Flag", default=False)
-    
+
 
     @api.model
     def get_so_data(self, origin):
@@ -100,6 +100,16 @@ class StockPicking(models.Model):
             for line in sale_order_line_id.order_line:
                 if line.product_id.id == product_id.id:
                     return line ## return line to fetched data on qweb DC report
+
+
+            ## Keep for future referance
+            ## No need now provide solution to create new records for every product which is same but different internal data
+            # new_origin = origin + ':WH: Stock -> CustomersMTO'
+            # mo_id = self.env['mrp.production'].search([('origin', '=', new_origin),('state', '=', 'done'),('product_id', '=', product_id.id)])
+            # if mo_id:
+            #     for line in sale_order_line_id.order_line:
+            #             if line.product_id.id == product_id.id and line.product_uom_qty == mo_id:
+            #                 return line ## return line to fetched data on qweb DC report
 
     @api.model
     def get_purchase_order_line_data(self, origin, product_id):

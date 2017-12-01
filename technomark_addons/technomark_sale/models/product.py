@@ -3,10 +3,17 @@
 
 from odoo import api, fields, models,_
 from odoo.exceptions import UserError, ValidationError
+import itertools
+import psycopg2
+
+import odoo.addons.decimal_precision as dp
+
 
 
 class ProductTemplate(models.Model):
-    _inherit = "product.template"
+    _name = "product.template"
+
+    _inherit = ['product.template', 'mail.thread', 'ir.needaction_mixin']
 
 
     # @api.one
@@ -27,6 +34,10 @@ class ProductTemplate(models.Model):
 
     ## Add HSN code field on product template form
     product_hsn_code = fields.Char(string="HSN Code")
+    ## Inherit price field to add track_visibility
+    list_price = fields.Float('Sale Price', default=1.0,
+        digits=dp.get_precision('Product Price'),
+        help="Base price to compute the customer price. Sometimes called the catalog price.", track_visibility='always')
 
 
 class Product(models.Model):

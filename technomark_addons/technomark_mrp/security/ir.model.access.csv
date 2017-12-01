@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bom_cost_lines,access_bom_cost_lines,model_bom_cost_lines,base.group_user,1,1,1,1

@@ -54,21 +54,24 @@ class AccountInvoice(models.Model):
 
     ## Add new fields to print on TAX Invoice On Invoice object
     buyer_order_no = fields.Char(string="Buyer Order No")
-    # despateched_doc_no = fields.Char(string="E-Way Bill No")
     tax_payable = fields.Selection([('YES','YES'),('NO','NO')], string="Tax Payable on Reverse charge")
     destination = fields.Char(string="Destination")
     other_ref = fields.Char(string="Other Ref")
+    eway_bill_no = fields.Char(string="E-Way Bill No")
 
     @api.model
     def get_product_line_info(self, origin, product_id):
         """ This function fetch data from SOL like bore, value operation, pn, case file no, etc on DC"""
+        print origin,'------------origin'
         sale_order_obj = self.env['sale.order']
         if origin == 'incoming_shipment':
             return False
         res = []
         if origin:
             sale_order_line_id = sale_order_obj.search([('name', '=', origin)])
+            print sale_order_line_id,'---------sale_order_line_id'
             for line in sale_order_line_id.order_line:
+                print line.valve,'--------line'
                 if line.product_id.id == product_id.id:
                     return line ## return line to fetched data on qweb DC report
 
@@ -123,7 +126,7 @@ class AccountInvoice(models.Model):
     def date_converted(self, date):
         """ This function convert date %Y-%m-%d %H:%M:%S to  %m/%d/%Y remove time from date"""
         if date:
-            converted_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%m/%d/%Y')
+            converted_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
             return converted_date
 
     @api.model
@@ -236,7 +239,7 @@ class AccountInvoice(models.Model):
                         if pack_operation_id.product_id.id == product_id.id:
                             for lot_id in pack_operation_id.pack_lot_ids:
                                 pack_id_list.append(lot_id.lot_id.name)
-        return pack_id_list
+                    return pack_id_list
 
 
 

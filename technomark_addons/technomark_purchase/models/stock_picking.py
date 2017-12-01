@@ -30,6 +30,13 @@ class StockPicking(models.Model):
             else:
                 vals.update({'picking_type_flag':False})
         res = super(StockPicking, self).create(vals)
+        if res:
+            res.in_time = False
+            res.transporter_name = ""
+            res.vehical_no = ""
+            res.challan_date = False
+            res.challan_no = ""
+            res.ics_lr_no = ""
         return res
 
     # Flag for vsible/hide Incoming Shipment View on StockPicking

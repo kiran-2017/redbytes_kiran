@@ -37,7 +37,6 @@ class Picking(models.Model):
         """
         sale_obj = self.env['sale.order']
 
-        print pick_id,'-----pick_id'
         if pick_id:
             ## Get SO id from current pick_id
             sale_order_id = sale_obj.search([('name','=',pick_id.origin)])

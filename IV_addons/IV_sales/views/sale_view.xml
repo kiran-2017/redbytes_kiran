@@ -125,17 +125,28 @@
 
               <!-- Add new group under other information for delivery info -->
               <xpath expr="//group[@name='sales_person']" position="after">
-                  <group string="DELIVERY" name="delivery_info">
+                  <group string="DELIVERY" name="delivery_info" colspan="4" cols="4">
+                    <group>
                       <field name="delivery"/>
                       <field name="freight"/>
+                    </group>
+                    <group>
                       <field name="insurance"/>
                       <field name="transporter"/>
+                    </group>
+                    <group>
                       <field name="performance_guarantee"/>
                       <field name="delivery_instructions"/>
+                    </group>
+                    <group>
                       <field name="mode_of_shipment"/>
-                      <field name="picking_policy" string="SHIPPING POLICY"/>
-                      <label for="delivery_text_instruction" string="DELIVERY INSTRUCTION" style="color:red;font-style:bold;"/>
-                      <field name="delivery_text_instruction" style="border-color:red" string="Delivery Instruction" nolabel="1"/>
+                      <!-- <field name="picking_policy" string="SHIPPING POLICY"/> -->
+                      <field name="shipping_policy" string="SHIPPING POLICY"/>
+                    </group>
+                    <group>
+                      <label for="delivery_text_instruction" string="DELIVERY INSTRUCTION"/>
+                      <strong><field name="delivery_text_instruction" style="border-color:red;color:red;" string="Delivery Instruction" nolabel="1"/></strong>
+                    </group>
                   </group>
 
                   <group string="GAD" name="delivery_info">
@@ -166,12 +177,39 @@
                     </group>
                 </xpath>
 
+                <!-- Set domain to order lines Need to work for this -->
+                <xpath expr="//field[@name='order_line']" position="attributes">
+                  <attribute name="domain">[('product_id','=',52)]</attribute>
+                </xpath>
+
+
+
+                <!-- <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="attributes">
+                  <attribute name="attrs">{'invisible': [('product_uom_qty','=',0)]}</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="attributes">
+                  <attribute name="attrs">{'invisible': [('product_uom_qty','=',0)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="attributes">
+                  <attribute name="attrs">{'invisible': [('product_uom_qty','=',0)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='tax_id']" position="attributes">
+                  <attribute name="attrs">{'invisible': [('product_uom_qty','=',0)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="attributes">
+                  <attribute name="attrs">{'invisible': [('product_uom_qty','=',0)]}</attribute>
+                </xpath> -->
+
+
+
                 <!-- Add new fields in sale order line tree view -->
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
                   <field name="size" string="Size(mm)"/>
                   <field name="moc"/>
                   <field name="operation"/>
                   <field name="pn"/>
+                  <field name="down_payment_active" invisible="1"/>
                 </xpath>
 
                 <!-- Add new fields in sale order line  form view -->
@@ -180,6 +218,7 @@
                     <field name="moc"/>
                     <field name="operation"/>
                     <field name="pn"/>
+                    <!-- <field name="down_payment_active"/> -->
                 </xpath>
 
 
@@ -337,18 +376,47 @@
 
                     <group col="2" colspan="2">
                         <group string="RFQ Received">
-                           <!-- <div class="horizontalgap" style="width:405px"> -->
-                            <field name="rfq_received_lines" nolabel="1" readonly="1">
+                           <div class="horizontalgap" style="width:405px">
+                              <field name="rfq_received_lines" nolabel="1" readonly="1">
+                                <tree editable="bottom">
+                                    <field name="rfq_received_date"/>
+                                    <field name="rfq_received_by"/>
+                                    <field name="sale_order_id" invisible="1"/>
+                                </tree>
+                              </field>
+                            </div>
+                        </group>
+                        <group string="Quotation Sent">
+                          <div class="horizontalgap" style="width:405px">
+                            <field name="quotation_sent_line_ids" nolabel="1" readonly="1">
                               <tree editable="bottom">
-                                  <field name="rfq_received_date"/>
-                                  <field name="rfq_received_by"/>
+                                  <field name="quotation_sent_date"/>
+                                  <field name="quotation_sent_by"/>
+                                  <field name="quotation_sent_no" />
                                   <field name="sale_order_id" invisible="1"/>
                               </tree>
                             </field>
-                            <!-- </div> -->
+                          </div>
                         </group>
+                    </group>
 
-                        <group string="Order Accepted">
+                    <group col="2" colspan="2">
+                      <group string="Customer PO Received">
+                        <div class="horizontalgap" style="width:405px">
+                          <field name="customer_po_received_line_ids" nolabel="1" readonly="1">
+                            <tree editable="bottom">
+                                <field name="customer_po_received_date"/>
+                                <field name="customer_po_received_by"/>
+                                <field name="customer_po_received_no"/>
+                                <field name="order_state"/>
+                                <field name="sale_order_id" invisible="1"/>
+                            </tree>
+                          </field>
+                        </div>
+                      </group>
+
+                      <group string="Order Accepted">
+                        <div class="horizontalgap" style="width:405px">
                           <field name="order_accepted_lines" nolabel="1" readonly="1">
                             <tree editable="bottom">
                                 <field name="order_accepted_date"/>
@@ -357,12 +425,61 @@
                                 <field name="sale_order_id" invisible="1"/>
                             </tree>
                           </field>
-                        </group>
+                        </div>
+                      </group>
+                  </group>
 
+
+
+                  <group col="2" colspan="2">
+                    <group string="GA Drawing Ready">
+                      <div class="horizontalgap" style="width:405px">
+                        <field name="ga_drawing_ready_lines" nolabel="1" readonly="1">
+                          <tree editable="bottom">
+                              <field name="ga_drawing_ready_date"/>
+                              <field name="ga_drawing_ready_by"/>
+                              <field name="ga_drawing_ready"/>
+                              <field name="sale_order_id" invisible="1"/>
+                          </tree>
+                        </field>
+                      </div>
                     </group>
+
+                    <group string="GA Drawing Sent">
+                      <div class="horizontalgap" style="width:405px">
+                        <field name="ga_drawing_sent_lines" nolabel="1" readonly="1">
+                          <tree editable="bottom">
+                              <field name="ga_drawing_sent_date"/>
+                              <field name="ga_drawing_sent_by"/>
+                              <field name="ga_drawing_sent"/>
+                              <field name="sale_order_id" invisible="1"/>
+                          </tree>
+                        </field>
+                      </div>
+                    </group>
+                </group>
+
+                <group col="1" colspan="1">
+                  <group string="QAP Sent">
+                    <!-- <div class="horizontalgap" style="width:405px"> -->
+                      <field name="qap_sent_lines" nolabel="1" readonly="1">
+                        <tree editable="bottom">
+                            <field name="qap_sent_date"/>
+                            <field name="qap_sent_by"/>
+                            <field name="qap_sent"/>
+                            <field name="sale_order_id" invisible="1"/>
+                        </tree>
+                      </field>
+                    <!-- </div> -->
+                  </group>
+                </group>
+
+
+
 
                     <group col="2" colspan="2">
                         <group string="GA Drawing Approved">
+                          <div class="horizontalgap" style="width:405px">
                             <field name="gad_approved_lines" nolabel="1" readonly="1">
                               <tree editable="bottom">
                                   <field name="ga_drawing_approved_date"/>
@@ -371,87 +488,103 @@
                                   <field name="sale_order_id" invisible="1"/>
                               </tree>
                             </field>
+                          </div>
                         </group>
                         <group string="QAP Approved">
-                            <field name="qap_approved_lines" nolabel="1" readonly="1">
-                              <tree editable="bottom">
-                                  <field name="qap_approved_date"/>
-                                  <field name="qap_approved_by"/>
-                                  <field name='qap_approved'/>
-                                  <field name="sale_order_id" invisible="1"/>
-                              </tree>
-                            </field>
+                          <div class="horizontalgap" style="width:405px">
+                              <field name="qap_approved_lines" nolabel="1" readonly="1">
+                                <tree editable="bottom">
+                                    <field name="qap_approved_date"/>
+                                    <field name="qap_approved_by"/>
+                                    <field name='qap_approved'/>
+                                    <field name="sale_order_id" invisible="1"/>
+                                </tree>
+                              </field>
+                            </div>
                         </group>
                     </group>
 
 
-                    <group col="2" colspan="2">
-                      <group string="Quotation Sent">
-                        <field name="quotation_sent_line_ids" nolabel="1" readonly="1">
-                          <tree editable="bottom">
-                              <field name="quotation_sent_date"/>
-                              <field name="quotation_sent_by"/>
-                              <field name="quotation_sent_no" />
-                              <field name="sale_order_id" invisible="1"/>
-                          </tree>
-                        </field>
-                      </group>
 
-                      <group string="Customer PO Received">
-                        <field name="customer_po_received_line_ids" nolabel="1" readonly="1">
-                          <tree editable="bottom">
-                              <field name="customer_po_received_date"/>
-                              <field name="customer_po_received_by"/>
-                              <field name="customer_po_received_no"/>
-                              <field name="order_state"/>
-                              <field name="sale_order_id" invisible="1"/>
-                          </tree>
-                        </field>
-                      </group>
-                  </group>
 
                   <group col="2" colspan="2">
                       <group string="Manufacturing Order Issued">
-                        <field name="mo_issued_lines" string="Manufacturing Order Issued" class="oe_inline" nolabel="1" readonly="1">
-                          <tree editable="bottom">
-                              <!-- <field name="mo_issued"/> -->
-                              <field name="mo_issued_date"/>
-                              <field name="mo_issued_by"/>
-                              <field name="mo_issued_no" />
-                              <field name="mo_production_completed"/>
-                              <field name="mo_date" widget="date"/>
-                              <field name="sale_order_id" invisible="1"/>
-                          </tree>
-                        </field>
+                        <div class="horizontalgap" style="width:405px">
+                          <field name="mo_issued_lines" string="Manufacturing Order Issued" class="oe_inline" nolabel="1" readonly="1">
+                            <tree editable="bottom">
+                                <!-- <field name="mo_issued"/> -->
+                                <field name="mo_issued_date"/>
+                                <field name="mo_issued_by"/>
+                                <field name="mo_issued_no" />
+                                <field name="mo_production_completed"/>
+                                <field name="mo_date" widget="date"/>
+                                <field name="sale_order_id" invisible="1"/>
+                            </tree>
+                          </field>
+                        </div>
                       </group>
 
                       <group string="PO Sent">
-                        <field name="po_sent_lines" string="PO Sent" class="oe_inline" nolabel="1" readonly="1">
-                          <tree editable="bottom">
-                              <field name="po_sent_no"/>
-                              <field name="vendor_id"/>
-                              <field name="po_sent_date"/>
-                              <field name="po_sent_by"/>
-                              <field name="sale_order_id" invisible="1"/>
-                              <field name="purchase_id" invisible="1"/>
-                          </tree>
-                        </field>
+                        <div class="horizontalgap" style="width:405px">
+                          <field name="po_sent_lines" string="PO Sent" class="oe_inline" nolabel="1" readonly="1">
+                            <tree editable="bottom">
+                                <field name="po_sent_no"/>
+                                <field name="vendor_id"/>
+                                <field name="po_sent_date"/>
+                                <field name="po_sent_by"/>
+                                <field name="sale_order_id" invisible="1"/>
+                                <field name="purchase_id" invisible="1"/>
+                            </tree>
+                          </field>
+                        </div>
                       </group>
                     </group>
 
                     <group col="1" colspan="1">
                       <group string="Raw Materials Received">
-                        <field name="raw_material_received_lines" class="oe_inline" nolabel="1" readonly="1">
-                          <tree editable="bottom">
-                              <field name="raw_material_received_no"/>
-                              <field name="raw_material_received_date"/>
-                              <field name="raw_material_received_by"/>
-                              <field name="raw_material_received"/>
-                              <field name="purchase_id"/>
-                              <field name="sale_order_id" invisible="1"/>
-                              <field name="incoming_pick_id" invisible="1"/>
-                          </tree>
-                        </field>
+                        <!-- <div class="horizontalgap" style="width:405px"> -->
+                          <field name="raw_material_received_lines" class="oe_inline" nolabel="1" readonly="1">
+                            <tree editable="bottom">
+                                <field name="raw_material_received_no"/>
+                                <field name="raw_material_received_date"/>
+                                <field name="raw_material_received_by"/>
+                                <field name="raw_material_received"/>
+                                <field name="purchase_id"/>
+                                <field name="sale_order_id" invisible="1"/>
+                                <field name="incoming_pick_id" invisible="1"/>
+                            </tree>
+                          </field>
+                        <!-- </div> -->
+                      </group>
+
+                      <group col="2" colspan="2">
+                          <group string="TPI Call Issued">
+                            <div class="horizontalgap" style="width:405px">
+                              <field name="tpi_call_issued_lines" string="TPI Call Issued" class="oe_inline" nolabel="1" readonly="1">
+                                <tree editable="bottom">
+                                    <!-- <field name="mo_issued"/> -->
+                                    <field name="tpi_call_issued_date"/>
+                                    <field name="tpi_call_issued_by"/>
+                                    <field name="tpi_call_issued" />
+                                    <field name="sale_order_id" invisible="1"/>
+                                </tree>
+                              </field>
+                            </div>
+                          </group>
+
+                          <group string="TPI Completed">
+                            <div class="horizontalgap" style="width:405px">
+                              <field name="tpi_completed_lines" string="TPI Completed" class="oe_inline" nolabel="1" readonly="1">
+                                <tree editable="bottom">
+                                    <!-- <field name="mo_issued"/> -->
+                                    <field name="tpi_completed_date"/>
+                                    <field name="tpi_completed_by"/>
+                                    <field name="tpi_completed" />
+                                    <field name="sale_order_id" invisible="1"/>
+                                </tree>
+                              </field>
+                            </div>
+                          </group>
                       </group>
 
                     <!-- <group string="MO Production Completed">
@@ -554,6 +687,10 @@
                   <xpath expr="//group[@name='sale_shipping']" position="attributes">
                     <attribute name="string">COMMERCIAL</attribute>
                   </xpath>
+                  <!-- Hide Warehouse id -->
+                  <xpath expr="//field[@name='warehouse_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                  </xpath>
                   <!-- to rename incoterm string to price -->
                   <xpath expr="//field[@name='incoterm']" position="attributes">
                     <attribute name="string">PRICE</attribute>
@@ -564,6 +701,8 @@
                       <field name="advance_bg_details" attrs="{'invisible': [('advance_bg_required','in',('NO','BLANK'))], 'required': [('advance_bg_required','=','YES')]}"/>
                       <field name="warranty"/>
                   </xpath>
+
+
               </field>
           </record>
 

@@ -163,11 +163,13 @@
                                   <td class="td_formating" width="50%" style="border-right-style: none;">
                                     DC Date :
                                     <t t-set="order_info" t-value="o.get_delivery_date(o.origin)" />
-                                    <t t-if="order_info.state == 'done'">
-                                      <strong><span t-if="order_info.date_done" t-esc="o.date_converted(order_info.date_done)"/></strong>
-                                    </t>
-                                    <t t-if="order_info.state != 'done'">
-                                         <strong><span t-if="order_info.min_date" t-esc="o.date_converted(order_info.min_date)"/></strong>
+                                    <t t-if="order_info">
+                                      <t t-if="order_info.state == 'done'">
+                                        <strong><span t-if="order_info.date_done" t-esc="o.date_converted(order_info.date_done)"/></strong>
+                                      </t>
+                                      <t t-if="order_info.state != 'done'">
+                                           <strong><span t-if="order_info.min_date" t-esc="o.date_converted(order_info.min_date)"/></strong>
+                                      </t>
                                     </t>
                                     <!-- <strong><span t-if="order_info" t-esc="o.date_converted(order_info.date_done)"/></strong> -->
                                   </td>
@@ -348,12 +350,12 @@
                                           <!-- Print vore, valve , valve operation, pn, case file no, seril no, etc-->
                                           <t t-if="o.type=='out_invoice'">
                                             <span t-if="product_info"><br/></span>
-                                            <span t-if="product_info">For:</span><span t-if="product_info.valve" t-field="product_info.valve"/><span t-if="product_info.valve">,</span>
-                                            <span t-if="product_info.valve_operation" t-field="product_info.valve_operation"/><span t-if="product_info.valve_operation">,</span>
+                                            <span t-if="product_info">For:</span><span t-if="product_info" t-field="product_info.valve"/><span t-if="product_info">,</span>
+                                            <span t-if="product_info" t-field="product_info.valve_operation"/><span t-if="product_info">,</span>
                                             PN:<span t-if="product_info" t-field="product_info.pn"/><br/>
                                             Case File: <span  t-if="product_info" t-field="product_info.case_file_number"/><br/>
-                                            Bore: <span t-if="product_info.bore" t-field="product_info.bore"/>
-                                            <span t-if="product_info.bore"> mm</span>
+                                            Bore: <span t-if="product_info" t-field="product_info.bore"/>
+                                            <span t-if="product_info"> mm</span>
                                           </t>
                                           <br/>
                                           <!-- Logic to print lot serail number for product in Tax Invoice-->
@@ -549,14 +551,14 @@
                               <td>
                                 Tax Payable on Reverse charge : <span t-esc="o.tax_payable"/> <br/>
                                 Terms of Delivery : <span t-esc="o.get_order_data(o.origin)"/> <br/>
-                                Vehicle Registration No : <span t-esc="order_info.vehical_registration_no"/> <br/>
-                                LR No : <span t-esc="order_info.lr_no"/><br/>
-                                Transporter : <span t-esc="order_info.transporter_name_id.name"/><br/>
-                                E-Way Bill No : <span t-esc="o.get_eway_bill_no(o.origin)"/><br/>
+                                Vehicle Registration No : <span t-if="order_info" t-esc="order_info.vehical_registration_no"/> <br/>
+                                LR No : <span t-if="order_info" t-esc="order_info.lr_no"/><br/>
+                                Transporter : <span t-if="order_info" t-esc="order_info.transporter_name_id.name"/><br/>
+                                E-Way Bill No : <span t-esc="o.eway_bill_no"/><br/>
                               </td>
                               <td>
                                 Insurance Terms : <span t-esc="o.get_insurance(o.origin)"/><br/>
-                                Freight Terms : <span t-esc="order_info.basis_of_freight"/><br/>
+                                Freight Terms : <span t-if="order_info" t-esc="order_info.basis_of_freight"/><br/>
                                 Payment Terms : <span t-esc="o.payment_term_id.name"/><br/>
                                 Mode of delivery : <span t-esc="o.get_delivery_instructions(o.origin)"/><br/>
                                 Mode of shipment : <span t-esc="o.get_mode_of_shipment(o.origin)"/><br/>

@@ -145,6 +145,15 @@ class StockPicking(models.Model):
     def create(self, vals):
         """ Inherit create method to pass default dc_mode as Non-Returnable when dc created from SO"""
         res = super(StockPicking, self).create(vals)
+        ## To make other info field blank after creation of backorder
+        if res:
+            res.transporter_name_id = False
+            res.lr_no = " "
+            res.vehical_registration_no = " "
+            res.basis_of_freight = ""
+            res.delivery_type = ""
+            res.road_permit_no = ""
+            res.eway_bill_no = ""
         if res and res.origin:
             sale_order_id = self.env['sale.order'].search([('name', '=', res.origin)])
             if sale_order_id and res.picking_type_id.code == 'outgoing':
@@ -162,7 +171,8 @@ class StockPicking(models.Model):
     road_permit_no = fields.Char(string="Road Permit No")
     delivery_type = fields.Selection([('door_delivery', 'DOOR DELIVERY'), ('godown_delivery', 'GODOWN DELIVERY')], 'Delivery Type', default='door_delivery')
     dc_mode = fields.Selection([('returnable', 'Returnable'), ('non_returnable', 'Non-Returnable')], 'Delivery Mode')
-    
+    eway_bill_no = fields.Char(string="E-Way Bill No")
+
 
 
 class TransporterName(models.Model):

@@ -2,10 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models,_
+import odoo.addons.decimal_precision as dp
+from odoo.exceptions import UserError
+import time
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
-    ## Add field to store down payment % this will show on payment lines on so 
+    ## Add field to store down payment % this will show on payment lines on so
     per_amt = fields.Char(string="Amount(%)")
 
 
@@ -78,3 +81,57 @@ class SaleAdvancePaymentInv(models.TransientModel):
                     values={'self': invoice, 'origin': order},
                     subtype_id=self.env.ref('mail.mt_note').id)
         return invoice
+
+
+    @api.multi
+    def create_invoices(self):
+        """
+            Inherit function to make down payment lines invisible from Sale order line\
+            add down_payment_active fields
+            if down_payment_active == True then hide line (Write search condtion for this)
+        """
+
+        sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
+        down_payment_active_flag = False
+        if self.advance_payment_method == 'delivered':
+            sale_orders.action_invoice_create()
+        elif self.advance_payment_method == 'all':
+            sale_orders.action_invoice_create(final=True)
+        else:
+            # Create deposit product if necessary
+            if not self.product_id:
+                vals = self._prepare_deposit_product()
+                self.product_id = self.env['product.product'].create(vals)
+                self.env['ir.values'].sudo().set_default('sale.config.settings', 'deposit_product_id_setting', self.product_id.id)
+
+            sale_line_obj = self.env['sale.order.line']
+            for order in sale_orders:
+                if self.advance_payment_method == 'percentage':
+                    amount = order.amount_untaxed * self.amount / 100
+                    down_payment_active_flag = True
+                else:
+                    amount = self.amount
+                    down_payment_active_flag = False
+                if self.product_id.invoice_policy != 'order':
+                    raise UserError(_('The product used to invoice a down payment should have an invoice policy set to "Ordered quantities". Please update your deposit product to be able to create a deposit invoice.'))
+                if self.product_id.type != 'service':
+                    raise UserError(_("The product used to invoice a down payment should be of type 'Service'. Please use another product or update this product."))
+                if order.fiscal_position_id and self.product_id.taxes_id:
+                    tax_ids = order.fiscal_position_id.map_tax(self.product_id.taxes_id).ids
+                else:
+                    tax_ids = self.product_id.taxes_id.ids
+                so_line = sale_line_obj.create({
+                    'name': _('Advance: %s') % (time.strftime('%m %Y'),),
+                    'price_unit': amount,
+                    'product_uom_qty': 0.0,
+                    'order_id': order.id,
+                    'down_payment_active':down_payment_active_flag,
+                    'discount': 0.0,
+                    'product_uom': self.product_id.uom_id.id,
+                    'product_id': self.product_id.id,
+                    'tax_id': [(6, 0, tax_ids)],
+                })
+                self._create_invoice(order, so_line, amount)
+        if self._context.get('open_invoices', False):
+            return sale_orders.action_view_invoice()
+        return {'type': 'ir.actions.act_window_close'}

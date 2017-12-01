@@ -27,6 +27,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'data/sent_qap_mail_template.xml',
         'data/sent_tpi_mail_template.xml',
         'views/ir_attachment_view.xml',
+        'report/sale_report_templates.xml',
     ],
     'demo': [
     ],

@@ -17,7 +17,7 @@
                             <field name="insurance"/>
                             <field name="warranty"/>
                             <field name="mode_of_shipment"/>
-                            <field name="eway_bill_no"/>
+                            <!-- <field name="eway_bill_no"/> -->
                         </group>
                     </group>
                  </page>
@@ -26,6 +26,16 @@
               <xpath expr="//field[@name='incoterm']" position="attributes">
                   <attribute name="string">Terms of Delivery</attribute>
               </xpath>
+
+              <!-- Convert datetime to date for date order field on SO-->
+              <xpath expr="//field[@name='date_order']" position="attributes">
+                <attribute name="widget">date</attribute>
+              </xpath>
+              <!-- Convert datetime to date for Confirmation order field on SO-->
+              <xpath expr="//field[@name='confirmation_date']" position="attributes">
+                <attribute name="widget">date</attribute>
+              </xpath>
+
 
               <!-- Add new fields to sale order line form view -->
               <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']" position="after">
@@ -70,6 +80,18 @@
               <xpath expr="//field[@name='order_line']/tree/field[@name='qty_invoiced']" position="attributes">
                   <attribute name="invisible">1</attribute>
               </xpath>
+            </field>
+        </record>
+
+
+        <record id="tmi_view_order_tree_inherited" model="ir.ui.view">
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+                <!-- Convert date order to date field -->
+                <xpath expr="//field[@name='date_order']" position="attributes">
+                  <attribute name="widget">date</attribute>
+                </xpath>
             </field>
         </record>
 </odoo>

@@ -27,3 +27,10 @@ access_qap_approved_lines,access_qap_approved_lines,model_qap_approved_lines,bas
 access_rfq_received,access_rfq_received,model_rfq_received,base.group_user,1,1,1,1
 access_order_accepted,access_order_accepted,model_order_accepted,base.group_user,1,1,1,1
 access_delivery_type,access_delivery_type,model_delivery_type,base.group_user,1,1,1,1
+
+access_ga_drawing_ready_lines,access_ga_drawing_ready_lines,model_ga_drawing_ready_lines,base.group_user,1,1,1,1
+access_ga_drawing_sent_lines,access_ga_drawing_sent_lines,model_ga_drawing_sent_lines,base.group_user,1,1,1,1
+access_qap_sent_lines,access_qap_sent_lines,model_qap_sent_lines,base.group_user,1,1,1,1
+access_tpi_call_issued_lines,access_tpi_call_issued_lines,model_tpi_call_issued_lines,base.group_user,1,1,1,1
+access_tpi_completed_lines,access_tpi_completed_lines,model_tpi_completed_lines,base.group_user,1,1,1,1
+access_iv_shippin_policy,access_iv_shippin_policy,model_iv_shippin_policy,base.group_user,1,1,1,1

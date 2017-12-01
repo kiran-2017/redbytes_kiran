@@ -17,8 +17,8 @@
             id="purchase.action_report_purchase_order"
             model="purchase.order"
             report_type="qweb-pdf"
-            name="technomark_purchase.report_purchaseorder"
-            file="technomark_purchase.report_purchaseorder"
+            name="purchase.report_purchaseorder"
+            file="purchase.report_purchaseorder"
             menu="False"
         />
 </odoo>
